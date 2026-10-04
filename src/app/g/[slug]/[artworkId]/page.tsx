@@ -98,6 +98,7 @@ export default function ArtworkPublicPage() {
     buying,
     view3d,
     setView3d,
+    cartCount: items.length,
   };
 
   switch (artist.theme) {

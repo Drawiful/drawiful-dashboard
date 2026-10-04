@@ -1,8 +1,9 @@
 "use client";
 import Link from "next/link";
-import { Box, Lock, ShieldCheck, ShoppingBag, ArrowLeft, Trash2 } from "lucide-react";
+import { Box, Lock, ShieldCheck, ArrowLeft, Trash2 } from "lucide-react";
 import ModelViewerPremium from "@/components/ModelViewerPremium";
 import type { CartItem } from "@/lib/cart";
+import { PublicTopBar, PublicFooter, MAISON_HAUSSMANN_PALETTE as PALETTE } from "@/components/themes/PublicChrome";
 
 const FONT_IMPORT = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Instrument+Sans:wght@400;500&display=swap');`;
 
@@ -11,10 +12,11 @@ function money(cents: number, currency: string) {
 }
 
 // ---------- Liste des œuvres ----------
-export function MaisonHaussmannListing({ artist, slug }: { artist: any; slug: string }) {
+export function MaisonHaussmannListing({ artist, slug, cartCount = 0 }: { artist: any; slug: string; cartCount?: number }) {
   return (
     <div className="min-h-screen bg-[#F6F1E3]" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
       <style>{`${FONT_IMPORT}`}</style>
+      <PublicTopBar slug={slug} galleryName={artist.galleryName} cartCount={cartCount} palette={PALETTE} />
 
       <header className="flex flex-col items-center text-center px-8 py-20 border-b border-[#D8C9A8]">
         <p className="text-[11px] tracking-[0.25em] uppercase text-[#B9862F] mb-5">✦ ✦ ✦ Galerie</p>
@@ -25,13 +27,6 @@ export function MaisonHaussmannListing({ artist, slug }: { artist: any; slug: st
           {artist.galleryName}
         </h1>
         {artist.bio && <p className="text-sm text-[#7C5A2E] max-w-md leading-relaxed">{artist.bio}</p>}
-        <Link
-          href={`/g/${slug}/panier`}
-          className="flex items-center gap-2 mt-8 text-xs tracking-widest uppercase text-[#2B2013] border border-[#D8C9A8] px-4 py-2.5 rounded-full hover:bg-[#2B2013] hover:text-[#F6F1E3] transition-colors"
-        >
-          <ShoppingBag size={13} />
-          Mon panier
-        </Link>
       </header>
 
       <main className="px-8 md:px-16 py-16">
@@ -64,9 +59,7 @@ export function MaisonHaussmannListing({ artist, slug }: { artist: any; slug: st
         )}
       </main>
 
-      <footer className="text-center py-10 border-t border-[#D8C9A8]">
-        <p className="text-xs tracking-widest uppercase text-[#7C5A2E]">Galerie propulsée par Drawiful</p>
-      </footer>
+      <PublicFooter slug={slug} palette={PALETTE} />
     </div>
   );
 }
@@ -82,6 +75,7 @@ export function MaisonHaussmannArtwork({
   buying,
   view3d,
   setView3d,
+  cartCount = 0,
 }: {
   artist: any;
   artwork: any;
@@ -92,22 +86,18 @@ export function MaisonHaussmannArtwork({
   buying: boolean;
   view3d: boolean;
   setView3d: (v: boolean) => void;
+  cartCount?: number;
 }) {
   return (
     <div className="min-h-screen bg-[#F6F1E3]" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
       <style>{`${FONT_IMPORT}`}</style>
+      <PublicTopBar slug={slug} galleryName={artist.galleryName} cartCount={cartCount} palette={PALETTE} />
 
-      <header className="flex items-center justify-between px-8 md:px-16 py-6 border-b border-[#D8C9A8]">
+      <header className="flex items-center justify-between px-8 md:px-16 py-4 border-b border-[#D8C9A8]">
         <Link href={`/g/${slug}`} className="flex items-center gap-2 text-xs tracking-widest uppercase text-[#7C5A2E] hover:text-[#2B2013] transition-colors">
           <ArrowLeft size={13} />
           Retour à la galerie
         </Link>
-        <div className="flex items-center gap-5">
-          <p className="text-sm" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#2B2013" }}>{artist.galleryName}</p>
-          <Link href={`/g/${slug}/panier`} className="text-[#2B2013]">
-            <ShoppingBag size={16} />
-          </Link>
-        </div>
       </header>
 
       <div className="grid md:grid-cols-2 min-h-[calc(100vh-73px)]">
@@ -170,6 +160,7 @@ export function MaisonHaussmannArtwork({
           )}
         </div>
       </div>
+      <PublicFooter slug={slug} palette={PALETTE} />
     </div>
   );
 }
@@ -195,13 +186,13 @@ export function MaisonHaussmannCart({
   return (
     <div className="min-h-screen bg-[#F6F1E3]" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
       <style>{`${FONT_IMPORT}`}</style>
+      <PublicTopBar slug={slug} galleryName={artist.galleryName} cartCount={items.length} palette={PALETTE} />
 
-      <header className="flex items-center justify-between px-8 md:px-16 py-6 border-b border-[#D8C9A8]">
+      <header className="flex items-center justify-between px-8 md:px-16 py-4 border-b border-[#D8C9A8]">
         <Link href={`/g/${slug}`} className="flex items-center gap-2 text-xs tracking-widest uppercase text-[#7C5A2E] hover:text-[#2B2013] transition-colors">
           <ArrowLeft size={13} />
           Continuer mes achats
         </Link>
-        <p className="text-sm" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#2B2013" }}>{artist.galleryName}</p>
       </header>
 
       <main className="px-8 md:px-16 py-16 max-w-3xl mx-auto">
@@ -244,6 +235,7 @@ export function MaisonHaussmannCart({
           </>
         )}
       </main>
+      <PublicFooter slug={slug} palette={PALETTE} />
     </div>
   );
 }

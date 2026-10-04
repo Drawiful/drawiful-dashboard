@@ -2,13 +2,12 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { GalerieBlancheListing } from "@/components/themes/GalerieBlanche";
-import { MaisonHaussmannListing } from "@/components/themes/MaisonHaussmann";
+import { GalerieBlancheAPropos, MaisonHaussmannAPropos } from "@/components/themes/APropos";
 import { useCart } from "@/lib/cart";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-export default function GalleryPublicPage() {
+export default function AProposPage() {
   const params = useParams();
   const slug = params.slug as string;
   const [artist, setArtist] = useState<any>(null);
@@ -41,13 +40,11 @@ export default function GalleryPublicPage() {
     );
   }
 
-  // artist.theme pilote l'habillage visuel ; même contrat de données,
-  // même logique métier (has3dAccess, panier, achat) pour tous les thèmes.
   switch (artist.theme) {
     case "maison-haussmann":
-      return <MaisonHaussmannListing artist={artist} slug={slug} cartCount={items.length} />;
+      return <MaisonHaussmannAPropos artist={artist} slug={slug} cartCount={items.length} />;
     case "galerie-blanche":
     default:
-      return <GalerieBlancheListing artist={artist} slug={slug} cartCount={items.length} />;
+      return <GalerieBlancheAPropos artist={artist} slug={slug} cartCount={items.length} />;
   }
 }
