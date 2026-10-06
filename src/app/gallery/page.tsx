@@ -5,29 +5,7 @@ import DashboardShell from "@/components/DashboardShell";
 import { api } from "@/lib/api";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
-const THEMES = [
-  {
-    value: "galerie-blanche",
-    label: "Blanc Galerie",
-    description: "Épuré, lumineux — crème clair, Fraunces.",
-    swatch: ["#FEFEFC", "#1A1A18", "#B08D57"],
-    available: true,
-  },
-  {
-    value: "maison-haussmann",
-    label: "Maison Haussmann",
-    description: "Classique, chaleureux — crème, bronze et doré.",
-    swatch: ["#F6F1E3", "#2B2013", "#B9862F"],
-    available: true,
-  },
-  {
-    value: "atelier-sombre",
-    label: "Atelier Sombre",
-    description: "Anthracite et bleu cobalt — bientôt disponible.",
-    swatch: ["#181B1E", "#4C7CF0", "#C68E4E"],
-    available: false,
-  },
-];
+import { THEME_OPTIONS as THEMES } from "@/components/themes/skins";
 
 export default function GalleryPage() {
   const [galleryName, setGalleryName] = useState("");

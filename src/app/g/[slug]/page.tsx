@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { GalerieBlancheListing } from "@/components/themes/GalerieBlanche";
-import { MaisonHaussmannListing } from "@/components/themes/MaisonHaussmann";
+import { ThemedListing } from "@/components/themes/ThemedListing";
+import { getSkin } from "@/components/themes/skins";
 import { useCart } from "@/lib/cart";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -43,11 +44,12 @@ export default function GalleryPublicPage() {
 
   // artist.theme pilote l'habillage visuel ; même contrat de données,
   // même logique métier (has3dAccess, panier, achat) pour tous les thèmes.
-  switch (artist.theme) {
-    case "maison-haussmann":
-      return <MaisonHaussmannListing artist={artist} slug={slug} cartCount={items.length} />;
-    case "galerie-blanche":
-    default:
-      return <GalerieBlancheListing artist={artist} slug={slug} cartCount={items.length} />;
+  // Les 6 thèmes actuels sont décrits dans components/themes/skins.ts.
+  const skin = getSkin(artist.theme);
+  if (skin) {
+    return <ThemedListing skin={skin} artist={artist} slug={slug} cartCount={items.length} />;
   }
+
+  // Ancien thème (« galerie-blanche ») : rendu d'origine conservé.
+  return <GalerieBlancheListing artist={artist} slug={slug} cartCount={items.length} />;
 }
