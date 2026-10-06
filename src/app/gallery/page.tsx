@@ -37,6 +37,9 @@ export default function GalleryPage() {
   const [signatureUrl, setSignatureUrl] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [theme, setTheme] = useState("galerie-blanche");
+  const [legalMentionsText, setLegalMentionsText] = useState("");
+  const [termsOfSaleText, setTermsOfSaleText] = useState("");
+  const [privacyPolicyText, setPrivacyPolicyText] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadingSignature, setUploadingSignature] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -50,6 +53,9 @@ export default function GalleryPage() {
     setSignatureUrl(profile.signatureUrl ?? "");
     setWebsiteUrl(profile.websiteUrl ?? "");
     setTheme(profile.theme ?? "galerie-blanche");
+    setLegalMentionsText(profile.legalMentionsText ?? "");
+    setTermsOfSaleText(profile.termsOfSaleText ?? "");
+    setPrivacyPolicyText(profile.privacyPolicyText ?? "");
   }
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -79,7 +85,18 @@ export default function GalleryPage() {
     setMessage(null);
     setSaving(true);
     try {
-      await api.updateMyProfile({ galleryName, slug, bio, avatarUrl, signatureUrl, websiteUrl, theme });
+      await api.updateMyProfile({
+        galleryName,
+        slug,
+        bio,
+        avatarUrl,
+        signatureUrl,
+        websiteUrl,
+        theme,
+        legalMentionsText,
+        termsOfSaleText,
+        privacyPolicyText,
+      });
       setMessage("Profil mis à jour ✓");
     } catch (err: any) {
       setMessage(err.message || "Erreur lors de la mise à jour");
@@ -215,6 +232,53 @@ export default function GalleryPage() {
             onChange={(e) => setWebsiteUrl(e.target.value)}
             className="w-full px-3.5 py-2.5 rounded-md border border-bordure text-sm bg-white"
           />
+        </div>
+
+        <div className="pt-2 border-t border-bordure">
+          <h3 className="font-display text-xl text-encre mt-5 mb-1">Pages légales</h3>
+          <p className="text-xs text-encre/50 mb-4">
+            Laisse un champ vide pour afficher le modèle générique par défaut sur ta galerie
+            publique. Renseigne-le pour le remplacer par ton propre texte.
+          </p>
+
+          <div className="space-y-5">
+            <div>
+              <label className="block text-sm mb-1.5 text-encre/80">Mentions légales</label>
+              <textarea
+                value={legalMentionsText}
+                onChange={(e) => setLegalMentionsText(e.target.value)}
+                rows={6}
+                placeholder="SIRET, raison sociale, adresse, directeur de publication, hébergeur..."
+                className="w-full px-3.5 py-2.5 rounded-md border border-bordure text-sm bg-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm mb-1.5 text-encre/80">
+                Conditions générales de vente
+              </label>
+              <textarea
+                value={termsOfSaleText}
+                onChange={(e) => setTermsOfSaleText(e.target.value)}
+                rows={6}
+                placeholder="Modalités de paiement, livraison, retours, garanties..."
+                className="w-full px-3.5 py-2.5 rounded-md border border-bordure text-sm bg-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm mb-1.5 text-encre/80">
+                Politique de confidentialité
+              </label>
+              <textarea
+                value={privacyPolicyText}
+                onChange={(e) => setPrivacyPolicyText(e.target.value)}
+                rows={6}
+                placeholder="Données collectées, finalités, durée de conservation, droits RGPD..."
+                className="w-full px-3.5 py-2.5 rounded-md border border-bordure text-sm bg-white"
+              />
+            </div>
+          </div>
         </div>
 
         {message && <p className="text-sm text-sauge">{message}</p>}
