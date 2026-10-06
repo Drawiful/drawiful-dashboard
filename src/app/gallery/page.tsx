@@ -85,18 +85,19 @@ export default function GalleryPage() {
     setMessage(null);
     setSaving(true);
     try {
-      await api.updateMyProfile({
+            await api.updateMyProfile({
         galleryName,
         slug,
         bio,
-        avatarUrl,
-        signatureUrl,
-        websiteUrl,
+        avatarUrl: avatarUrl || null,
+        signatureUrl: signatureUrl || null,
+        websiteUrl: websiteUrl || null,
         theme,
         legalMentionsText,
         termsOfSaleText,
         privacyPolicyText,
-      });
+      } as any);
+
       setMessage("Profil mis à jour ✓");
     } catch (err: any) {
       setMessage(err.message || "Erreur lors de la mise à jour");
