@@ -29,7 +29,7 @@ export function ThemedCart({
   const thumbRadius = skin.radius ? 12 : 0;
   return (
     <ThemedPage skin={skin}>
-      <ThemedHeader skin={skin} slug={slug} galleryName={artist.galleryName} cartCount={items.length} />
+      <ThemedHeader skin={skin} slug={slug} galleryName={artist.galleryName} cartCount={items.length} has3d={!!artist.has3dAccess} />
 
       <div style={{ padding: `24px ${PAD} 0` }}>
         <Link

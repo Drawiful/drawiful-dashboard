@@ -98,11 +98,14 @@ export function ThemedHeader({
   slug,
   galleryName,
   cartCount,
+  has3d = false,
 }: {
   skin: Skin;
   slug: string;
   galleryName: string;
   cartCount: number;
+  // Affiche le lien "Visite 3D" (artistes avec accès 3D uniquement).
+  has3d?: boolean;
 }) {
   const initial = (galleryName || "G").trim().charAt(0).toUpperCase();
   const navText: CSSProperties = {
@@ -148,6 +151,12 @@ export function ThemedHeader({
       <Link href={`/g/${slug}/a-propos`} style={navText} className="hover:underline">
         À propos
       </Link>
+      {has3d && (
+        <Link href={`/g/${slug}/visite-3d`} style={{ ...navText, gap: 6 }} className="hover:underline">
+          <Box size={15} />
+          Visite 3D
+        </Link>
+      )}
     </>
   );
   const cart = (

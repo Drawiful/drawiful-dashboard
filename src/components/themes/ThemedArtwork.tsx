@@ -47,7 +47,7 @@ export function ThemedArtwork({
 
   return (
     <ThemedPage skin={skin}>
-      <ThemedHeader skin={skin} slug={slug} galleryName={artist.galleryName} cartCount={cartCount} />
+      <ThemedHeader skin={skin} slug={slug} galleryName={artist.galleryName} cartCount={cartCount} has3d={!!artist.has3dAccess} />
 
       <div style={{ padding: `24px ${PAD} 0` }}>
         <Link

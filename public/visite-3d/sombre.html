@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Drawiful — Galerie 3D (Noire sombre)</title>
+
+<!--
+  Drawiful — salle de visite 3D (ambiance : sombre).
+  Affichée dans une iframe par src/app/g/[slug]/visite-3d/page.tsx, qui envoie
+  les œuvres via postMessage { type:'GALLERY_SET_ARTWORKS', artworks, galleryName, allowAR }
+  après avoir reçu { type:'GALLERY_READY' }. Au clic sur "Voir la fiche de l'œuvre",
+  la salle renvoie { type:'GALLERY_ARTWORK_CLICK', id }.
+-->
+
+<style>
+  :root{
+    --wall: #edeae1;
+    --ink: #1c1a17;
+    --muted: #6b6459;
+    --brass: #b8912f;
+    --brass-light:#d4b45c;
+    --overlay-bg: rgba(15,13,11,0.72);
+    --overlay-text:#f5f1e8;
+    --serif: 'Playfair Display', Georgia, serif;
+    --sans: 'Inter', system-ui, sans-serif;
+  }
+  html,body{ margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:#0c0b0a; font-family:var(--sans); }
+  canvas{ display:block; touch-action:none; }
+
+  #loading{
+    position:fixed; inset:0; z-index:50; background:#0c0b0a;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    color:var(--overlay-text); gap:14px; transition:opacity .5s ease;
+  }
+  #loading .spinner{
+    width:34px;height:34px;border-radius:50%;
+    border:2px solid rgba(212,180,92,0.25); border-top-color:var(--brass-light);
+    animation:spin 0.9s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  #loading .label{ font-family:var(--serif); font-size:15px; letter-spacing:.04em; color:#d8d2c4;}
+  #loading.hidden{ opacity:0; pointer-events:none; }
+
+  .hud{ position:fixed; z-index:20; font-family:var(--sans); color:var(--overlay-text); }
+
+  #topbar{
+    top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px; pointer-events:none;
+  }
+  #galleryTitle{
+    font-family:var(--serif); font-size:16px; letter-spacing:.03em;
+    background:var(--overlay-bg); backdrop-filter:blur(8px);
+    padding:8px 16px; border-radius:2px; border:1px solid rgba(212,180,92,0.25);
+    pointer-events:auto;
+  }
+  #arToggle{
+    pointer-events:auto; font-family:var(--sans); font-weight:600; font-size:12px;
+    letter-spacing:.08em; text-transform:uppercase; color:#1a1712;
+    background:linear-gradient(180deg,var(--brass-light),var(--brass));
+    border:none; padding:10px 18px; border-radius:2px; cursor:pointer;
+    box-shadow:0 4px 14px rgba(0,0,0,.35);
+  }
+  #arToggle:disabled{ opacity:.4; cursor:not-allowed; }
+
+  #hint{
+    bottom:22px; left:50%; transform:translateX(-50%);
+    background:var(--overlay-bg); backdrop-filter:blur(8px);
+    padding:8px 18px; border-radius:20px; font-size:12px; letter-spacing:.03em;
+    border:1px solid rgba(255,255,255,0.08); white-space:nowrap;
+  }
+
+  #crosshair{
+    top:50%; left:50%; width:5px; height:5px; margin:-2.5px 0 0 -2.5px;
+    background:rgba(255,255,255,.55); border-radius:50%; pointer-events:none;
+  }
+
+  #infoPanel{
+    left:50%; bottom:70px; transform:translateX(-50%) translateY(12px);
+    width:min(360px,86vw); background:var(--overlay-bg); backdrop-filter:blur(10px);
+    border:1px solid rgba(212,180,92,0.3); border-radius:3px; padding:16px 18px;
+    opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
+  }
+  #infoPanel.visible{ opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
+  #infoPanel .artist{ font-family:var(--serif); font-style:italic; font-size:12px; color:#c9c2b3; }
+  #infoPanel .title{ font-family:var(--serif); font-size:19px; margin:2px 0 6px; color:#fff; }
+  #infoPanel .rule{ width:32px; height:1px; background:var(--brass); margin:8px 0; }
+  #infoPanel .meta{ font-size:11px; letter-spacing:.05em; color:#a9a397; text-transform:uppercase; }
+  #infoPanel .price{ font-family:var(--serif); color:var(--brass-light); font-size:16px; margin-top:8px; }
+  #infoPanel button{
+    margin-top:12px; width:100%; padding:9px; background:transparent;
+    border:1px solid var(--brass); color:var(--brass-light); font-family:var(--sans);
+    font-size:11px; letter-spacing:.08em; text-transform:uppercase; border-radius:2px; cursor:pointer;
+  }
+  #infoPanel button:hover{ background:rgba(212,180,92,0.12); }
+
+  #arControls{
+    display:none; bottom:26px; left:50%; transform:translateX(-50%);
+    gap:10px;
+  }
+  #arControls.visible{ display:flex; }
+  #arControls button{
+    pointer-events:auto; font-family:var(--sans); font-size:12px; letter-spacing:.04em;
+    background:var(--overlay-bg); color:var(--overlay-text); border:1px solid rgba(212,180,92,0.35);
+    padding:9px 14px; border-radius:20px; cursor:pointer;
+  }
+
+  .label3d{
+    font-family:var(--serif); color:#f2ede1; font-size:12px; text-align:center;
+    background:rgba(12,11,10,0.55); backdrop-filter:blur(3px); padding:5px 10px;
+    border-top:1px solid var(--brass); white-space:nowrap; pointer-events:none;
+  }
+  .label3d .a{ font-style:italic; color:#c9c2b3; font-size:10px; display:block; }
+</style>
+</head>
+<body>
+
+  <div id="loading"><div class="spinner"></div><div class="label">Préparation de la galerie…</div></div>
+
+  <div class="hud" id="topbar">
+    <div id="galleryTitle">Galerie</div>
+    <button class="hud" id="arToggle" disabled>Voir en RA</button>
+  </div>
+
+  <div class="hud" id="hint">Cliquez pour explorer · ZQSD / flèches pour marcher · Échap pour sortir</div>
+  <div class="hud" id="crosshair"></div>
+
+  <div class="hud" id="infoPanel">
+    <div class="artist" id="ip-artist"></div>
+    <div class="title" id="ip-title"></div>
+    <div class="rule"></div>
+    <div class="meta" id="ip-meta"></div>
+    <div class="price" id="ip-price"></div>
+    <button id="ip-cta">Voir la fiche de l'œuvre</button>
+  </div>
+
+  <div class="hud" id="arControls">
+    <button id="arPrev">‹ Précédente</button>
+    <button id="arPlace">Poser ici</button>
+    <button id="arNext">Suivante ›</button>
+  </div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { ARButton } from 'three/addons/webxr/ARButton.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+import { Reflector } from 'three/addons/objects/Reflector.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+/* ---------------------------------------------------------------------- */
+/* 1. DONNÉES DES ŒUVRES — remplacées via ?artworks=... ou postMessage    */
+/* ---------------------------------------------------------------------- */
+// imageUrl 'generated:N' = toile abstraite générée en canvas (pas de dépendance
+// réseau). En production, remplacer par de vraies imageUrl (Bubble) : le
+// composant charge alors la vraie image via textureLoader normalement.
+
+function parseUrlArtworks(){
+  try{
+    const p = new URLSearchParams(location.search).get('artworks');
+    if(!p) return null;
+    return JSON.parse(decodeURIComponent(p));
+  }catch(e){ console.warn('artworks param invalide', e); return null; }
+}
+
+let artworks = []; // envoyées par la page /g/[slug]/visite-3d (voir section 6)
+const urlGalleryName = new URLSearchParams(location.search).get('galleryName');
+if(urlGalleryName) document.getElementById('galleryTitle').textContent = urlGalleryName;
+
+/* ---------------------------------------------------------------------- */
+/* 2. SCENE / RENDERER                                                     */
+/* ---------------------------------------------------------------------- */
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0c0b0a);
+
+const camera = new THREE.PerspectiveCamera(65, window.innerWidth/window.innerHeight, 0.05, 100);
+camera.position.set(0, 1.65, 4);
+
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.95;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.xr.enabled = true;
+document.body.appendChild(renderer.domElement);
+
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.setSize(window.innerWidth, window.innerHeight);
+labelRenderer.domElement.style.position='absolute';
+labelRenderer.domElement.style.top='0';
+labelRenderer.domElement.style.pointerEvents='none';
+document.body.appendChild(labelRenderer.domElement);
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  labelRenderer.setSize(window.innerWidth, window.innerHeight);
+  composer.setSize(window.innerWidth, window.innerHeight);
+});
+
+/* Post-traitement : rendu de base + léger bloom sur les spots + passe de sortie
+   (obligatoire avec EffectComposer pour retrouver le bon tone mapping/espace
+   colorimétrique, sinon l'image sort trop plate). Le bloom est désactivé sur
+   tactile pour préserver la fluidité sur mobile ; le rendu reste correct
+   (HDRI + matériaux) même sans lui. */
+const isTouchDevice = matchMedia('(pointer:coarse)').matches;
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+if(!isTouchDevice){
+  const bloomPass = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight), 0.55, 0.5, 0.74
+  );
+  composer.addPass(bloomPass);
+}
+composer.addPass(new OutputPass());
+composer.addPass(new SMAAPass(window.innerWidth, window.innerHeight));
+
+/* ---------------------------------------------------------------------- */
+/* 3. LUMIÈRES                                                             */
+/* ---------------------------------------------------------------------- */
+// Intensités réduites : l'environnement HDRI (ci-dessous) fournit désormais
+// l'essentiel de la lumière ambiante et des reflets, ces deux lumières ne
+// servent plus qu'à éviter les zones totalement noires.
+const hemiLight = new THREE.HemisphereLight(0x4a5564, 0x0d0c0a, 0.18);
+scene.add(hemiLight);
+const fill = new THREE.DirectionalLight(0xccd4e8, 0.11);
+fill.position.set(2,5,2);
+scene.add(fill);
+
+let trackSpotIndex = 0;
+function addTrackSpot(x,y,z, targetX,targetY,targetZ){
+  const spot = new THREE.SpotLight(0xfff0d2, 9, 8, Math.PI/6, 0.45, 1.2);
+  spot.position.set(x,y,z);
+  // Une ombre portée sur deux : rendu quasi identique visuellement, deux
+  // fois moins de shadow maps à calculer pour une galerie de 20-30 œuvres.
+  spot.castShadow = (trackSpotIndex % 2 === 0);
+  trackSpotIndex++;
+  spot.shadow.mapSize.set(512,512);
+  spot.shadow.bias = -0.0015;
+  const target = new THREE.Object3D();
+  target.position.set(targetX,targetY,targetZ);
+  scene.add(target);
+  spot.target = target;
+  scene.add(spot);
+}
+
+/* ---------------------------------------------------------------------- */
+/* 3bis. ENVIRONNEMENT HDRI — éclairage ambiant + reflets réalistes        */
+/* ---------------------------------------------------------------------- */
+const pmremGenerator = new THREE.PMREMGenerator(renderer);
+pmremGenerator.compileEquirectangularShader();
+
+function finishEnvLoad(envTexture){
+  if(envTexture){
+    scene.environment = envTexture; // n'affecte que l'éclairage/les reflets, pas le décor visible
+  } else {
+    // Pas de HDRI disponible (réseau restreint, ex. preview) : on compense
+    // avec un éclairage direct un peu plus fort pour garder une salle bien exposée.
+    hemiLight.intensity = 0.24;
+    fill.intensity = 0.14;
+  }
+  document.getElementById('loading').classList.add('hidden');
+}
+
+new RGBELoader()
+  .setPath('https://threejs.org/examples/textures/equirectangular/')
+  .load(
+    'venice_sunset_1k.hdr',
+    (hdrTex) => {
+      const envMap = pmremGenerator.fromEquirectangular(hdrTex).texture;
+      hdrTex.dispose();
+      pmremGenerator.dispose();
+      finishEnvLoad(envMap);
+    },
+    undefined,
+    () => { finishEnvLoad(null); } // si le CDN est bloqué, la galerie reste utilisable (éclairage direct seul)
+  );
+
+// filet de sécurité : jamais bloqué plus de 4s sur l'écran de chargement
+setTimeout(() => document.getElementById('loading').classList.add('hidden'), 4000);
+
+/* ---------------------------------------------------------------------- */
+/* 4. SALLE (murs / sol / plafond) — dimensionnée selon le nb d'œuvres     */
+/* ---------------------------------------------------------------------- */
+let roomGroup = new THREE.Group();
+let roomBounds = { minX:-4, maxX:4, minZ:-4, maxZ:4 };
+
+function makeFloorTexture(){
+  // Sol en marbre : nuages de teinte doux + veines qui bifurquent, plus
+  // sombre que les murs pour bien trancher, et compatible avec le sol
+  // réfléchissant (Reflector) déjà en place.
+  const c = document.createElement('canvas'); c.width=768; c.height=768;
+  const ctx = c.getContext('2d');
+  const W = 768, H = 768;
+  ctx.fillStyle = '#34302a'; ctx.fillRect(0,0,W,H);
+
+  // Nuages de teinte — marbre noir façon Nero Marquina, reflets plus clairs
+  // qui ressortent fort sur le fond très sombre.
+  for(let i=0;i<22;i++){
+    const x = Math.random()*W, y = Math.random()*H;
+    const r = 80 + Math.random()*160;
+    const lighter = Math.random() > 0.5;
+    const grad = ctx.createRadialGradient(x,y,0,x,y,r);
+    const c1 = lighter ? 'rgba(90,86,78,0.16)' : 'rgba(8,7,6,0.3)';
+    grad.addColorStop(0, c1);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+  }
+
+  // Veines principales, qui bifurquent en veines plus fines
+  function drawVein(x0,y0,x1,y1,width,alpha,depth){
+    const midx = (x0+x1)/2 + (Math.random()-0.5)*120;
+    const midy = (y0+y1)/2 + (Math.random()-0.5)*120;
+    ctx.strokeStyle = `rgba(205,198,182,${alpha*1.3})`;
+    ctx.lineWidth = width;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x0,y0);
+    ctx.quadraticCurveTo(midx,midy,x1,y1);
+    ctx.stroke();
+    if(depth > 0 && Math.random() > 0.35){
+      const t = 0.3+Math.random()*0.4;
+      const bx = x0+(x1-x0)*t, by = y0+(y1-y0)*t;
+      const ang = Math.atan2(y1-y0,x1-x0) + (Math.random()-0.5)*1.6;
+      const len = 60+Math.random()*140;
+      drawVein(bx,by, bx+Math.cos(ang)*len, by+Math.sin(ang)*len, width*0.55, alpha*0.8, depth-1);
+    }
+  }
+  for(let i=0;i<7;i++){
+    const x0 = Math.random()*W, y0 = Math.random()*H*0.3;
+    const x1 = x0 + (Math.random()-0.5)*300, y1 = y0 + H*0.6 + Math.random()*H*0.3;
+    drawVein(x0,y0,x1,y1, 1.6+Math.random()*1.8, 0.22+Math.random()*0.12, 2);
+  }
+
+  // Grain fin pour casser l'effet trop numérique
+  for(let i=0;i<1200;i++){
+    const shade = 95 + Math.random()*50;
+    ctx.fillStyle = `rgba(${shade},${shade-4},${shade-10},${0.015+Math.random()*0.04})`;
+    ctx.beginPath();
+    ctx.arc(Math.random()*W, Math.random()*H, 0.8+Math.random()*1.8, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+const floorTex = makeFloorTexture();
+
+function makeBumpTexture({ base=128, grain=16, blobs=0, blobColor=null } = {}){
+  // Texture de relief en niveaux de gris (utilisée comme bumpMap) : grain fin
+  // + éventuellement quelques variations plus larges (imperfections de plâtre).
+  const c = document.createElement('canvas'); c.width=512; c.height=512;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = `rgb(${base},${base},${base})`; ctx.fillRect(0,0,512,512);
+  for(let i=0;i<32000;i++){
+    const shade = base + (Math.random()-0.5)*grain;
+    ctx.fillStyle = `rgb(${shade},${shade},${shade})`;
+    ctx.fillRect(Math.random()*512, Math.random()*512, 1, 1);
+  }
+  for(let i=0;i<blobs;i++){
+    const shade = base + (Math.random()-0.5)*grain*1.8;
+    ctx.fillStyle = `rgba(${shade},${shade},${shade},0.35)`;
+    ctx.beginPath();
+    ctx.arc(Math.random()*512, Math.random()*512, 6+Math.random()*22, 0, Math.PI*2);
+    ctx.fill();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}
+function makeWoodAccentTexture(){
+  const c = document.createElement('canvas'); c.width=256; c.height=512;
+  const ctx = c.getContext('2d');
+  const planks = 8, plankH = 512/planks;
+  for(let i=0;i<planks;i++){
+    const base = 58 + Math.random()*22;
+    ctx.fillStyle = `rgb(${base},${base-28},${base-52})`;
+    ctx.fillRect(0, i*plankH, 256, plankH);
+    for(let g=0; g<8; g++){
+      const gx = Math.random()*256;
+      ctx.strokeStyle = `rgba(0,0,0,${0.06+Math.random()*0.08})`;
+      ctx.lineWidth = 1+Math.random();
+      ctx.beginPath();
+      ctx.moveTo(gx, i*plankH+2);
+      ctx.bezierCurveTo(gx+10, i*plankH+plankH*0.4, gx-10, i*plankH+plankH*0.6, gx, i*plankH+plankH-2);
+      ctx.stroke();
+    }
+  }
+  ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 2;
+  for(let i=0;i<=planks;i++){ ctx.beginPath(); ctx.moveTo(0,i*plankH); ctx.lineTo(256,i*plankH); ctx.stroke(); }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}
+const wallBumpTex = makeBumpTexture({ base:130, grain:34, blobs:110 });
+const wallRoughTex = makeBumpTexture({ base:150, grain:26, blobs:70 });
+const floorBumpTex = makeBumpTexture({ base:128, grain:22, blobs:0 });
+
+// Largeur (m) du plus grand tableau : la salle s'agrandit pour que les grands
+// formats restent espacés comme dans une vraie galerie.
+function maxArtWidth(){
+  return artworks.reduce((m, a) => Math.max(m, (a.widthCm||60)/100), 0);
+}
+
+function buildRoom(count){
+  scene.remove(roomGroup);
+  roomGroup = new THREE.Group();
+
+  const spacing = Math.max(2.6, maxArtWidth() + 1.2); // ≥ 1 m de mur libre entre deux cadres
+  const width = Math.max(9, Math.ceil(count/2)*spacing + 3);
+  const depth = 15;
+  const height = 5.6;
+  roomBounds = { minX:-width/2+0.6, maxX:width/2-0.6, minZ:-depth/2+0.6, maxZ:depth/2-0.6 };
+
+  // Couche 1 : vrai reflet miroir (atténué par la teinte) — c'est elle qui
+  // donne l'effet "sol poli" réaliste, notamment pour les cadres et la lumière.
+  const floorReflector = new Reflector(new THREE.PlaneGeometry(width, depth), {
+    textureWidth: (isTouchDevice ? 512 : 1024) * Math.min(window.devicePixelRatio, 1.5),
+    textureHeight: (isTouchDevice ? 512 : 1024) * Math.min(window.devicePixelRatio, 1.5),
+    color: 0x615d53,
+    clipBias: 0.003,
+  });
+  floorReflector.rotation.x = -Math.PI/2;
+  floorReflector.position.y = 0.001;
+  roomGroup.add(floorReflector);
+
+  // Couche 2 : texture béton ciré semi-transparente par-dessus, pour garder
+  // du grain/de la matière sans masquer le reflet en dessous.
+  floorTex.repeat.set(width/1.4, depth/1.4);
+  floorBumpTex.repeat.set(width/1.4, depth/1.4);
+  const floorOverlay = new THREE.Mesh(
+    new THREE.PlaneGeometry(width, depth),
+    new THREE.MeshStandardMaterial({
+      map: floorTex, bumpMap: floorBumpTex, bumpScale: 0.015,
+      roughness:0.4, metalness:0.05,
+      transparent:true, opacity:0.55, depthWrite:false
+    })
+  );
+  floorOverlay.rotation.x = -Math.PI/2;
+  floorOverlay.position.y = 0.0025;
+  floorOverlay.receiveShadow = true;
+  roomGroup.add(floorOverlay);
+
+  wallBumpTex.repeat.set(width/2.2, height/2.2);
+  wallRoughTex.repeat.set(width/2.2, height/2.2);
+  const wallMat = new THREE.MeshStandardMaterial({
+    color:0x3c3833, roughness:0.58,
+    bumpMap: wallBumpTex, bumpScale:0.045,
+    roughnessMap: wallRoughTex
+  });
+  const ceilMat = new THREE.MeshStandardMaterial({ color:0x0e0c09, roughness:1 });
+
+  const backWall = new THREE.Mesh(new THREE.PlaneGeometry(width, height), wallMat);
+  backWall.position.set(0, height/2, -depth/2);
+  backWall.receiveShadow = true;
+  roomGroup.add(backWall);
+
+  const frontWall = backWall.clone();
+  frontWall.position.z = depth/2;
+  frontWall.rotation.y = Math.PI;
+  roomGroup.add(frontWall);
+
+  const sideGeo = new THREE.PlaneGeometry(depth, height);
+  const leftWall = new THREE.Mesh(sideGeo, wallMat);
+  leftWall.position.set(-width/2, height/2, 0);
+  leftWall.rotation.y = Math.PI/2;
+  roomGroup.add(leftWall);
+
+  const rightWall = leftWall.clone();
+  rightWall.position.x = width/2;
+  rightWall.rotation.y = -Math.PI/2;
+  roomGroup.add(rightWall);
+
+  const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(width, depth), ceilMat);
+  ceiling.position.y = height;
+  ceiling.rotation.x = Math.PI/2;
+  roomGroup.add(ceiling);
+
+  // Lumière rasante sur les murs : sans ça, un mur très sombre peut devenir
+  // illisible dès qu'il n'y a pas de tableau/spot juste devant. Ces appliques
+  // proches du plafond éclairent la matière du mur lui-même (texture, grain),
+  // pas les œuvres — complémentaire des spots sur rail, pas un remplacement.
+  const washY = height - 0.5;
+  function wallWashSpot(x,y,z, targetX,targetY,targetZ){
+    const spot = new THREE.SpotLight(0xfff0d2, 9.5, 7.5, Math.PI/4.2, 0.6, 1.3);
+    spot.position.set(x,y,z);
+    spot.castShadow = false; // éclairage d'ambiance sur le mur, pas de précision nécessaire
+    const target = new THREE.Object3D();
+    target.position.set(targetX,targetY,targetZ);
+    scene.add(target);
+    spot.target = target;
+    scene.add(spot);
+  }
+  function addWallWash(count, make){
+    for(let i=0;i<count;i++){
+      const t = (i+0.5)/count;
+      const { pos, target } = make(t);
+      wallWashSpot(pos[0], pos[1], pos[2], target[0], target[1], target[2]);
+    }
+  }
+  const leftN = Math.max(2, Math.round(depth/6));
+  addWallWash(leftN, t => ({
+    pos: [-width/2+0.6, washY, -depth/2 + t*depth],
+    target: [-width/2+0.05, 0.3, -depth/2 + t*depth]
+  }));
+  addWallWash(leftN, t => ({
+    pos: [width/2-0.6, washY, -depth/2 + t*depth],
+    target: [width/2-0.05, 0.3, -depth/2 + t*depth]
+  }));
+  const endN = Math.max(2, Math.round(width/6));
+  addWallWash(endN, t => ({
+    pos: [-width/2 + t*width, washY, -depth/2+0.6],
+    target: [-width/2 + t*width, 0.3, -depth/2+0.05]
+  }));
+  addWallWash(endN, t => ({
+    pos: [-width/2 + t*width, washY, depth/2-0.6],
+    target: [-width/2 + t*width, 0.3, depth/2-0.05]
+  }));
+
+  // plinthe / baseboard
+  const baseMat = new THREE.MeshStandardMaterial({ color:0x2a231d, roughness:0.6 });
+  const baseGeo = new THREE.BoxGeometry(width, 0.09, 0.03);
+  const baseBack = new THREE.Mesh(baseGeo, baseMat);
+  baseBack.position.set(0, 0.045, -depth/2+0.015);
+  roomGroup.add(baseBack);
+
+  // Piliers / cloisons en saillie : cassent l'effet "cube" en créant de
+  // vrais passages qui contournent, comme dans une galerie réelle avec des
+  // alcôves plutôt qu'une seule salle ouverte.
+  const pillarObstacles = [];
+  function addPillar(zCenter, side, reach){
+    // side: -1 = part du mur gauche vers le centre, +1 = part du mur droit
+    const thickness = 1.3;
+    const wallX = side < 0 ? -width/2 : width/2;
+    const innerX = wallX - side*reach;
+    const pillar = new THREE.Mesh(
+      new THREE.BoxGeometry(reach, height, thickness),
+      wallMat
+    );
+    pillar.position.set((wallX+innerX)/2, height/2, zCenter);
+    pillar.castShadow = true;
+    pillar.receiveShadow = true;
+    roomGroup.add(pillar);
+    pillarObstacles.push({
+      minX: Math.min(wallX, innerX) - 0.35, maxX: Math.max(wallX, innerX) + 0.35,
+      minZ: zCenter - thickness/2 - 0.35, maxZ: zCenter + thickness/2 + 0.35
+    });
+  }
+  if(depth > 10 && width > 8){
+    const reach = Math.min(width*0.4, 3.2);
+    addPillar(-depth*0.2, -1, reach);
+    addPillar(depth*0.15, 1, reach);
+  }
+
+  // Cloison avec passage : sépare la galerie en deux zones distinctes reliées
+  // par une vraie ouverture à franchir, plutôt qu'un seul volume continu.
+  if(depth > 10){
+    const doorZ = depth*0.38;
+    const doorHalf = Math.min(2.2, width*0.24);
+    const doorTop = height*0.68;
+    const wallThickness = 0.9;
+    const stubW = width/2 - doorHalf;
+    const doorWallMat = wallMat.clone();
+
+    const leftStub = new THREE.Mesh(new THREE.BoxGeometry(stubW, height, wallThickness), doorWallMat);
+    leftStub.position.set(-(width/2+doorHalf)/2, height/2, doorZ);
+    leftStub.castShadow = true; leftStub.receiveShadow = true;
+    roomGroup.add(leftStub);
+
+    const rightStub = new THREE.Mesh(new THREE.BoxGeometry(stubW, height, wallThickness), doorWallMat);
+    rightStub.position.set((width/2+doorHalf)/2, height/2, doorZ);
+    rightStub.castShadow = true; rightStub.receiveShadow = true;
+    roomGroup.add(rightStub);
+
+    const lintel = new THREE.Mesh(new THREE.BoxGeometry(doorHalf*2, height-doorTop, wallThickness), doorWallMat);
+    lintel.position.set(0, doorTop+(height-doorTop)/2, doorZ);
+    lintel.castShadow = true; lintel.receiveShadow = true;
+    roomGroup.add(lintel);
+
+    pillarObstacles.push({
+      minX: -width/2-0.35, maxX: -doorHalf+0.05,
+      minZ: doorZ-wallThickness/2-0.35, maxZ: doorZ+wallThickness/2+0.35
+    });
+    pillarObstacles.push({
+      minX: doorHalf-0.05, maxX: width/2+0.35,
+      minZ: doorZ-wallThickness/2-0.35, maxZ: doorZ+wallThickness/2+0.35
+    });
+
+    // Mur d'accent bois sur un pan de la deuxième zone, au-delà du passage —
+    // casse la matière et marque le changement d'ambiance entre les deux zones.
+    const woodTex = makeWoodAccentTexture();
+    const accentDepth = depth/2 - doorZ - 0.3;
+    if(accentDepth > 1.2){
+      woodTex.repeat.set(1, accentDepth/1.6);
+      const accentMat = new THREE.MeshStandardMaterial({ map: woodTex, roughness:0.65 });
+      const accentWall = new THREE.Mesh(new THREE.PlaneGeometry(accentDepth, height*0.9), accentMat);
+      accentWall.position.set(width/2-0.02, height*0.45, (doorZ + depth/2)/2 + 0.15);
+      accentWall.rotation.y = -Math.PI/2;
+      roomGroup.add(accentWall);
+    }
+  }
+
+  /* ---------------------------------------------------------------------
+     FENÊTRE (mur gauche, première zone — le mur y est vide de tableaux)
+     Vraie ouverture dans le mur + embrasure épaisse + cadre à meneaux +
+     vitre + paysage visible dehors + soleil qui projette sur le sol la
+     lumière de la fenêtre et l'ombre des meneaux.
+     --------------------------------------------------------------------- */
+  if(depth > 10 && width > 8){
+    const pillarThick = 1.3, divThick = 0.9;
+    const zFreeA = -depth*0.2 + pillarThick/2;   // face du pilier gauche
+    const zFreeB = depth*0.38 - divThick/2;      // face de la cloison à passage
+    const winW = Math.min(4.6, (zFreeB - zFreeA) - 3.0);
+    if(winW > 2){
+      const zc = (zFreeA + zFreeB)/2;
+      const zA = zc - winW/2, zB = zc + winW/2;
+      const winSill = 0.85, winTop = 3.95, winH = winTop - winSill;
+      const midY = (winSill + winTop)/2;
+      const revealT = 0.42;                       // épaisseur du mur (embrasure)
+      const wallX = -width/2;
+      const frameX = wallX - 0.22;
+
+      // 1) Mur gauche percé : le plan plein est remplacé par une forme avec trou
+      const shape = new THREE.Shape();
+      shape.moveTo(-depth/2, -height/2);
+      shape.lineTo( depth/2, -height/2);
+      shape.lineTo( depth/2,  height/2);
+      shape.lineTo(-depth/2,  height/2);
+      shape.lineTo(-depth/2, -height/2);
+      const hole = new THREE.Path();
+      const lx0 = -zB, lx1 = -zA;                 // le mur est tourné : x local = -z monde
+      const ly0 = winSill - height/2, ly1 = winTop - height/2;
+      hole.moveTo(lx0, ly0); hole.lineTo(lx0, ly1); hole.lineTo(lx1, ly1); hole.lineTo(lx1, ly0); hole.lineTo(lx0, ly0);
+      shape.holes.push(hole);
+      const holeGeo = new THREE.ShapeGeometry(shape);
+      const hp = holeGeo.attributes.position, hu = holeGeo.attributes.uv;
+      for(let i=0;i<hp.count;i++){                // UV normalisés (mêmes textures que les autres murs)
+        hu.setXY(i, (hp.getX(i)+depth/2)/depth, (hp.getY(i)+height/2)/height);
+      }
+      hu.needsUpdate = true;
+      leftWall.geometry = holeGeo;
+
+      // 2) Embrasure : le mur a une vraie épaisseur autour de l'ouverture
+      const revealMat = wallMat.clone();
+      revealMat.side = THREE.DoubleSide;
+      const revBottom = new THREE.Mesh(new THREE.PlaneGeometry(revealT, winW), revealMat);
+      revBottom.rotation.x = -Math.PI/2; revBottom.position.set(wallX-revealT/2, winSill, zc);
+      const revTop = new THREE.Mesh(new THREE.PlaneGeometry(revealT, winW), revealMat);
+      revTop.rotation.x = Math.PI/2; revTop.position.set(wallX-revealT/2, winTop, zc);
+      const revA = new THREE.Mesh(new THREE.PlaneGeometry(revealT, winH), revealMat);
+      revA.position.set(wallX-revealT/2, midY, zA);
+      const revB = new THREE.Mesh(new THREE.PlaneGeometry(revealT, winH), revealMat);
+      revB.position.set(wallX-revealT/2, midY, zB);
+      [revBottom, revTop, revA, revB].forEach(m => { m.receiveShadow = true; roomGroup.add(m); });
+
+      // 3) Cadre métallique sombre à meneaux (3 vantaux × 2 rangées, comme sur la photo)
+      const frameMat = new THREE.MeshStandardMaterial({ color:0x3a3632, roughness:0.42, metalness:0.4 });
+      const addBar = (dx,dy,dz,x,y,z) => {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(dx,dy,dz), frameMat);
+        m.position.set(x,y,z); m.castShadow = true; m.receiveShadow = true;
+        roomGroup.add(m); return m;
+      };
+      const bt = 0.09, mull = 0.06;
+      addBar(0.12, bt, winW, frameX, winSill+bt/2, zc);
+      addBar(0.12, bt, winW, frameX, winTop-bt/2, zc);
+      addBar(0.12, winH, bt, frameX, midY, zA+bt/2);
+      addBar(0.12, winH, bt, frameX, midY, zB-bt/2);
+      for(let i=1;i<3;i++) addBar(0.10, winH-2*bt, mull, frameX, midY, zA + winW*i/3);
+      addBar(0.10, mull, winW-2*bt, frameX, winSill + winH*0.64, zc);
+
+      // 4) Vitre : très légèrement teintée, reflète l'environnement
+      const glass = new THREE.Mesh(
+        new THREE.PlaneGeometry(winW-2*bt, winH-2*bt),
+        new THREE.MeshStandardMaterial({
+          color:0xd6e8f2, transparent:true, opacity:0.14, roughness:0.03, metalness:0,
+          envMapIntensity:1.6, depthWrite:false, side:THREE.DoubleSide
+        })
+      );
+      glass.rotation.y = Math.PI/2; glass.position.set(frameX, midY, zc); glass.renderOrder = 2;
+      roomGroup.add(glass);
+
+      // 5) Moulures blanches côté salle + appui de fenêtre saillant
+      const trimMat = new THREE.MeshStandardMaterial({ color:0xfdfbf7, roughness:0.6 });
+      const addTrim = (dx,dy,dz,x,y,z) => {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(dx,dy,dz), trimMat);
+        m.position.set(x,y,z); m.castShadow = true; m.receiveShadow = true;
+        roomGroup.add(m);
+      };
+      addTrim(0.05, 0.16, winW+0.32, wallX+0.025, winTop+0.08, zc);              // linteau
+      addTrim(0.05, winH+0.16, 0.16, wallX+0.025, midY+0.08, zA-0.08);           // montant
+      addTrim(0.05, winH+0.16, 0.16, wallX+0.025, midY+0.08, zB+0.08);           // montant
+      addTrim(0.36, 0.05, winW+0.36, wallX+0.13, winSill-0.02, zc);              // appui
+
+      // 6) Extérieur : vraie photo de paysage, en grand fond plat éloigné —
+      //    largement dimensionné pour rester crédible même en se déplaçant
+      //    devant la fenêtre (pas de bord visible dans le champ de vision).
+      const landscapeTex = new THREE.TextureLoader().load('/visite-3d/paysage.jpg');
+      landscapeTex.colorSpace = THREE.SRGBColorSpace;
+      const landscapeRatio = 1600/1057;
+      const landH = 60, landW = landH*landscapeRatio;
+      const landscape = new THREE.Mesh(
+        new THREE.PlaneGeometry(landW, landH),
+        new THREE.MeshBasicMaterial({ map: landscapeTex, fog:false })
+      );
+      landscape.rotation.y = Math.PI/2;
+      landscape.position.set(wallX - 48, winSill + landH*0.34, zc);
+      roomGroup.add(landscape);
+
+      // Fond de ciel derrière la photo (évite tout vide si la vitre laisse
+      // deviner un bord de la photo sous un angle très rasant)
+      const skyBackdrop = new THREE.Mesh(
+        new THREE.PlaneGeometry(landW*2.4, landH*2.4),
+        new THREE.MeshBasicMaterial({ color:0xbcd6ea, fog:false })
+      );
+      skyBackdrop.rotation.y = Math.PI/2;
+      skyBackdrop.position.set(wallX - 60, winSill + landH*0.34, zc);
+      roomGroup.add(skyBackdrop);
+
+      // 7) Soleil : passe par l'ouverture, éclaire le sol en parallélogramme et
+      //    projette l'ombre des meneaux. Les "bloqueurs" invisibles empêchent la
+      //    lumière d'entrer ailleurs que par la fenêtre (murs/plafond n'ont pas
+      //    d'ombre propre pour ne pas perturber les spots des tableaux).
+      const sunElev = 35*Math.PI/180;
+      const toSun = new THREE.Vector3(-Math.cos(sunElev), Math.sin(sunElev), 0.26).normalize();
+      const sunTarget = new THREE.Object3D();
+      sunTarget.position.set(wallX + 3.42, 0, zc - 1.09);
+      const sun = new THREE.DirectionalLight(0xffd29a, 4.2);
+      sun.position.copy(sunTarget.position).addScaledVector(toSun, 34);
+      sun.target = sunTarget;
+      sun.castShadow = true;
+      const sMap = isTouchDevice ? 1024 : 2048;
+      sun.shadow.mapSize.set(sMap, sMap);
+      const sc = sun.shadow.camera;
+      sc.left = -14; sc.right = 14; sc.top = 14; sc.bottom = -14; sc.near = 1; sc.far = 80;
+      sc.updateProjectionMatrix();
+      sun.shadow.bias = -0.0003;
+      sun.shadow.normalBias = 0.02;
+      sun.shadow.radius = 3;
+      roomGroup.add(sun); roomGroup.add(sunTarget);
+
+      const blockMat = new THREE.MeshBasicMaterial({ colorWrite:false, depthWrite:false, side:THREE.DoubleSide });
+      const addBlocker = (geo, x, y, z, rx, ry) => {
+        const m = new THREE.Mesh(geo, blockMat);
+        m.position.set(x,y,z); m.rotation.x = rx||0; m.rotation.y = ry||0;
+        m.castShadow = true; m.receiveShadow = false;
+        roomGroup.add(m);
+      };
+      addBlocker(holeGeo, wallX-0.05, height/2, 0, 0, Math.PI/2);                     // mur gauche (avec trou)
+      addBlocker(new THREE.PlaneGeometry(width+2, depth+2), 0, height+0.05, 0, Math.PI/2, 0);   // plafond
+      addBlocker(new THREE.PlaneGeometry(width+2, height+1), 0, height/2, depth/2+0.05, 0, 0);  // mur avant
+    }
+  }
+
+  roomBounds.obstacles = pillarObstacles;
+
+  scene.add(roomGroup);
+  return { width, depth, height, spacing };
+}
+
+/* ---------------------------------------------------------------------- */
+/* 5. ŒUVRES                                                               */
+/* ---------------------------------------------------------------------- */
+const textureLoader = new THREE.TextureLoader();
+textureLoader.crossOrigin = 'anonymous';
+let frameGroups = []; // { group, data, mesh }
+let loadedCount = 0;
+
+function makeGeneratedArtTexture(seed){
+  // Petite toile abstraite générative (dégradé + formes), utilisée pour les
+  // œuvres de démo afin de ne dépendre d'aucune image externe.
+  let s = seed * 9301 + 49297;
+  const rnd = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+  const c = document.createElement('canvas'); c.width = 512; c.height = 384;
+  const ctx = c.getContext('2d');
+  const hue = Math.floor(rnd() * 360);
+  const grad = ctx.createLinearGradient(0, 0, 512, 384);
+  grad.addColorStop(0, `hsl(${hue},32%,90%)`);
+  grad.addColorStop(1, `hsl(${(hue + 45) % 360},28%,76%)`);
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, 512, 384);
+  for(let i = 0; i < 6; i++){
+    ctx.fillStyle = `hsla(${(hue + i * 37) % 360}, 55%, ${35 + rnd() * 25}%, ${0.45 + rnd() * 0.35})`;
+    ctx.beginPath();
+    ctx.ellipse(rnd() * 512, rnd() * 384, 50 + rnd() * 150, 35 + rnd() * 100, rnd() * Math.PI, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.strokeStyle = `hsla(${hue},25%,18%,0.3)`; ctx.lineWidth = 2;
+  for(let i = 0; i < 4; i++){
+    ctx.beginPath();
+    ctx.moveTo(rnd() * 512, rnd() * 384);
+    ctx.lineTo(rnd() * 512, rnd() * 384);
+    ctx.stroke();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+function createFrame(art){
+  const w = Math.max(0.25, (art.widthCm||60)/100);
+  const h = Math.max(0.25, (art.heightCm||45)/100);
+  const border = 0.06;
+
+  const group = new THREE.Group();
+  group.userData.art = art;
+
+  // Cadre : bois avec un léger vernis (clearcoat) qui accroche la lumière
+  // des spots et les reflets de l'environnement HDRI, plus crédible qu'un
+  // mat plat.
+  const frameMat = new THREE.MeshPhysicalMaterial({
+    color:0x3b2c20, roughness:0.45, metalness:0.1,
+    clearcoat:0.5, clearcoatRoughness:0.35
+  });
+  const frame = new THREE.Mesh(new THREE.BoxGeometry(w+border*2, h+border*2, 0.04), frameMat);
+  frame.castShadow = true;
+  group.add(frame);
+
+  const matMat = new THREE.MeshStandardMaterial({ color:0xf7f4ec, roughness:0.95 });
+  const passe = new THREE.Mesh(new THREE.PlaneGeometry(w+border, h+border), matMat);
+  passe.position.z = 0.021;
+  group.add(passe);
+
+  const placeholderMat = new THREE.MeshStandardMaterial({ color:0x8f887a, roughness:0.9 });
+  const canvasMesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), placeholderMat);
+  canvasMesh.position.z = 0.023;
+  canvasMesh.castShadow = true;
+  group.add(canvasMesh);
+
+  function applyArtTexture(tex){
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    tex.generateMipmaps = true;
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.needsUpdate = true;
+    // Léger vernis (clearcoat faible) qui capte un reflet discret de la
+    // pièce — évite l'effet "poster mat" tout en restant lisible.
+    canvasMesh.material = new THREE.MeshPhysicalMaterial({
+      map:tex, roughness:0.82, clearcoat:0.18, clearcoatRoughness:0.4
+    });
+  }
+
+  if((art.imageUrl || '').startsWith('generated:')){
+    applyArtTexture(makeGeneratedArtTexture(parseInt(art.imageUrl.split(':')[1], 10) || 1));
+  } else {
+    textureLoader.load(art.imageUrl, applyArtTexture, undefined, () => { /* garde le placeholder si l'image échoue */ });
+  }
+
+  const labelDiv = document.createElement('div');
+  labelDiv.className = 'label3d';
+  labelDiv.textContent = art.title || '';
+  const labelSub = document.createElement('span');
+  labelSub.className = 'a';
+  labelSub.textContent = (art.artist||'') + (art.year ? ' · '+art.year : '');
+  labelDiv.appendChild(labelSub);
+  const label = new CSS2DObject(labelDiv);
+  label.position.set(0, -(h/2+border+0.14), 0.03);
+  group.add(label);
+
+  return { group, art, canvasMesh, w, h };
+}
+
+function layoutArtworks(){
+  frameGroups.forEach(f => roomGroup.remove(f.group));
+  frameGroups = [];
+
+  const { width, depth, spacing, height } = buildRoom(artworks.length);
+  addTrackSpot(0, height-0.15, 0, 0, 1.5, 0); // spot central plafond
+
+  const perWall = Math.ceil(artworks.length/2);
+  const eyeY = 1.55;
+
+  artworks.forEach((art, i) => {
+    const f = createFrame(art);
+    const onBack = i < perWall;
+    const idx = onBack ? i : i - perWall;
+    const total = onBack ? Math.min(perWall, artworks.length) : artworks.length - perWall;
+    const usable = width - 2.4 - Math.max(0, maxArtWidth() - 1); // garde de l'air près des angles
+    const x = -usable/2 + (usable/(Math.max(total-1,1))) * idx * (total>1?1:0) + (total===1? usable/2 : 0);
+
+    if(onBack){
+      f.group.position.set(x, eyeY, -depth/2+0.06);
+      addTrackSpot(x, height-0.15, -depth/2+1.4, x, eyeY, -depth/2);
+    } else {
+      f.group.position.set(x, eyeY, depth/2-0.06);
+      f.group.rotation.y = Math.PI;
+      addTrackSpot(x, height-0.15, depth/2-1.4, x, eyeY, depth/2);
+    }
+    roomGroup.add(f.group);
+    frameGroups.push(f);
+  });
+
+  document.getElementById('arToggle').disabled = frameGroups.length === 0 || !arSupported;
+}
+
+/* ---------------------------------------------------------------------- */
+/* 6. RÉCEPTION DES DONNÉES DEPUIS BUBBLE (postMessage)                    */
+/* ---------------------------------------------------------------------- */
+let artworksLaidOut = false;
+window.addEventListener('message', (e) => {
+  if(e.origin !== location.origin) return; // seule la boutique Drawiful peut piloter la salle
+  const data = e.data || {};
+  if(data.type === 'GALLERY_SET_ARTWORKS' && Array.isArray(data.artworks) && !artworksLaidOut){
+    // Une seule mise en place : les spots sont ajoutés à la scène et
+    // s'accumuleraient si on reconstruisait la salle.
+    artworksLaidOut = true;
+    artworks = data.artworks;
+    if(data.galleryName) document.getElementById('galleryTitle').textContent = data.galleryName;
+    if(data.allowAR === false) document.getElementById('arToggle').style.display = 'none';
+    layoutArtworks();
+  }
+});
+// Prévient la page parente que la salle est prête à recevoir les œuvres.
+if(window.parent !== window) window.parent.postMessage({ type:'GALLERY_READY' }, location.origin);
+
+/* ---------------------------------------------------------------------- */
+/* 7. DÉPLACEMENT — souris/clavier (desktop) ou orbite tactile (mobile)    */
+/* ---------------------------------------------------------------------- */
+const isTouch = matchMedia('(pointer:coarse)').matches;
+let plControls, orbitControls;
+const move = { f:false, b:false, l:false, r:false, turnL:false, turnR:false };
+const velocity = new THREE.Vector3();
+const clock = new THREE.Clock();
+
+if(!isTouch){
+  plControls = new PointerLockControls(camera, renderer.domElement);
+  renderer.domElement.addEventListener('click', () => { if(!renderer.xr.isPresenting) plControls.lock(); });
+
+  document.addEventListener('keydown', (e) => {
+    switch(e.code){
+      case 'KeyW': case 'ArrowUp': move.f = true; break;
+      case 'KeyS': case 'ArrowDown': move.b = true; break;
+      case 'KeyA': move.l = true; break;
+      case 'KeyD': move.r = true; break;
+      case 'ArrowLeft': move.turnL = true; break;
+      case 'ArrowRight': move.turnR = true; break;
+    }
+  });
+  document.addEventListener('keyup', (e) => {
+    switch(e.code){
+      case 'KeyW': case 'ArrowUp': move.f = false; break;
+      case 'KeyS': case 'ArrowDown': move.b = false; break;
+      case 'KeyA': move.l = false; break;
+      case 'KeyD': move.r = false; break;
+      case 'ArrowLeft': move.turnL = false; break;
+      case 'ArrowRight': move.turnR = false; break;
+    }
+  });
+} else {
+  orbitControls = new OrbitControls(camera, renderer.domElement);
+  orbitControls.target.set(0, 1.5, 0);
+  orbitControls.enablePan = false;
+  orbitControls.minDistance = 1.2;
+  orbitControls.maxDistance = 9;
+  orbitControls.maxPolarAngle = Math.PI*0.6;
+  document.getElementById('hint').textContent = 'Glissez pour regarder autour · Pincez pour zoomer';
+  orbitControls.update();
+}
+
+function updateMovement(delta){
+  if(!plControls || !plControls.isLocked) return;
+  const turnSpeed = 1.8; // rad/s
+  if(move.turnL) camera.rotation.y += turnSpeed*delta;
+  if(move.turnR) camera.rotation.y -= turnSpeed*delta;
+  const speed = 3.2;
+  velocity.x -= velocity.x * 8 * delta;
+  velocity.z -= velocity.z * 8 * delta;
+  const dir = new THREE.Vector3(Number(move.r)-Number(move.l), 0, Number(move.b)-Number(move.f));
+  if(dir.lengthSq()>0) dir.normalize();
+  velocity.x -= dir.x * speed * delta * 10;
+  velocity.z -= dir.z * speed * delta * 10;
+  plControls.moveRight(-velocity.x*delta);
+  plControls.moveForward(velocity.z*delta);
+
+  const p = camera.position;
+  p.x = THREE.MathUtils.clamp(p.x, roomBounds.minX, roomBounds.maxX);
+  p.z = THREE.MathUtils.clamp(p.z, roomBounds.minZ, roomBounds.maxZ);
+
+  // Repousse le joueur hors des piliers en gardant le déplacement le long
+  // de la face touchée (comme un vrai mur), plutôt que de bloquer net.
+  if(roomBounds.obstacles){
+    for(const o of roomBounds.obstacles){
+      if(p.x > o.minX && p.x < o.maxX && p.z > o.minZ && p.z < o.maxZ){
+        const dLeft = p.x - o.minX, dRight = o.maxX - p.x;
+        const dBack = p.z - o.minZ, dFront = o.maxZ - p.z;
+        const minPen = Math.min(dLeft, dRight, dBack, dFront);
+        if(minPen === dLeft) p.x = o.minX;
+        else if(minPen === dRight) p.x = o.maxX;
+        else if(minPen === dBack) p.z = o.minZ;
+        else p.z = o.maxZ;
+      }
+    }
+  }
+  p.y = 1.65;
+}
+
+/* ---------------------------------------------------------------------- */
+/* 8. PANNEAU D'INFO — regard/raycast vers l'œuvre la plus proche du centre*/
+/* ---------------------------------------------------------------------- */
+const raycaster = new THREE.Raycaster();
+const infoPanel = document.getElementById('infoPanel');
+let focusedArt = null;
+
+document.getElementById('ip-cta').addEventListener('click', () => {
+  if(!focusedArt) return;
+  window.parent.postMessage({ type:'GALLERY_ARTWORK_CLICK', id:focusedArt.id }, location.origin);
+});
+
+function updateFocus(){
+  if(renderer.xr.isPresenting){ infoPanel.classList.remove('visible'); return; }
+  raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+  const meshes = frameGroups.map(f => f.canvasMesh);
+  const hits = raycaster.intersectObjects(meshes, false);
+  if(hits.length && hits[0].distance < 5){
+    const f = frameGroups.find(x => x.canvasMesh === hits[0].object);
+    focusedArt = f.art;
+    document.getElementById('ip-artist').textContent = f.art.artist || '';
+    document.getElementById('ip-title').textContent = f.art.title;
+    document.getElementById('ip-meta').textContent = f.art.meta || '';
+    document.getElementById('ip-price').textContent = f.art.price || '';
+    infoPanel.classList.add('visible');
+  } else {
+    infoPanel.classList.remove('visible');
+    focusedArt = null;
+  }
+}
+
+/* ---------------------------------------------------------------------- */
+/* 9. RÉALITÉ AUGMENTÉE (WebXR hit-test)                                   */
+/* ---------------------------------------------------------------------- */
+let arSupported = false;
+let hitTestSource = null, hitTestSourceRequested = false;
+let reticle, arPlaced = null, arIndex = 0;
+
+if(navigator.xr && navigator.xr.isSessionSupported){
+  navigator.xr.isSessionSupported('immersive-ar').then((ok) => {
+    arSupported = ok;
+    document.getElementById('arToggle').disabled = !ok || frameGroups.length===0;
+    if(!ok){
+      document.getElementById('arToggle').title = "RA non disponible sur cet appareil/navigateur (Chrome Android + ARCore requis).";
+    }
+  }).catch(()=>{ arSupported=false; });
+}
+
+reticle = new THREE.Mesh(
+  new THREE.RingGeometry(0.08,0.1,32).rotateX(-Math.PI/2),
+  new THREE.MeshBasicMaterial({ color:0xd4b45c })
+);
+reticle.matrixAutoUpdate = false;
+reticle.visible = false;
+scene.add(reticle);
+
+const arButtonEl = ARButton.createButton(renderer, {
+  requiredFeatures:['hit-test'],
+  optionalFeatures:['dom-overlay'],
+  domOverlay:{ root: document.body }
+});
+arButtonEl.style.display = 'none'; // on pilote via notre propre bouton stylé
+document.body.appendChild(arButtonEl);
+
+document.getElementById('arToggle').addEventListener('click', () => arButtonEl.click());
+
+renderer.xr.addEventListener('sessionstart', () => {
+  document.getElementById('arControls').classList.add('visible');
+  document.getElementById('topbar').style.display = 'none';
+  document.getElementById('hint').style.display = 'none';
+  roomGroup.visible = false; // en RA on ne montre que l'œuvre, pas la salle virtuelle
+});
+renderer.xr.addEventListener('sessionend', () => {
+  document.getElementById('arControls').classList.remove('visible');
+  document.getElementById('topbar').style.display = '';
+  document.getElementById('hint').style.display = '';
+  roomGroup.visible = true;
+  hitTestSourceRequested = false;
+  hitTestSource = null;
+  if(arPlaced){ scene.remove(arPlaced); arPlaced = null; }
+});
+
+document.getElementById('arPrev').addEventListener('click', () => { arIndex = (arIndex-1+artworks.length)%artworks.length; });
+document.getElementById('arNext').addEventListener('click', () => { arIndex = (arIndex+1)%artworks.length; });
+document.getElementById('arPlace').addEventListener('click', () => {
+  if(!reticle.visible) return;
+  if(arPlaced) scene.remove(arPlaced);
+  const f = createFrame(artworks[arIndex]);
+  f.group.matrixAutoUpdate = false;
+  f.group.matrix.copy(reticle.matrix);
+  f.group.matrixAutoUpdate = true;
+  f.group.matrix.decompose(f.group.position, f.group.quaternion, f.group.scale);
+  scene.add(f.group);
+  arPlaced = f.group;
+});
+
+function onXRFrame(timestamp, frame){
+  if(!frame) return;
+  const session = renderer.xr.getSession();
+  const refSpace = renderer.xr.getReferenceSpace();
+
+  if(!hitTestSourceRequested){
+    session.requestReferenceSpace('viewer').then((viewerSpace) => {
+      session.requestHitTestSource({ space: viewerSpace }).then((source) => {
+        hitTestSource = source;
+      });
+    });
+    session.addEventListener('end', () => { hitTestSourceRequested=false; hitTestSource=null; });
+    hitTestSourceRequested = true;
+  }
+
+  if(hitTestSource){
+    const results = frame.getHitTestResults(hitTestSource);
+    if(results.length){
+      const pose = results[0].getPose(refSpace);
+      reticle.visible = true;
+      reticle.matrix.fromArray(pose.transform.matrix);
+    } else {
+      reticle.visible = false;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------- */
+/* 10. BOUCLE DE RENDU                                                     */
+/* ---------------------------------------------------------------------- */
+// La salle est construite à la réception des œuvres (section 6).
+
+renderer.setAnimationLoop((timestamp, frame) => {
+  const delta = Math.min(clock.getDelta(), 0.05);
+  if(renderer.xr.isPresenting){
+    // En RA, rendu direct (pas de post-traitement sur le flux caméra du visiteur)
+    onXRFrame(timestamp, frame);
+    renderer.render(scene, camera);
+  } else {
+    updateMovement(delta);
+    if(orbitControls) orbitControls.update();
+    updateFocus();
+    composer.render();
+  }
+  labelRenderer.render(scene, camera);
+});
+</script>
+</body>
+</html>

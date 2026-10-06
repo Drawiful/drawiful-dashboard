@@ -79,7 +79,7 @@ export function ThemedAPropos({ skin, artist, slug, cartCount = 0 }: AProposProp
 
   return (
     <ThemedPage skin={skin}>
-      <ThemedHeader skin={skin} slug={slug} galleryName={artist.galleryName} cartCount={cartCount} />
+      <ThemedHeader skin={skin} slug={slug} galleryName={artist.galleryName} cartCount={cartCount} has3d={!!artist.has3dAccess} />
 
       <main style={{ maxWidth: 680, margin: "0 auto", padding: `72px ${PAD} 96px`, textAlign: "center" }}>
         {artist.avatarUrl && (
