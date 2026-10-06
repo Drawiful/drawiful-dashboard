@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { GalerieBlancheAPropos, MaisonHaussmannAPropos } from "@/components/themes/APropos";
+import { GalerieBlancheAPropos, ThemedAPropos } from "@/components/themes/APropos";
+import { getSkin } from "@/components/themes/skins";
 import { useCart } from "@/lib/cart";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -40,11 +41,11 @@ export default function AProposPage() {
     );
   }
 
-  switch (artist.theme) {
-    case "maison-haussmann":
-      return <MaisonHaussmannAPropos artist={artist} slug={slug} cartCount={items.length} />;
-    case "galerie-blanche":
-    default:
-      return <GalerieBlancheAPropos artist={artist} slug={slug} cartCount={items.length} />;
+  // Les 6 thèmes du sélecteur passent par le système de skins ;
+  // l'ancien "galerie-blanche" garde son rendu d'origine.
+  const skin = getSkin(artist.theme);
+  if (skin) {
+    return <ThemedAPropos skin={skin} artist={artist} slug={slug} cartCount={items.length} />;
   }
+  return <GalerieBlancheAPropos artist={artist} slug={slug} cartCount={items.length} />;
 }

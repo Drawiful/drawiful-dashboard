@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { GalerieBlancheCart } from "@/components/themes/GalerieBlanche";
-import { MaisonHaussmannCart } from "@/components/themes/MaisonHaussmann";
+import { ThemedCart } from "@/components/themes/ThemedCart";
+import { getSkin } from "@/components/themes/skins";
 import { useCart } from "@/lib/cart";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -77,11 +78,11 @@ export default function CartPage() {
     checkingOut,
   };
 
-  switch (artist.theme) {
-    case "maison-haussmann":
-      return <MaisonHaussmannCart {...sharedProps} />;
-    case "galerie-blanche":
-    default:
-      return <GalerieBlancheCart {...sharedProps} />;
+  // Les 6 thèmes du sélecteur passent par le système de skins ;
+  // l'ancien "galerie-blanche" garde son rendu d'origine.
+  const skin = getSkin(artist.theme);
+  if (skin) {
+    return <ThemedCart skin={skin} {...sharedProps} />;
   }
+  return <GalerieBlancheCart {...sharedProps} />;
 }

@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { GalerieBlancheArtwork } from "@/components/themes/GalerieBlanche";
-import { MaisonHaussmannArtwork } from "@/components/themes/MaisonHaussmann";
+import { ThemedArtwork } from "@/components/themes/ThemedArtwork";
+import { getSkin } from "@/components/themes/skins";
 import { useCart } from "@/lib/cart";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -101,11 +102,12 @@ export default function ArtworkPublicPage() {
     cartCount: items.length,
   };
 
-  switch (artist.theme) {
-    case "maison-haussmann":
-      return <MaisonHaussmannArtwork {...sharedProps} />;
-    case "galerie-blanche":
-    default:
-      return <GalerieBlancheArtwork {...sharedProps} />;
+  // Les 6 thèmes du sélecteur (Maison Haussmann compris) passent par le
+  // système de skins. Un ancien thème ("galerie-blanche") ou inconnu garde
+  // son rendu d'origine.
+  const skin = getSkin(artist.theme);
+  if (skin) {
+    return <ThemedArtwork skin={skin} {...sharedProps} />;
   }
+  return <GalerieBlancheArtwork {...sharedProps} />;
 }
