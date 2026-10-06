@@ -35,7 +35,7 @@ export function GalerieBlancheLegal({
         <div className="flex flex-col gap-8">
           {sections.map((s, i) => (
             <div key={i}>
-              <h2 className="text-sm tracking-widest uppercase text-[#B08D57] mb-2">{s.heading}</h2>
+              {s.heading && <h2 className="text-sm tracking-widest uppercase text-[#B08D57] mb-2">{s.heading}</h2>}
               <p className="text-sm leading-relaxed text-[#4A473F] whitespace-pre-line">{s.body}</p>
             </div>
           ))}

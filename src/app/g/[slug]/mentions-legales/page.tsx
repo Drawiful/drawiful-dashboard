@@ -39,7 +39,7 @@ export default function MentionsLegalesPage() {
     );
   }
 
-  const sections = [
+  const genericSections = [
     {
       heading: "Éditeur du site",
       body:
@@ -63,6 +63,8 @@ export default function MentionsLegalesPage() {
         "vérifiable publiquement depuis sa page dédiée.",
     },
   ];
+  const customText = (artist.legalMentionsText ?? "").trim();
+  const sections = customText ? [{ heading: "", body: customText }] : genericSections;
 
   const sharedProps = { title: "Mentions légales", sections, artist, slug, cartCount: items.length };
 

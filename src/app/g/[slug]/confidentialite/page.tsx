@@ -39,7 +39,7 @@ export default function ConfidentialitePage() {
     );
   }
 
-  const sections = [
+const genericSections = [
     {
       heading: "Données collectées",
       body: "Lors d'un achat, la galerie collecte le nom, l'adresse email et l'adresse de livraison de l'acheteur.",
@@ -65,6 +65,9 @@ export default function ConfidentialitePage() {
       body: "Ce site utilise uniquement des cookies techniques nécessaires au fonctionnement du panier et de la navigation.",
     },
   ];
+
+  const customText = (artist.privacyPolicyText ?? "").trim();
+  const sections = customText ? [{ heading: "", body: customText }] : genericSections;
 
   const sharedProps = { title: "Politique de confidentialité", sections, artist, slug, cartCount: items.length };
 

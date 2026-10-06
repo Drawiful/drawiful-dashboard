@@ -39,7 +39,7 @@ export default function CgvPage() {
     );
   }
 
-  const sections = [
+ const genericSections = [
     { heading: "Objet", body: `Les présentes conditions régissent les ventes d'œuvres réalisées sur la galerie « ${artist.galleryName} ».` },
     {
       heading: "Œuvres et prix",
@@ -72,6 +72,9 @@ export default function CgvPage() {
       body: "Tout litige relève des tribunaux compétents du lieu du siège de l'éditeur du site.",
     },
   ];
+
+  const customText = (artist.termsOfSaleText ?? "").trim();
+  const sections = customText ? [{ heading: "", body: customText }] : genericSections;
 
   const sharedProps = { title: "Conditions générales de vente", sections, artist, slug, cartCount: items.length };
 
