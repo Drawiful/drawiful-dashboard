@@ -73,6 +73,8 @@ export const api = {
   // Abonnement
   getPlans: () => request("/api/subscriptions/plans"),
   createPortalSession: () => request("/api/subscriptions/portal", { method: "POST" }),
+  createSubscriptionCheckout: (planKey: string) =>
+    request("/api/subscriptions/checkout", { method: "POST", body: JSON.stringify({ planKey }) }),
 
   // Ventes
   getOrders: () => request("/api/orders"),
