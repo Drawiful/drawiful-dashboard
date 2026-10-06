@@ -33,7 +33,7 @@ export function ThemedListing({
   const artworks: any[] = artist.artworks ?? [];
   return (
     <ThemedPage skin={skin}>
-      <ThemedHeader skin={skin} slug={slug} galleryName={artist.galleryName} cartCount={cartCount} />
+      <ThemedHeader skin={skin} slug={slug} galleryName={artist.galleryName} cartCount={cartCount} has3d={!!artist.has3dAccess} />
       <Hero skin={skin} artist={artist} count={artworks.length} />
       <Works skin={skin} artist={artist} slug={slug} artworks={artworks} />
       <ThemedFooter skin={skin} slug={slug} />

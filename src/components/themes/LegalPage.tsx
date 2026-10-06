@@ -21,7 +21,7 @@ type LegalProps = {
 function ThemedLegal({ skin, title, sections, artist, slug, cartCount = 0 }: LegalProps & { skin: Skin }) {
   return (
     <ThemedPage skin={skin}>
-      <ThemedHeader skin={skin} slug={slug} galleryName={artist.galleryName} cartCount={cartCount} />
+      <ThemedHeader skin={skin} slug={slug} galleryName={artist.galleryName} cartCount={cartCount} has3d={!!artist.has3dAccess} />
       <main style={{ maxWidth: 720, margin: "0 auto", padding: "64px clamp(20px,4vw,56px) 96px" }}>
         <h1
           style={{
