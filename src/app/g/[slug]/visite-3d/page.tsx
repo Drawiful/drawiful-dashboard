@@ -7,6 +7,7 @@ import { getSkin } from "@/components/themes/skins";
 import type { Skin } from "@/components/themes/skins";
 import { PAD, ThemedPage, ThemedHeader, ThemedFooter, btnStyle, money } from "@/components/themes/ThemedChrome";
 import { useCart } from "@/lib/cart";
+import { getToken } from "@/lib/api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -31,6 +32,24 @@ type Art3d = {
 };
 
 type Status = "loading" | "notfound" | "locked" | "empty" | "ready";
+
+// L'artiste connecté au dashboard (même domaine) est-il le propriétaire de
+// cette galerie ? Si oui, il peut prévisualiser sa salle même sans plan 3D.
+// Pas de redirection vers /login ici : un visiteur doit pouvoir arriver sans compte.
+async function isOwner(slug: string): Promise<boolean> {
+  try {
+    const token = getToken();
+    if (!token) return false;
+    const r = await fetch(`${API_BASE_URL}/api/artists/me/profile`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!r.ok) return false;
+    const me = await r.json();
+    return me?.slug === slug;
+  } catch {
+    return false;
+  }
+}
 
 // Lit les proportions de l'image (pas besoin de CORS pour ça).
 function imageRatio(url: string): Promise<number | null> {
@@ -71,6 +90,7 @@ export default function Visite3DPage() {
   const [status, setStatus] = useState<Status>("loading");
   const [artist, setArtist] = useState<any>(null);
   const [works, setWorks] = useState<Art3d[]>([]);
+  const [preview, setPreview] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -83,8 +103,13 @@ export default function Visite3DPage() {
         setArtist(data);
 
         if (!data.has3dAccess) {
-          setStatus("locked");
-          return;
+          const owner = await isOwner(slug);
+          if (cancelled) return;
+          if (!owner) {
+            setStatus("locked");
+            return;
+          }
+          setPreview(true);
         }
         const arts = (data.artworks || []).filter((a: any) => a.imageUrl);
         if (arts.length === 0) {
@@ -222,12 +247,54 @@ export default function Visite3DPage() {
         <ArrowLeft size={15} />
         Retour à la boutique
       </Link>
+
+      {preview && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(72px + env(safe-area-inset-top, 0px))",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "max-content",
+            maxWidth: "calc(100% - 32px)",
+            boxSizing: "border-box",
+            padding: "12px 18px",
+            borderRadius: 14,
+            background: "rgba(15,13,11,0.82)",
+            backdropFilter: "blur(8px)",
+            border: "1px solid rgba(212,180,92,0.45)",
+            color: "#f5f1e8",
+            fontSize: 13,
+            lineHeight: 1.5,
+            textAlign: "center",
+          }}
+        >
+          Aperçu visible par vous seul. Vos visiteurs verront cette salle avec le plan Artiste ou Gallery.{" "}
+          <Link href="/subscription" style={{ color: "#d4b45c", fontWeight: 600 }}>
+            Voir les plans
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
 
 // Écran d'information habillé selon le thème (accès 3D absent, salle vide).
-function InfoScreen({ skin, artist, slug, title, text, cartCount }: { skin: Skin | null; artist: any; slug: string; title: string; text: string; cartCount: number }) {
+function InfoScreen({
+  skin,
+  artist,
+  slug,
+  title,
+  text,
+  cartCount,
+}: {
+  skin: Skin | null;
+  artist: any;
+  slug: string;
+  title: string;
+  text: string;
+  cartCount: number;
+}) {
   if (!skin) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[#FEFEFC] px-8 text-center">
