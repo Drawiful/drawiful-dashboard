@@ -111,6 +111,9 @@
     border-top:1px solid var(--brass); white-space:nowrap; pointer-events:none;
   }
   .label3d .a{ font-style:italic; color:#c9c2b3; font-size:10px; display:block; }
+  /* Bouton RA natif de Three.js : il se réaffiche tout seul avec "AR NOT SUPPORTED"
+     sur les ordinateurs. On le garde invisible ; c'est #arToggle qui le pilote. */
+  #ARButton{ display:none !important; }
 </style>
 </head>
 <body>
@@ -1035,6 +1038,7 @@ const arButtonEl = ARButton.createButton(renderer, {
   domOverlay:{ root: document.body }
 });
 arButtonEl.style.display = 'none'; // on pilote via notre propre bouton stylé
+arButtonEl.id = 'ARButton'; // garantit que la règle CSS #ARButton le masque
 document.body.appendChild(arButtonEl);
 
 document.getElementById('arToggle').addEventListener('click', () => arButtonEl.click());
