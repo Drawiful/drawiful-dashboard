@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, setToken, ApiError } from "@/lib/api";
 
@@ -9,6 +10,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [resetDone, setResetDone] = useState(false);
+
+  // Arrivée depuis la page « Nouveau mot de passe » après un changement réussi.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("reset") === "success") {
+      setResetDone(true);
+      window.history.replaceState(null, "", "/login");
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,6 +41,12 @@ export default function LoginPage() {
         <h1 className="font-display text-3xl text-encre mb-1">Drawiful</h1>
         <p className="text-sm text-encre/60 mb-8">Connecte-toi à ta galerie</p>
 
+        {resetDone && (
+          <p role="status" className="text-sm text-sauge mb-6">
+            Ton mot de passe a été modifié. Connecte-toi avec le nouveau.
+          </p>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm mb-1.5 text-encre/80">Email</label>
@@ -43,7 +59,12 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label className="block text-sm mb-1.5 text-encre/80">Mot de passe</label>
+            <div className="flex items-baseline justify-between mb-1.5">
+              <label className="block text-sm text-encre/80">Mot de passe</label>
+              <Link href="/forgot-password" className="text-xs text-encre/60 underline">
+                Mot de passe oublié ?
+              </Link>
+            </div>
             <input
               type="password"
               required
