@@ -85,7 +85,7 @@
   #infoPanel .artist{ font-family:var(--serif); font-style:italic; font-size:12px; color:#c9c2b3; }
   #infoPanel .title{ font-family:var(--serif); font-size:19px; margin:2px 0 6px; color:#fff; }
   #infoPanel .rule{ width:32px; height:1px; background:var(--brass); margin:8px 0; }
-  #infoPanel .meta{ font-size:11px; letter-spacing:.05em; color:#a9a397; text-transform:uppercase; }
+  #infoPanel .meta{ font-size:12px; letter-spacing:.02em; color:#a9a397; }
   #infoPanel .price{ font-family:var(--serif); color:var(--brass-light); font-size:16px; margin-top:8px; }
   #infoPanel button{
     margin-top:12px; width:100%; padding:9px; background:transparent;
@@ -199,7 +199,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.3;
+renderer.toneMappingExposure = 1.08; // était 1.3 : salle surexposée
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.xr.enabled = true;
@@ -230,7 +230,7 @@ const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 if(!isTouchDevice){
   const bloomPass = new UnrealBloomPass(
-    new THREE.Vector2(window.innerWidth, window.innerHeight), 0.32, 0.45, 0.86
+    new THREE.Vector2(window.innerWidth, window.innerHeight), 0.18, 0.4, 0.95 // seuil haut : les zones blanches des œuvres ne « bavent » plus
   );
   composer.addPass(bloomPass);
 }
@@ -243,15 +243,15 @@ composer.addPass(new SMAAPass(window.innerWidth, window.innerHeight));
 // Intensités réduites : l'environnement HDRI (ci-dessous) fournit désormais
 // l'essentiel de la lumière ambiante et des reflets, ces deux lumières ne
 // servent plus qu'à éviter les zones totalement noires.
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0xb8b3a6, 0.5);
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0xb8b3a6, 0.4);
 scene.add(hemiLight);
-const fill = new THREE.DirectionalLight(0xfffaf0, 0.35);
+const fill = new THREE.DirectionalLight(0xfffaf0, 0.28);
 fill.position.set(2,5,2);
 scene.add(fill);
 
 let trackSpotIndex = 0;
 function addTrackSpot(x,y,z, targetX,targetY,targetZ){
-  const spot = new THREE.SpotLight(0xfff0d2, 9, 8, Math.PI/6, 0.45, 1.2);
+  const spot = new THREE.SpotLight(0xfff0d2, 6.5, 8, Math.PI/6, 0.45, 1.2);
   spot.position.set(x,y,z);
   // Une ombre portée sur deux : rendu quasi identique visuellement, deux
   // fois moins de shadow maps à calculer pour une galerie de 20-30 œuvres.
