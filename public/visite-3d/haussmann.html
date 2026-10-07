@@ -158,7 +158,6 @@ import { PointerLockControls } from 'three/addons/controls/PointerLockControls.j
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { ARButton } from 'three/addons/webxr/ARButton.js';
-import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { Reflector } from 'three/addons/objects/Reflector.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
@@ -284,19 +283,10 @@ function finishEnvLoad(envTexture){
   document.getElementById('loading').classList.add('hidden');
 }
 
-new RGBELoader()
-  .setPath('https://threejs.org/examples/textures/equirectangular/')
-  .load(
-    'venice_sunset_1k.hdr',
-    (hdrTex) => {
-      const envMap = pmremGenerator.fromEquirectangular(hdrTex).texture;
-      hdrTex.dispose();
-      pmremGenerator.dispose();
-      finishEnvLoad(envMap);
-    },
-    undefined,
-    () => { finishEnvLoad(null); } // si le CDN est bloqué, la galerie reste utilisable (éclairage direct seul)
-  );
+// Éclairage identique aux maquettes validées : pas d'environnement HDRI.
+// L'HDRI (chargé depuis threejs.org) arrivait quelques secondes après
+// l'ouverture et éclaircissait brutalement toute la salle.
+finishEnvLoad(null);
 
 // filet de sécurité : jamais bloqué plus de 4s sur l'écran de chargement
 setTimeout(() => document.getElementById('loading').classList.add('hidden'), 4000);
