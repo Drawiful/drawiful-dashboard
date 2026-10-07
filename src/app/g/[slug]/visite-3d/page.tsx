@@ -8,6 +8,7 @@ import type { Skin } from "@/components/themes/skins";
 import { PAD, ThemedPage, ThemedHeader, ThemedFooter, btnStyle, money } from "@/components/themes/ThemedChrome";
 import { useCart } from "@/lib/cart";
 import { getToken } from "@/lib/api";
+import { formatDimensions } from "@/lib/dimensions";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -68,10 +69,10 @@ function imageRatio(url: string): Promise<number | null> {
   });
 }
 
-// Le backend ne stocke pas encore les dimensions réelles : on accroche chaque
-// œuvre au format d'un grand tableau de galerie (grand côté = 160 cm, proche
-// du format 100 F de 162 × 130 cm) en gardant ses proportions. Ces valeurs
-// servent uniquement au rendu, jamais affichées. La salle s'agrandit d'elle-même.
+// Œuvre sans dimensions renseignées : on l'accroche au format d'un grand
+// tableau de galerie (grand côté = 160 cm, proche du format 100 F de
+// 162 × 130 cm) en gardant ses proportions. Ces valeurs servent uniquement au
+// rendu, jamais affichées. La salle s'agrandit d'elle-même.
 function displaySize(ratio: number | null) {
   const r = ratio && isFinite(ratio) ? Math.min(Math.max(ratio, 0.4), 2.5) : 0.8;
   const LONG = 160;
@@ -91,6 +92,9 @@ export default function Visite3DPage() {
   const [artist, setArtist] = useState<any>(null);
   const [works, setWorks] = useState<Art3d[]>([]);
   const [preview, setPreview] = useState(false);
+  // Réalité augmentée : seulement si toutes les œuvres ont leurs vraies dimensions,
+  // sinon une œuvre serait posée chez l'acheteur à une taille inventée.
+  const [allowAR, setAllowAR] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -116,17 +120,23 @@ export default function Visite3DPage() {
           setStatus("empty");
           return;
         }
-        const ratios = await Promise.all(arts.map((a: any) => imageRatio(a.imageUrl)));
+        // On ne lit les proportions de l'image que pour les œuvres sans dimensions.
+        const ratios = await Promise.all(
+          arts.map((a: any) => (a.widthCm && a.heightCm ? Promise.resolve(null) : imageRatio(a.imageUrl)))
+        );
         if (cancelled) return;
+        setAllowAR(arts.every((a: any) => a.widthCm && a.heightCm));
         setWorks(
           arts.map((a: any, i: number) => ({
             id: a.id,
             title: a.title,
             artist: data.galleryName || "",
             price: money(a.priceCents, a.currency || "EUR"),
-            meta: "Œuvre originale",
+            meta: formatDimensions(a) ?? "Œuvre originale",
             imageUrl: a.imageUrl,
-            ...displaySize(ratios[i]),
+            ...(a.widthCm && a.heightCm
+              ? { widthCm: a.widthCm, heightCm: a.heightCm }
+              : displaySize(ratios[i])),
           }))
         );
         setStatus("ready");
@@ -153,9 +163,7 @@ export default function Visite3DPage() {
             type: "GALLERY_SET_ARTWORKS",
             artworks: works,
             galleryName: artist?.galleryName,
-            // Pas de réalité augmentée tant que les dimensions réelles ne sont
-            // pas renseignées : l'œuvre serait posée à une taille inexacte.
-            allowAR: false,
+            allowAR,
           },
           window.location.origin
         );
@@ -165,7 +173,7 @@ export default function Visite3DPage() {
     }
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [status, works, artist, slug, router]);
+  }, [status, works, artist, slug, router, allowAR]);
 
   const skin = getSkin(artist?.theme);
 

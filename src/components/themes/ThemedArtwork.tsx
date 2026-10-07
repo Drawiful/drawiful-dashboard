@@ -5,6 +5,7 @@ import type { CSSProperties } from "react";
 import ModelViewerPremium from "@/components/ModelViewerPremium";
 import type { Skin } from "./skins";
 import { PAD, ThemedPage, ThemedHeader, ThemedFooter, ArtworkMedia, btnStyle, money } from "./ThemedChrome";
+import { formatDimensions } from "@/lib/dimensions";
 
 // Mêmes propriétés que les anciens composants MaisonHaussmannArtwork /
 // GalerieBlancheArtwork : la page de la fiche œuvre n'a pas besoin de changer
@@ -97,6 +98,9 @@ export function ThemedArtwork({
             {artwork.title}
           </h1>
           <p style={{ margin: 0, fontSize: 16, color: skin.muted }}>Par {artist.galleryName}</p>
+          {formatDimensions(artwork) && (
+            <p style={{ margin: 0, fontSize: 15, color: skin.muted }}>{formatDimensions(artwork)}</p>
+          )}
 
           {artwork.description && (
             <p style={{ margin: 0, fontSize: 16, lineHeight: 1.7, color: skin.ink }}>{artwork.description}</p>

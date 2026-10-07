@@ -19,6 +19,8 @@ export default function ArtworkForm({
   const [imageUrl, setImageUrl] = useState(artwork?.imageUrl ?? "");
   const [model3dUrl, setModel3dUrl] = useState(artwork?.model3dUrl ?? "");
   const [status, setStatus] = useState(artwork?.status ?? "DRAFT");
+  const [widthCm, setWidthCm] = useState(artwork?.widthCm != null ? String(artwork.widthCm) : "");
+  const [heightCm, setHeightCm] = useState(artwork?.heightCm != null ? String(artwork.heightCm) : "");
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploading3d, setUploading3d] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -53,6 +55,19 @@ export default function ArtworkForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    // Les deux dimensions vont ensemble : soit les deux, soit aucune.
+    const w = widthCm.trim() ? Number(widthCm.replace(",", ".")) : null;
+    const h = heightCm.trim() ? Number(heightCm.replace(",", ".")) : null;
+    if ((w === null) !== (h === null)) {
+      setError("Indique la largeur et la hauteur, ou laisse les deux vides.");
+      return;
+    }
+    if (w !== null && h !== null && (!(w >= 1 && w <= 1000) || !(h >= 1 && h <= 1000))) {
+      setError("Les dimensions doivent être comprises entre 1 et 1 000 cm.");
+      return;
+    }
+
     setSaving(true);
     const payload = {
       title,
@@ -61,6 +76,8 @@ export default function ArtworkForm({
       imageUrl: imageUrl || undefined,
       model3dUrl: model3dUrl || undefined,
       status,
+      widthCm: w === null ? null : Math.round(w * 10) / 10,
+      heightCm: h === null ? null : Math.round(h * 10) / 10,
     };
     try {
       if (artwork) {
@@ -120,6 +137,45 @@ export default function ArtworkForm({
               className="w-full px-3.5 py-2.5 rounded-md border border-bordure text-sm"
             />
           </div>
+
+          <fieldset>
+            <legend className="block text-sm mb-1.5 text-encre/80">Dimensions réelles (cm) — facultatif</legend>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="artwork-width" className="block text-xs mb-1 text-encre/60">Largeur</label>
+                <input
+                  id="artwork-width"
+                  type="number"
+                  inputMode="decimal"
+                  min="1"
+                  max="1000"
+                  step="0.1"
+                  placeholder="ex. 73"
+                  value={widthCm}
+                  onChange={(e) => setWidthCm(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-md border border-bordure text-sm"
+                />
+              </div>
+              <div>
+                <label htmlFor="artwork-height" className="block text-xs mb-1 text-encre/60">Hauteur</label>
+                <input
+                  id="artwork-height"
+                  type="number"
+                  inputMode="decimal"
+                  min="1"
+                  max="1000"
+                  step="0.1"
+                  placeholder="ex. 130"
+                  value={heightCm}
+                  onChange={(e) => setHeightCm(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-md border border-bordure text-sm"
+                />
+              </div>
+            </div>
+            <p className="text-xs mt-1.5 text-encre/50">
+              Affichées sur la fiche de l'œuvre et utilisées pour l'accrocher à sa vraie taille dans la visite 3D.
+            </p>
+          </fieldset>
 
           <div>
             <label className="block text-sm mb-1.5 text-encre/80">Image</label>
