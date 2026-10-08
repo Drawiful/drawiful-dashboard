@@ -133,6 +133,9 @@
     padding:0 12px; color:var(--brass-light);
   }
   #tour.focused #tourOverview{ display:block; }
+  /* Mode capture (?capture=1 : sans habillage ; ?capture=2 : sans cartels non plus) */
+  body.capture .hud, body.capture #crosshair, body.capture #ARButton{ display:none !important; }
+  body.capture-nolabels .label3d{ display:none !important; }
   #tourCount{ font-size:12px; min-width:56px; text-align:center; font-variant-numeric:tabular-nums; color:#d8d2c4; }
   @media (pointer:coarse){
     #hint{ bottom:auto; top:64px; white-space:normal; width:max-content; max-width:86vw; text-align:center; }
@@ -207,6 +210,24 @@ const SKIN = {
   ceilGlow:0.42, plinthColor:0xdcd8cf, woodAccent:true, wallWash:false, centerSpot:true, minBottom:0.35, sun:7,
   window:{ maxW:3.6, minW:2, sill:0.85, top:3.95, cols:3, rows:2, mull:0.06, frameColor:0x3a3632, frameRough:0.42, frameMetal:0.4, railing:false }
 };
+
+// Mode capture pour les visuels marketing : /g/<slug>/visite-3d?capture=1
+// masque tout l'habillage (titre, boutons, point de visée, aides) et fait
+// passer la salle au-dessus des éléments de la page (bandeau d'aperçu, retour).
+// ?capture=2 masque aussi les cartels sous les œuvres.
+const CAPTURE = (() => {
+  const own = new URLSearchParams(location.search).get('capture');
+  if(own) return own;
+  try{ return new URLSearchParams(window.parent.location.search).get('capture'); }catch(e){ return null; }
+})();
+if(CAPTURE){
+  document.body.classList.add('capture');
+  if(CAPTURE === '2') document.body.classList.add('capture-nolabels');
+  try{
+    const fe = window.frameElement;
+    if(fe) fe.style.cssText += ';position:fixed;inset:0;width:100vw;height:100vh;z-index:2147483647;border:0;';
+  }catch(e){}
+}
 
 /* ---------------------------------------------------------------------- */
 /* 1. DONNÉES DES ŒUVRES — remplacées via ?artworks=... ou postMessage    */
