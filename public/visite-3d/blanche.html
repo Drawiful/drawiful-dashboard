@@ -1756,7 +1756,7 @@ if(isTouchDevice){
     if(touchState.pts.size === 1){
       if(!touchState.moved) return;
       _eul.setFromQuaternion(camera.quaternion, 'YXZ');
-      _eul.y += dx*0.0045;
+      _eul.y -= dx*0.0045;   // glisser vers la droite = tourner la tête à droite
       _eul.x = THREE.MathUtils.clamp(_eul.x + dy*0.0045, -1.1, 1.1);
       _eul.z = 0;
       camera.quaternion.setFromEuler(_eul);
