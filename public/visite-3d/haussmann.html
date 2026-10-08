@@ -136,7 +136,9 @@
   #tourCount{ font-size:12px; min-width:56px; text-align:center; font-variant-numeric:tabular-nums; color:#d8d2c4; }
   @media (pointer:coarse){
     #hint{ bottom:auto; top:64px; white-space:normal; width:max-content; max-width:86vw; text-align:center; }
-    #tour{ left:50%; right:auto; transform:translateX(-50%); bottom:calc(14px + env(safe-area-inset-bottom)); }
+    #tour{ right:12px; bottom:calc(14px + env(safe-area-inset-bottom)); }
+    #arToggle{ position:fixed; left:12px; top:auto; bottom:calc(16px + env(safe-area-inset-bottom)); font-size:10px; padding:9px 12px; }
+    #galleryTitle{ max-width:calc(100vw - 200px); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; }
     #infoPanel{ bottom:calc(66px + env(safe-area-inset-bottom)); }
   }
 </style>
@@ -202,7 +204,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 const SKIN = {
   haussmann:true, floor:'parquet', reflectorColor:0x6b5a48, overlayOpacity:0.82, overlayRoughness:0.45,
   wallColor:0xefe7d8, wallRoughness:0.95, wallBump:0.032, ceilColor:0xf1ece2,
-  plinthColor:0xf3eee4, woodAccent:false, wallWash:false, centerSpot:false, minBottom:0.95, sun:7,
+  ceilGlow:0.3, plinthColor:0xf3eee4, woodAccent:false, wallWash:false, centerSpot:false, minBottom:0.95, sun:7,
   // Porte-fenêtre à petits bois (2 vantaux) donnant sur un balcon en fer forgé
   window:{ maxW:2.2, minW:1.2, sill:0.12, top:4.3, cols:4, rows:5, mull:0.04, frameColor:0xf1ede4, frameRough:0.55, frameMetal:0, railing:true }
 };
@@ -271,7 +273,7 @@ const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 if(!isTouchDevice){
   const bloomPass = new UnrealBloomPass(
-    new THREE.Vector2(window.innerWidth, window.innerHeight), 0.32, 0.45, 0.86
+    new THREE.Vector2(window.innerWidth, window.innerHeight), 0.3, 0.45, 0.95
   );
   composer.addPass(bloomPass);
 }
@@ -864,7 +866,12 @@ function buildRoom(geo, nArt){
     bumpMap: wallBumpTex, bumpScale: SKIN.wallBump,
     roughnessMap: wallRoughTex
   });
-  const ceilMat = new THREE.MeshStandardMaterial({ color: SKIN.ceilColor, roughness:1 });
+  // Les spots éclairent vers le bas : sans un léger éclat propre, le plafond
+  // d'une salle claire paraît gris foncé (salle sombre : ceilGlow = 0).
+  const ceilMat = new THREE.MeshStandardMaterial({
+    color: SKIN.ceilColor, roughness:1,
+    emissive: SKIN.ceilColor, emissiveIntensity: SKIN.ceilGlow || 0
+  });
 
   const backWall = new THREE.Mesh(new THREE.PlaneGeometry(width, height), wallMat);
   backWall.position.set(0, height/2, -depth/2);
@@ -1353,14 +1360,7 @@ if(!isTouch){
     }
   });
 } else {
-  orbitControls = new OrbitControls(camera, renderer.domElement);
-  orbitControls.target.set(0, 1.5, -1.7);
-  orbitControls.enablePan = false;
-  orbitControls.minDistance = 1.2;
-  orbitControls.maxDistance = 9;
-  orbitControls.maxPolarAngle = Math.PI*0.6;
-  document.getElementById('hint').textContent = 'Touchez une œuvre pour vous en approcher · Glissez pour regarder autour';
-  orbitControls.update();
+  document.getElementById('hint').textContent = 'Glissez pour regarder · Touchez le sol pour marcher, ou une œuvre pour l’approcher · Pincez pour avancer';
 }
 
 function updateMovement(delta){
@@ -1551,13 +1551,13 @@ function goOverview(){
   startFlight(pos, target, () => { if(orbitControls){ resetOrbitLimits(); orbitControls.update(); } });
 }
 
-// Garde la caméra (mode tactile) dans la salle et hors des piliers/cloisons
-function confineCamera(){
-  const p = camera.position, b = roomBounds;
+// Garde un point (caméra ou destination) dans la salle et hors des piliers/cloisons
+function confinePoint(p){
+  const b = roomBounds;
   p.x = THREE.MathUtils.clamp(p.x, b.minX, b.maxX);
   p.z = THREE.MathUtils.clamp(p.z, b.minZ, b.maxZ);
   if(roomGeo) p.y = THREE.MathUtils.clamp(p.y, 0.4, roomGeo.H - 0.4);
-  if(!b.obstacles) return;
+  if(!b.obstacles) return p;
   for(const o of b.obstacles){
     if(p.x > o.minX && p.x < o.maxX && p.z > o.minZ && p.z < o.maxZ){
       const dl = p.x - o.minX, dr = o.maxX - p.x, db = p.z - o.minZ, df = o.maxZ - p.z;
@@ -1565,32 +1565,122 @@ function confineCamera(){
       if(m === dl) p.x = o.minX; else if(m === dr) p.x = o.maxX; else if(m === db) p.z = o.minZ; else p.z = o.maxZ;
     }
   }
+  return p;
 }
+function confineCamera(){ confinePoint(camera.position); }
 
-// Toucher une œuvre (mobile) : la caméra s'en approche
+/* Navigation tactile "à la première personne" (comme une visite immobilière) :
+   - glisser un doigt : regarder autour
+   - toucher le sol   : marcher jusque-là
+   - pincer           : avancer / reculer
+   - toucher une œuvre: s'en approcher (puis on repart librement) */
 const _ndc = new THREE.Vector2();
-function pickFrame(cx, cy){
+function setRayFromScreen(cx, cy){
   const r = renderer.domElement.getBoundingClientRect();
   _ndc.set(((cx - r.left)/r.width)*2 - 1, -((cy - r.top)/r.height)*2 + 1);
   raycaster.setFromCamera(_ndc, camera);
+}
+function pickFrame(cx, cy){
+  setRayFromScreen(cx, cy);
   const hits = raycaster.intersectObjects([...frameGroups.map(f => f.group), ...occluders], true);
   const h = hits.find(x => x.object.userData.frame || occluders.includes(x.object));
   return h && h.object.userData.frame ? h.object.userData.frame : null;
 }
-let _down = null;
-renderer.domElement.addEventListener('pointerdown', (e) => {
-  _down = { x:e.clientX, y:e.clientY, t:performance.now() };
-});
-renderer.domElement.addEventListener('pointerup', (e) => {
-  const d = _down; _down = null;
-  if(!isTouchDevice || !d || flight || renderer.xr.isPresenting) return;
-  if(Math.hypot(e.clientX - d.x, e.clientY - d.y) > 10 || performance.now() - d.t > 350) return;
-  const f = pickFrame(e.clientX, e.clientY);
-  if(!f) return;
-  tourIndex = frameGroups.indexOf(f);
+
+const _fw = new THREE.Vector3();
+function walkForward(d){
+  camera.getWorldDirection(_fw);
+  _fw.y = 0;
+  if(_fw.lengthSq() < 1e-6) return;
+  _fw.normalize();
+  camera.position.addScaledVector(_fw, d);
+  camera.position.y += (1.65 - camera.position.y)*0.15;   // revient doucement à hauteur d'yeux
+  confineCamera();
+}
+
+function walkTowardTap(cx, cy){
+  setRayFromScreen(cx, cy);
+  const ray = raycaster.ray;
+  const hd = new THREE.Vector3(ray.direction.x, 0, ray.direction.z);
+  const hl = hd.length();
+  if(hl < 1e-3) return;
+  hd.divideScalar(hl);
+  // distance horizontale jusqu'au point touché au sol (ou 4 m si on vise un mur)
+  let dist = ray.direction.y < -0.02 ? ((0 - ray.origin.y)/ray.direction.y)*hl : 4;
+  const occ = raycaster.intersectObjects(occluders, false)[0];
+  if(occ) dist = Math.min(dist, occ.distance*hl - 0.8);   // on s'arrête devant un pilier
+  dist = THREE.MathUtils.clamp(dist, 0, 12);
+  if(dist < 0.3) return;
+  const to = camera.position.clone().addScaledVector(hd, dist);
+  to.y = 1.65;
+  confinePoint(to);
+  const look = to.clone().addScaledVector(hd, 3);
+  look.y = 1.6;
+  tourIndex = -1;
   updateTourCount();
-  flyToFrame(f);
-});
+  startFlight(to, look);
+}
+
+const touchState = { pts: new Map(), pinch: 0, moved: false, start: null };
+const _eul = new THREE.Euler(0, 0, 0, 'YXZ');
+function pinchDistance(){
+  const [a, b] = [...touchState.pts.values()];
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+if(isTouchDevice){
+  const el = renderer.domElement;
+  el.addEventListener('pointerdown', (e) => {
+    try{ el.setPointerCapture(e.pointerId); }catch(err){}
+    touchState.pts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    if(touchState.pts.size === 1){
+      touchState.moved = false;
+      touchState.start = { x:e.clientX, y:e.clientY, t:performance.now() };
+    } else {
+      touchState.moved = true;   // deux doigts : jamais un "toucher"
+      if(touchState.pts.size === 2) touchState.pinch = pinchDistance();
+    }
+  });
+  el.addEventListener('pointermove', (e) => {
+    const p = touchState.pts.get(e.pointerId);
+    if(!p) return;
+    const dx = e.clientX - p.x, dy = e.clientY - p.y;
+    p.x = e.clientX; p.y = e.clientY;
+    const s = touchState.start;
+    if(s && Math.hypot(e.clientX - s.x, e.clientY - s.y) > 10) touchState.moved = true;
+    if(flight || renderer.xr.isPresenting) return;
+    if(touchState.pts.size === 1){
+      if(!touchState.moved) return;
+      _eul.setFromQuaternion(camera.quaternion, 'YXZ');
+      _eul.y += dx*0.0045;
+      _eul.x = THREE.MathUtils.clamp(_eul.x + dy*0.0045, -1.1, 1.1);
+      _eul.z = 0;
+      camera.quaternion.setFromEuler(_eul);
+    } else if(touchState.pts.size === 2){
+      const d = pinchDistance();
+      walkForward((d - touchState.pinch)*0.014);
+      touchState.pinch = d;
+    }
+  });
+  const end = (e) => {
+    if(!touchState.pts.delete(e.pointerId)) return;
+    if(touchState.pts.size === 2) touchState.pinch = pinchDistance();
+    if(touchState.pts.size > 0) return;
+    const s = touchState.start;
+    touchState.start = null;
+    if(e.type !== 'pointerup' || !s || touchState.moved || flight || renderer.xr.isPresenting) return;
+    if(performance.now() - s.t > 400) return;
+    const f = pickFrame(e.clientX, e.clientY);
+    if(f){
+      tourIndex = frameGroups.indexOf(f);
+      updateTourCount();
+      flyToFrame(f);
+    } else {
+      walkTowardTap(e.clientX, e.clientY);
+    }
+  };
+  el.addEventListener('pointerup', end);
+  el.addEventListener('pointercancel', end);
+}
 
 // Cartels : affichés seulement pour les œuvres proches, vues de face et
 // non cachées par un pilier ou la cloison (sinon ils traversent les murs).
