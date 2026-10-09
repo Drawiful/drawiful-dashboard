@@ -115,6 +115,8 @@
      sur les ordinateurs. On le garde invisible ; c'est #arToggle qui le pilote. */
   #ARButton{ display:none !important; }
 
+  #hint{ transition: opacity .6s ease; }
+  #hint.faded{ opacity: 0; pointer-events: none; }
   /* Visite œuvre par œuvre */
   #tour{
     right:16px; bottom:16px; display:none; align-items:center; gap:4px;
@@ -1458,6 +1460,13 @@ function updateFocus(){
 /* 8bis. VISITE ŒUVRE PAR ŒUVRE — boutons ‹ ›, toucher une œuvre (mobile)   */
 /* ---------------------------------------------------------------------- */
 const tourEl = document.getElementById('tour');
+
+// Aide de navigation : elle s'efface d'elle-même pour ne pas gêner la visite
+// (au premier geste sur mobile, dès qu'on entre dans la salle sur ordinateur).
+const hintEl = document.getElementById('hint');
+function hideHint(){ hintEl.classList.add('faded'); }
+setTimeout(hideHint, isTouchDevice ? 7000 : 12000);
+if(plControls) plControls.addEventListener('lock', () => setTimeout(hideHint, 2500));
 const tourCount = document.getElementById('tourCount');
 let tourIndex = -1;
 let flight = null;
@@ -1652,6 +1661,7 @@ function pinchDistance(){
 if(isTouchDevice){
   const el = renderer.domElement;
   el.addEventListener('pointerdown', (e) => {
+    setTimeout(hideHint, 1200);
     try{ el.setPointerCapture(e.pointerId); }catch(err){}
     touchState.pts.set(e.pointerId, { x:e.clientX, y:e.clientY });
     if(touchState.pts.size === 1){
