@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { api, getToken } from "../../lib/api";
+import DashboardShell from "@/components/DashboardShell";
+import { api } from "@/lib/api";
 
 type DnsRecord = { type: string; name: string; value: string; reason?: string };
 type DomainStatus = {
@@ -48,10 +48,6 @@ export default function DomainPage() {
   }
 
   useEffect(() => {
-    if (!getToken()) {
-      window.location.href = "/login";
-      return;
-    }
     load().catch((e) => setError(e.message));
   }, []);
 
@@ -88,21 +84,18 @@ export default function DomainPage() {
 
   if (!status) {
     return (
-      <div className="min-h-screen bg-platre px-4 py-10">
-        <p className="text-sm text-encre/60 max-w-2xl mx-auto">{error ?? "Chargement…"}</p>
-      </div>
+      <DashboardShell>
+        <p className="text-sm text-encre/60">{error ?? "Chargement…"}</p>
+      </DashboardShell>
     );
   }
 
   const slugChanged = slug.trim().toLowerCase() !== status.slug;
 
   return (
-    <div className="min-h-screen bg-platre px-4 py-10">
-      <div className="max-w-2xl mx-auto">
-        <Link href="/" className="text-sm text-encre/60 hover:text-encre">
-          ← Retour au tableau de bord
-        </Link>
-        <h1 className="font-display text-3xl text-encre mt-4 mb-2">Adresse de ta galerie</h1>
+    <DashboardShell>
+      <div className="max-w-2xl">
+        <h2 className="font-display text-4xl text-encre mb-2">Adresse & domaine</h2>
         <p className="text-sm text-encre/60 mb-8">
           Ta galerie a toujours une adresse Drawiful. Tu peux aussi y relier ton propre nom de domaine.
         </p>
@@ -277,6 +270,6 @@ export default function DomainPage() {
           )}
         </section>
       </div>
-    </div>
+    </DashboardShell>
   );
 }

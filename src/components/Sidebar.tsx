@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutGrid, Image, Palette, CreditCard, LogOut, ShoppingBag, Settings } from "lucide-react";
+import { LayoutGrid, Image, Palette, CreditCard, LogOut, ShoppingBag, Settings, Globe } from "lucide-react";
 import { clearToken } from "@/lib/api";
 
 const navItems = [
@@ -9,6 +9,7 @@ const navItems = [
   { href: "/artworks", icon: Image, label: "Mes œuvres" },
   { href: "/orders", icon: ShoppingBag, label: "Mes ventes" },
   { href: "/gallery", icon: Palette, label: "Ma galerie" },
+  { href: "/domaine", icon: Globe, label: "Adresse & domaine" },
   { href: "/subscription", icon: CreditCard, label: "Abonnement" },
   { href: "/settings", icon: Settings, label: "Paramètres" },
 ];
