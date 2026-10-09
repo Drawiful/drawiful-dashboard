@@ -1361,6 +1361,7 @@ if(!isTouch){
   renderer.domElement.addEventListener('click', () => { if(!renderer.xr.isPresenting) plControls.lock(); });
 
   document.addEventListener('keydown', (e) => {
+    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','PageUp','PageDown'].includes(e.code)) e.preventDefault();
     switch(e.code){
       case 'KeyW': case 'ArrowUp': move.f = true; break;
       case 'KeyS': case 'ArrowDown': move.b = true; break;

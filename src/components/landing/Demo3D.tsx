@@ -122,6 +122,8 @@ export default function Demo3D() {
             title={`Visite 3D — ${current.label}`}
             className="absolute inset-0 h-full w-full border-0"
             allow="fullscreen; xr-spatial-tracking"
+            // Le clavier va directement à la salle (flèches pour marcher)
+            onLoad={() => iframeRef.current?.contentWindow?.focus()}
           />
         ) : (
           <button
