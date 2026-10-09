@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
   Aiguillage des adresses de galerie :
   - sagalerie.drawiful.app/...      -> /g/sagalerie/...
   - www.sagalerie.com/... (vérifié) -> /g/<slug de la galerie>/...
+  - drawiful.app/                   -> landing (/decouvrir) ; le reste du site = tableau de bord
+  - www.drawiful.app                -> redirigé vers drawiful.app
   - drawiful-dashboard.vercel.app   -> tableau de bord, inchangé
   Les fichiers statiques (/_next, /visite-3d/*.html, images…) ne passent pas ici.
 */
@@ -41,8 +43,7 @@ function isAppHost(host: string) {
   return (
     host === "localhost" ||
     host === "127.0.0.1" ||
-    host.endsWith(".vercel.app") ||
-    host === ROOT_DOMAIN
+    host.endsWith(".vercel.app")
   );
 }
 
@@ -58,6 +59,22 @@ function rewriteToGallery(req: NextRequest, slug: string) {
 export async function middleware(req: NextRequest) {
   const host = (req.headers.get("host") || "").toLowerCase().split(":")[0];
   if (!host || isAppHost(host)) return NextResponse.next();
+
+  // Domaine principal : la landing à la racine, le reste = l'application
+  if (host === `www.${ROOT_DOMAIN}`) {
+    return NextResponse.redirect(
+      new URL(`${req.nextUrl.pathname}${req.nextUrl.search}`, `https://${ROOT_DOMAIN}`),
+      308,
+    );
+  }
+  if (host === ROOT_DOMAIN) {
+    if (req.nextUrl.pathname === "/") {
+      const url = req.nextUrl.clone();
+      url.pathname = "/decouvrir";
+      return NextResponse.rewrite(url);
+    }
+    return NextResponse.next();
+  }
 
   // 1) Adresse par défaut : <slug>.drawiful.app
   if (host.endsWith(`.${ROOT_DOMAIN}`)) {
