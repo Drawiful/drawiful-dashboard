@@ -21,6 +21,8 @@ export default function ArtworkForm({
   const [status, setStatus] = useState(artwork?.status ?? "DRAFT");
   const [widthCm, setWidthCm] = useState(artwork?.widthCm != null ? String(artwork.widthCm) : "");
   const [heightCm, setHeightCm] = useState(artwork?.heightCm != null ? String(artwork.heightCm) : "");
+  const [framed, setFramed] = useState<boolean>(artwork?.framed ?? false);
+  const [frameDescription, setFrameDescription] = useState(artwork?.frameDescription ?? "");
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploading3d, setUploading3d] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -78,6 +80,8 @@ export default function ArtworkForm({
       status,
       widthCm: w === null ? null : Math.round(w * 10) / 10,
       heightCm: h === null ? null : Math.round(h * 10) / 10,
+      framed,
+      frameDescription: framed ? frameDescription.trim() || null : null,
     };
     try {
       if (artwork) {
@@ -175,6 +179,59 @@ export default function ArtworkForm({
             <p className="text-xs mt-1.5 text-encre/50">
               Affichées sur la fiche de l'œuvre et utilisées pour l'accrocher à sa vraie taille dans la visite 3D.
             </p>
+          </fieldset>
+
+          <fieldset>
+            <legend className="block text-sm mb-1.5 text-encre/80">Présentation</legend>
+            <div className="space-y-2">
+              <label
+                className={`flex items-start gap-3 rounded-md border px-3.5 py-2.5 cursor-pointer ${
+                  framed ? "border-aubergine bg-platre" : "border-bordure"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="presentation"
+                  checked={framed}
+                  onChange={() => setFramed(true)}
+                  className="mt-1 accent-aubergine"
+                />
+                <span>
+                  <span className="block text-sm text-encre">Vendue encadrée</span>
+                  <span className="block text-xs text-encre/60">Je l'encadre moi-même avant l'envoi.</span>
+                </span>
+              </label>
+              <label
+                className={`flex items-start gap-3 rounded-md border px-3.5 py-2.5 cursor-pointer ${
+                  !framed ? "border-aubergine bg-platre" : "border-bordure"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="presentation"
+                  checked={!framed}
+                  onChange={() => setFramed(false)}
+                  className="mt-1 accent-aubergine"
+                />
+                <span className="block text-sm text-encre">Vendue sans cadre</span>
+              </label>
+            </div>
+            {framed && (
+              <div className="mt-3">
+                <label htmlFor="frame-description" className="block text-xs mb-1 text-encre/60">
+                  Décrivez le cadre — facultatif
+                </label>
+                <input
+                  id="frame-description"
+                  maxLength={200}
+                  placeholder="ex. Cadre chêne naturel, 3 cm, verre anti-reflet"
+                  value={frameDescription}
+                  onChange={(e) => setFrameDescription(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-md border border-bordure text-sm"
+                />
+              </div>
+            )}
+            <p className="text-xs mt-1.5 text-encre/50">Affiché sur la fiche de l'œuvre pour vos collectionneurs.</p>
           </fieldset>
 
           <div>

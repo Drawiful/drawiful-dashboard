@@ -101,6 +101,16 @@ export function ThemedArtwork({
           {formatDimensions(artwork) && (
             <p style={{ margin: 0, fontSize: 15, color: skin.muted }}>{formatDimensions(artwork)}</p>
           )}
+          <p style={{ margin: 0, fontSize: 15, color: skin.muted }}>
+            {artwork.framed ? (
+              <>
+                <span style={{ color: skin.ink, fontWeight: 600 }}>Vendue encadrée par l'artiste</span>
+                {artwork.frameDescription ? ` — ${artwork.frameDescription}` : ""}
+              </>
+            ) : (
+              "Vendue sans cadre"
+            )}
+          </p>
 
           {artwork.description && (
             <p style={{ margin: 0, fontSize: 16, lineHeight: 1.7, color: skin.ink }}>{artwork.description}</p>

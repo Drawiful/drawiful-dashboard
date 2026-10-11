@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Image as ImageIcon, Clock, Award, TrendingUp } from "lucide-react";
 import DashboardShell from "@/components/DashboardShell";
+import PrintsInterestCard from "@/components/PrintsInterestCard";
 import { api } from "@/lib/api";
 
 function daysLeft(dateStr?: string) {
@@ -45,7 +46,7 @@ export default function OverviewPage() {
         </h2>
       </header>
 
-      <div className="grid grid-cols-4 gap-5 mb-12">
+      <div className="grid grid-cols-4 gap-5 mb-8">
         <div className="rounded-md p-5 bg-white border border-bordure">
           <ImageIcon size={18} className="text-argile" strokeWidth={1.8} />
           <p className="font-display text-2xl text-encre mt-3">{published}</p>
@@ -76,6 +77,8 @@ export default function OverviewPage() {
           <p className="text-xs mt-1 text-encre/60">Avant prochaine échéance</p>
         </div>
       </div>
+
+      <PrintsInterestCard />
 
       <div className="flex items-baseline justify-between mb-5">
         <h3 className="font-display text-2xl text-encre">Œuvres récentes</h3>

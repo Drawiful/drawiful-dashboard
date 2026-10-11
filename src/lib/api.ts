@@ -64,6 +64,11 @@ export const api = {
   verifyMyDomain: () => request("/api/artists/me/domain/verify", { method: "POST" }),
   removeMyDomain: () => request("/api/artists/me/domain", { method: "DELETE" }),
 
+  // Intérêt pour une fonctionnalité à venir (ex. les tirages encadrés)
+  getMyInterests: () => request("/api/interests/me"),
+  registerInterest: (data: { feature: string; formats?: string[]; priceRange?: string }) =>
+    request("/api/interests", { method: "POST", body: JSON.stringify(data) }),
+
   // Œuvres
   getArtworks: () => request("/api/artworks"),
   createArtwork: (data: Record<string, unknown>) =>
