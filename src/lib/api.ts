@@ -92,6 +92,7 @@ export const api = {
   getOrders: () => request("/api/orders"),
   getOrderStats: () => request("/api/orders/stats"),
   markOrderShipped: (id: string) => request(`/api/orders/${id}/ship`, { method: "PATCH" }),
+  refundOrder: (id: string) => request(`/api/orders/${id}/refund`, { method: "POST" }),
 
   // Stripe Connect
   getConnectStatus: () => request("/api/stripe-connect/status"),

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { TrendingUp, Package, Truck, MapPin } from "lucide-react";
+import { TrendingUp, Package, Truck, MapPin, RotateCcw, Loader2 } from "lucide-react";
 import DashboardShell from "@/components/DashboardShell";
 import { api } from "@/lib/api";
 
@@ -19,6 +19,10 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  // Remboursement : confirmation en deux temps, puis appel à l'API.
+  const [confirmRefund, setConfirmRefund] = useState<string | null>(null);
+  const [refunding, setRefunding] = useState<string | null>(null);
+  const [refundError, setRefundError] = useState<{ id: string; message: string } | null>(null);
 
   function load() {
     setLoading(true);
@@ -36,6 +40,20 @@ export default function OrdersPage() {
   async function handleShip(id: string) {
     await api.markOrderShipped(id);
     load();
+  }
+
+  async function handleRefund(id: string) {
+    setRefunding(id);
+    setRefundError(null);
+    try {
+      await api.refundOrder(id);
+      setConfirmRefund(null);
+      load();
+    } catch (e: any) {
+      setRefundError({ id, message: e?.message || "Le remboursement n'a pas pu être effectué." });
+    } finally {
+      setRefunding(null);
+    }
   }
 
   return (
@@ -119,14 +137,65 @@ export default function OrdersPage() {
                   </div>
                 )}
 
-                {order.status === "PAID" && (
-                  <button
-                    onClick={() => handleShip(order.id)}
-                    className="flex items-center gap-2 mt-4 text-sm px-4 py-2 rounded-md bg-aubergine text-platre"
-                  >
-                    <Truck size={15} />
-                    Marquer comme expédiée
-                  </button>
+                {(order.status === "PAID" || order.status === "SHIPPED") && (
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    {order.status === "PAID" && (
+                      <button
+                        onClick={() => handleShip(order.id)}
+                        className="flex items-center gap-2 text-sm px-4 py-2 rounded-md bg-aubergine text-platre"
+                      >
+                        <Truck size={15} />
+                        Marquer comme expédiée
+                      </button>
+                    )}
+
+                    {confirmRefund === order.id ? (
+                      <div className="flex flex-wrap items-center gap-2 text-sm">
+                        <span className="text-encre/70">
+                          Rembourser {formatMoney(order.totalCents, order.currency)} à l'acheteur ?
+                        </span>
+                        <button
+                          onClick={() => handleRefund(order.id)}
+                          disabled={refunding === order.id}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-argile text-white disabled:opacity-60"
+                        >
+                          {refunding === order.id && <Loader2 size={14} className="animate-spin" />}
+                          {refunding === order.id ? "Remboursement..." : "Confirmer"}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setConfirmRefund(null);
+                            setRefundError(null);
+                          }}
+                          disabled={refunding === order.id}
+                          className="px-3 py-1.5 rounded-md border border-bordure text-encre/70"
+                        >
+                          Annuler
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setConfirmRefund(order.id);
+                          setRefundError(null);
+                        }}
+                        className="flex items-center gap-2 text-sm px-4 py-2 rounded-md border border-bordure text-encre/70 hover:text-encre"
+                      >
+                        <RotateCcw size={15} />
+                        Rembourser
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {confirmRefund === order.id && !refundError && (
+                  <p className="text-xs mt-2 text-encre/50">
+                    L'acheteur est remboursé en totalité sur sa carte et l'œuvre est remise en vente. Les frais
+                    Stripe de la vente ne sont pas restitués.
+                  </p>
+                )}
+                {refundError?.id === order.id && (
+                  <p className="text-xs mt-2 text-argile">{refundError.message}</p>
                 )}
               </div>
             );
