@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { UploadCloud, Check, Lock } from "lucide-react";
+import { UploadCloud, Check, Lock, ExternalLink } from "lucide-react";
 import DashboardShell from "@/components/DashboardShell";
 import { api } from "@/lib/api";
 import { uploadToCloudinary } from "@/lib/cloudinary";
@@ -10,6 +10,7 @@ import { THEME_OPTIONS as THEMES } from "@/components/themes/skins";
 export default function GalleryPage() {
   const [galleryName, setGalleryName] = useState("");
   const [slug, setSlug] = useState("");
+  const [savedSlug, setSavedSlug] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [signatureUrl, setSignatureUrl] = useState("");
@@ -26,6 +27,7 @@ export default function GalleryPage() {
   function loadProfile(profile: any) {
     setGalleryName(profile.galleryName ?? "");
     setSlug(profile.slug ?? "");
+    setSavedSlug(profile.slug ?? "");
     setBio(profile.bio ?? "");
     setAvatarUrl(profile.avatarUrl ?? "");
     setSignatureUrl(profile.signatureUrl ?? "");
@@ -76,6 +78,7 @@ export default function GalleryPage() {
         privacyPolicyText,
       } as any);
 
+      setSavedSlug(slug);
       setMessage("Profil mis à jour ✓");
     } catch (err: any) {
       setMessage(err.message || "Erreur lors de la mise à jour");
@@ -140,15 +143,35 @@ export default function GalleryPage() {
         </div>
 
         <div>
-          <label className="block text-sm mb-1.5 text-encre/80">URL publique</label>
+          <label className="block text-sm mb-1.5 text-encre/80">Adresse de ta galerie</label>
           <div className="flex items-center rounded-md border border-bordure bg-white overflow-hidden">
-            <span className="px-3 text-sm text-encre/40">drawiful.art/</span>
+            <span className="pl-3.5 text-sm text-encre/40">https://</span>
             <input
               value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              className="flex-1 py-2.5 pr-3.5 text-sm outline-none"
+              onChange={(e) =>
+                setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))
+              }
+              className="min-w-0 flex-1 py-2.5 text-sm outline-none text-right"
             />
+            <span className="pr-3.5 text-sm text-encre/40">.drawiful.app</span>
           </div>
+          {slug !== savedSlug && savedSlug ? (
+            <p className="text-xs mt-1.5 text-argile">
+              Attention : l'ancienne adresse ({savedSlug}.drawiful.app) ne fonctionnera plus. Pense à
+              mettre à jour tes liens en bio.
+            </p>
+          ) : (
+            savedSlug && (
+              <a
+                href={`https://${savedSlug}.drawiful.app`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs mt-1.5 text-aubergine hover:underline"
+              >
+                Voir ma galerie <ExternalLink size={12} />
+              </a>
+            )
+          )}
         </div>
 
         <div>

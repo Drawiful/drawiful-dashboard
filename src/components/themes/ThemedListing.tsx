@@ -51,6 +51,28 @@ function Hero({ skin, artist, count }: { skin: Skin; artist: any; count: number 
   const eyebrow = count > 0 ? `${count} ${plural(count, "pièce unique", "pièces uniques")}` : "Galerie d'art";
   const img: string | null = artist.artworks?.[0]?.imageUrl || artist.avatarUrl || null;
 
+  // Logo / photo de l'artiste (Ma galerie → Photo / avatar), affiché au-dessus
+  // du titre. Masqué si l'avatar sert déjà de grande image (galerie sans œuvre).
+  const logo =
+    artist.avatarUrl && img !== artist.avatarUrl ? (
+      <img
+        src={artist.avatarUrl}
+        alt={`Logo ${artist.galleryName ?? ""}`.trim()}
+        style={{
+          width: 72,
+          height: 72,
+          borderRadius: "50%",
+          objectFit: "contain",
+          background: "#FFFFFF",
+          border: `1px solid ${skin.border}`,
+          padding: 6,
+          boxSizing: "border-box",
+          display: "block",
+          flexShrink: 0,
+        }}
+      />
+    ) : null;
+
   const title: CSSProperties = {
     margin: 0,
     fontFamily: skin.display,
@@ -82,6 +104,7 @@ function Hero({ skin, artist, count }: { skin: Skin; artist: any; count: number 
       return (
         <section style={{ display: "flex", flexWrap: "wrap", gap: "48px 56px", alignItems: "center", padding: `48px ${PAD} 72px` }}>
           <div style={{ ...colLeft, flex: "1.3 1 420px" }}>
+            {logo}
             <p style={{ margin: 0, alignSelf: "flex-start", padding: "6px 16px", borderRadius: 999, border: `1px solid ${skin.decor}`, color: skin.decor, fontSize: 13, fontWeight: 700 }}>
               {eyebrow}
             </p>
@@ -125,6 +148,7 @@ function Hero({ skin, artist, count }: { skin: Skin; artist: any; count: number 
       return (
         <section style={{ display: "flex", flexWrap: "wrap", gap: 56, alignItems: "center", padding: `56px ${PAD} 104px` }}>
           <div style={{ ...colLeft, flex: "1.2 1 420px" }}>
+            {logo}
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
               <span style={{ display: "block", width: 44, height: 1, background: skin.decor }} />
               <span style={{ ...caps, color: skin.decor, fontWeight: 500 }}>{eyebrow}</span>
@@ -167,6 +191,7 @@ function Hero({ skin, artist, count }: { skin: Skin; artist: any; count: number 
       return (
         <section style={{ display: "flex", flexWrap: "wrap", gap: 56, alignItems: "center", padding: `80px ${PAD} 96px` }}>
           <div style={{ ...colLeft, flex: "1.2 1 400px" }}>
+            {logo}
             <p style={caps}>{eyebrow}</p>
             <h1 style={{ ...title, fontSize: "clamp(50px,7.5vw,104px)", lineHeight: 1, letterSpacing: "-0.01em" }}>
               {first}
@@ -197,6 +222,7 @@ function Hero({ skin, artist, count }: { skin: Skin; artist: any; count: number 
     case "swiss":
       return (
         <section style={{ padding: `88px ${PAD} 72px` }}>
+          {logo && <div style={{ marginBottom: 40 }}>{logo}</div>}
           <h1 style={{ ...title, fontSize: "clamp(56px,12vw,184px)", lineHeight: 0.88, letterSpacing: "-0.045em" }}>
             {first}
             {rest && (
@@ -225,6 +251,7 @@ function Hero({ skin, artist, count }: { skin: Skin; artist: any; count: number 
       return (
         <section style={{ margin: "24px clamp(16px,3vw,40px) 0", borderRadius: 36, background: skin.media, padding: "88px clamp(24px,5vw,72px)", display: "flex", flexWrap: "wrap", gap: 40, alignItems: "center" }}>
           <div style={{ ...colLeft, flex: "1.3 1 400px", gap: 26 }}>
+            {logo}
             <p style={{ ...caps, letterSpacing: "0.12em", fontWeight: 700 }}>{eyebrow}</p>
             <h1 style={{ ...title, fontSize: "clamp(46px,6.4vw,92px)", lineHeight: 1.02, letterSpacing: "-0.01em" }}>
               {first}
@@ -261,6 +288,7 @@ function Hero({ skin, artist, count }: { skin: Skin; artist: any; count: number 
             </div>
           )}
           <div style={{ ...colLeft, flex: "1.1 1 400px", gap: 26 }}>
+            {logo}
             <p style={caps}>{eyebrow}</p>
             <h1 style={{ ...title, fontSize: "clamp(54px,7.6vw,112px)", lineHeight: 0.98, letterSpacing: "-0.01em" }}>
               {first}
