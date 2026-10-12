@@ -7,15 +7,17 @@ import { X } from "lucide-react";
 export default function ShopNotice({
   message,
   onClose,
+  duration = 7000,
 }: {
   message: string | null;
   onClose: () => void;
+  duration?: number;
 }) {
   useEffect(() => {
     if (!message) return;
-    const t = setTimeout(onClose, 7000);
+    const t = setTimeout(onClose, duration);
     return () => clearTimeout(t);
-  }, [message, onClose]);
+  }, [message, onClose, duration]);
 
   if (!message) return null;
 
