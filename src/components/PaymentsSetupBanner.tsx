@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CreditCard, Loader2 } from "lucide-react";
 import { api } from "@/lib/api";
 
@@ -8,6 +8,14 @@ import { api } from "@/lib/api";
 export default function PaymentsSetupBanner({ profile }: { profile: any }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // À chaque visite de la vue d'ensemble, on interroge Stripe : ça met à jour
+  // l'état des paiements et aligne le nom / logo affichés aux acheteurs sur
+  // la galerie (le backend ne fait la mise à jour que si quelque chose a changé).
+  const accountId = profile?.stripeAccountId;
+  useEffect(() => {
+    if (accountId) api.getConnectStatus().catch(() => {});
+  }, [accountId]);
 
   if (!profile || profile.stripeOnboardingDone) return null;
 
