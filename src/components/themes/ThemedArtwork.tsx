@@ -21,6 +21,9 @@ export type ArtworkPageProps = {
   view3d: boolean;
   setView3d: (v: boolean) => void;
   cartCount?: number;
+  // false = l'artiste n'a pas encore activé les paiements : on n'affiche
+  // pas les boutons d'achat. Absent = boutique ouverte.
+  canBuy?: boolean;
 };
 
 export function ThemedArtwork({
@@ -35,6 +38,7 @@ export function ThemedArtwork({
   view3d,
   setView3d,
   cartCount = 0,
+  canBuy = true,
 }: ArtworkPageProps & { skin: Skin }) {
   const can3d = !!artwork.model3dUrl && !!artist.has3dAccess;
   const caps: CSSProperties = {
@@ -120,6 +124,7 @@ export function ThemedArtwork({
             {money(artwork.priceCents, artwork.currency)}
           </div>
 
+          {canBuy ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 420 }}>
             <button onClick={onBuyNow} disabled={buying} style={{ ...btnStyle(skin, "primary"), width: "100%", opacity: buying ? 0.6 : 1 }}>
               {buying ? "Redirection..." : "Acheter maintenant"}
@@ -131,6 +136,16 @@ export function ThemedArtwork({
               Paiement sécurisé · Livraison incluse
             </p>
           </div>
+          ) : (
+            <div
+              style={{ maxWidth: 420, padding: "18px 20px", boxSizing: "border-box", borderRadius: skin.radius ? 20 : 0, border: `1px solid ${skin.border}`, background: skin.surface }}
+            >
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: skin.ink }}>Vente en ligne bientôt disponible</p>
+              <p style={{ margin: "6px 0 0", fontSize: 14, lineHeight: 1.6, color: skin.muted }}>
+                L'artiste finalise l'ouverture de sa boutique. Revenez très bientôt pour acquérir cette œuvre.
+              </p>
+            </div>
+          )}
 
           {artwork.certificate && (
             <a

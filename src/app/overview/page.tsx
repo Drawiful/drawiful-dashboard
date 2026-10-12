@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Image as ImageIcon, Clock, Award, TrendingUp } from "lucide-react";
 import DashboardShell from "@/components/DashboardShell";
 import PrintsInterestCard from "@/components/PrintsInterestCard";
+import PaymentsSetupBanner from "@/components/PaymentsSetupBanner";
 import { api } from "@/lib/api";
 
 function daysLeft(dateStr?: string) {
@@ -45,6 +46,8 @@ export default function OverviewPage() {
           Voici votre galerie aujourd'hui
         </h2>
       </header>
+
+      <PaymentsSetupBanner profile={profile} />
 
       <div className="grid grid-cols-4 gap-5 mb-8">
         <div className="rounded-md p-5 bg-white border border-bordure">

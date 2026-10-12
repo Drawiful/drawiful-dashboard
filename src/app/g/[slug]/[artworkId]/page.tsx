@@ -1,11 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { GalerieBlancheArtwork } from "@/components/themes/GalerieBlanche";
 import { ThemedArtwork } from "@/components/themes/ThemedArtwork";
 import { getSkin } from "@/components/themes/skins";
 import { useCart } from "@/lib/cart";
+import ShopNotice, { NOT_OPEN_MESSAGE } from "@/components/ShopNotice";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -19,6 +20,8 @@ export default function ArtworkPublicPage() {
   const [view3d, setView3d] = useState(false);
   const [buying, setBuying] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  const closeNotice = useCallback(() => setNotice(null), []);
 
   const { items, addItem } = useCart(slug);
   const inCart = items.some((i) => i.artworkId === artworkId);
@@ -50,20 +53,32 @@ export default function ArtworkPublicPage() {
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl;
       } else {
-        alert(data.message || "Impossible de lancer le paiement");
+        setNotice(data.message || "Impossible de lancer le paiement. Réessayez dans un instant.");
         setBuying(false);
       }
     } catch {
+      setNotice("Connexion impossible. Vérifiez votre réseau et réessayez.");
       setBuying(false);
     }
   }
 
+  // Absent (ancien backend) = on considère que la boutique est ouverte.
+  const canBuy = artist?.acceptsPayments !== false;
+
   function handleBuyNow() {
+    if (!canBuy) {
+      setNotice(NOT_OPEN_MESSAGE);
+      return;
+    }
     checkout([{ artworkId, quantity: 1 }]);
   }
 
   function handleAddToCart() {
     if (!artwork) return;
+    if (!canBuy) {
+      setNotice(NOT_OPEN_MESSAGE);
+      return;
+    }
     addItem({
       artworkId: artwork.id,
       title: artwork.title,
@@ -106,8 +121,14 @@ export default function ArtworkPublicPage() {
   // système de skins. Un ancien thème ("galerie-blanche") ou inconnu garde
   // son rendu d'origine.
   const skin = getSkin(artist.theme);
-  if (skin) {
-    return <ThemedArtwork skin={skin} {...sharedProps} />;
-  }
-  return <GalerieBlancheArtwork {...sharedProps} />;
+  return (
+    <>
+      {skin ? (
+        <ThemedArtwork skin={skin} {...sharedProps} canBuy={canBuy} />
+      ) : (
+        <GalerieBlancheArtwork {...sharedProps} />
+      )}
+      <ShopNotice message={notice} onClose={closeNotice} />
+    </>
+  );
 }
