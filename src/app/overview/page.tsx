@@ -5,6 +5,7 @@ import { Image as ImageIcon, Clock, Award, TrendingUp } from "lucide-react";
 import DashboardShell from "@/components/DashboardShell";
 import PrintsInterestCard from "@/components/PrintsInterestCard";
 import PaymentsSetupBanner from "@/components/PaymentsSetupBanner";
+import GettingStarted, { onboardingComplete } from "@/components/GettingStarted";
 import { api } from "@/lib/api";
 
 function daysLeft(dateStr?: string) {
@@ -47,7 +48,12 @@ export default function OverviewPage() {
         </h2>
       </header>
 
-      <PaymentsSetupBanner profile={profile} />
+      {/* Premiers pas tant que la galerie n'est pas prête (inclut l'activation
+          des paiements) ; ensuite, le bandeau paiements reste en filet de sécurité. */}
+      <GettingStarted profile={profile} />
+      {profile && (onboardingComplete(profile) || profile.stripeOnboardingDone) && (
+        <PaymentsSetupBanner profile={profile} />
+      )}
 
       <div className="grid grid-cols-4 gap-5 mb-8">
         <div className="rounded-md p-5 bg-white border border-bordure">
