@@ -49,8 +49,15 @@ export const api = {
   // Auth
   login: (email: string, password: string) =>
     request("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
-  register: (email: string, password: string) =>
-    request("/api/auth/register", { method: "POST", body: JSON.stringify({ email, password }) }),
+  register: (
+    email: string,
+    password: string,
+    attribution: { signupSource?: string; signupMedium?: string; signupCampaign?: string } = {},
+  ) =>
+    request("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ email, password, ...attribution }),
+    }),
 
   // Profil artiste
   getMyProfile: () => request("/api/artists/me/profile"),

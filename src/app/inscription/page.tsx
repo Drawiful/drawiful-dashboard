@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { api, getToken, setToken } from "@/lib/api";
 import { trackMeta } from "@/components/MetaPixel";
+import { getAttribution } from "@/lib/attribution";
 
 /*
   Inscription depuis la landing : compte créé (/api/auth/register), puis
@@ -45,7 +46,7 @@ function InscriptionForm() {
     }
     setLoading(true);
     try {
-      const data: any = await api.register(email.trim(), password);
+      const data: any = await api.register(email.trim(), password, getAttribution());
       const token = data?.accessToken || data?.access_token || data?.token;
       if (!token) throw new Error("Compte créé, mais la connexion a échoué. Connecte-toi pour continuer.");
       setToken(token);
