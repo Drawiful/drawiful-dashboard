@@ -173,6 +173,10 @@ const PLANS = [
 
 const FAQ = [
   {
+    q: "Drawiful prend-il une commission sur mes ventes ?",
+    a: "Non, aucune. Le collectionneur paie directement sur votre compte Stripe. Seuls les frais bancaires de Stripe sont déduits (environ 1,5 % + 0,25 € pour une carte européenne). Vous ne payez que votre abonnement mensuel, quel que soit votre chiffre d'affaires.",
+  },
+  {
     q: "Suis-je toujours propriétaire de mes œuvres ?",
     a: "Oui, entièrement. Drawiful présente et vend vos œuvres en votre nom ; vous gardez tous vos droits sur vos créations.",
   },
@@ -280,7 +284,7 @@ export default function LandingPage() {
             ["3 salles", "d'exposition en 3D"],
             ["6 styles", "de boutique au choix"],
             ["1 certificat", "pour chaque œuvre vendue"],
-            ["24 h sur 24", "votre galerie reste ouverte"],
+            ["0 %", "de commission sur vos ventes"],
           ].map(([a, b]) => (
             <div key={a}>
               <p className="font-display-lp text-3xl text-[#2B1E2F]">{a}</p>
@@ -319,6 +323,17 @@ export default function LandingPage() {
             </p>
           </div>
           <Demo3D />
+          <p className="mt-6 text-sm text-[#F7F5F0]/70">
+            Envie de voir aussi la boutique de cet artiste ?{" "}
+            <a
+              href="https://erwan.drawiful.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#E3C77A] underline underline-offset-4 hover:text-[#F7F5F0]"
+            >
+              Ouvrir erwan.drawiful.app
+            </a>
+          </p>
         </div>
       </section>
 
@@ -432,6 +447,39 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* 0 % DE COMMISSION : le calcul sur une vente de 1 000 € */}
+      <section id="commission" className="bg-[#2B1E2F] text-[#F7F5F0] scroll-mt-16">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 py-24 sm:py-28 grid lg:grid-cols-[1fr_1.1fr] gap-12 lg:gap-20 items-center">
+          <div>
+            <p className="text-[#E3C77A] text-sm">0 % de commission</p>
+            <h2 className="font-display-lp mt-4 text-4xl sm:text-5xl leading-[1.05]">
+              Vous vendez une œuvre 1 000 €. Combien gardez-vous ?
+            </h2>
+            <p className="mt-6 text-[#F7F5F0]/75 leading-relaxed max-w-lg">
+              Drawiful ne prend aucune commission sur vos ventes. Le collectionneur paie directement sur votre compte
+              Stripe : seuls les frais bancaires de Stripe sont déduits. Votre abonnement reste le même, que vous vendiez
+              une œuvre ou cent.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="rounded-[6px] border border-[#F7F5F0]/15 p-7">
+              <p className="text-sm text-[#F7F5F0]/60">Plateforme à 30 % de commission</p>
+              <p className="font-display-lp text-5xl mt-4 text-[#F7F5F0]/60">700&nbsp;€</p>
+              <p className="text-sm text-[#F7F5F0]/50 mt-3">300 € partent à la plateforme.</p>
+            </div>
+            <div className="rounded-[6px] bg-[#F7F5F0] text-[#1C1A17] p-7 ring-2 ring-[#B8912F]">
+              <p className="text-sm text-[#77706A]">Avec Drawiful</p>
+              <p className="font-display-lp text-5xl mt-4 text-[#2B1E2F]">985&nbsp;€</p>
+              <p className="text-sm text-[#4A4540] mt-3">Environ 15 € de frais Stripe, rien pour Drawiful.</p>
+            </div>
+            <p className="sm:col-span-2 text-xs text-[#F7F5F0]/50 leading-relaxed">
+              Exemple pour une carte bancaire européenne (frais Stripe d'environ 1,5 % + 0,25 €). Les frais varient selon
+              le pays et le type de carte de l'acheteur.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* TARIFS */}
       <section id="tarifs" className="bg-[#EEEBE4] scroll-mt-16">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 py-24 sm:py-32">
@@ -454,7 +502,7 @@ export default function LandingPage() {
               >
                 {p.featured && (
                   <span className="absolute -top-3 left-8 rounded-full bg-[#B8912F] px-3 py-1 text-xs font-semibold text-[#1C1A17]">
-                    La plus choisie
+                    Recommandée
                   </span>
                 )}
                 <h3 className="font-display-lp text-3xl">{p.name}</h3>

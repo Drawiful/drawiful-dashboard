@@ -15,7 +15,7 @@ import { usePathname } from "next/navigation";
 export const META_PIXEL_ID = "2820169321731713";
 const CONSENT_KEY = "drawiful_cookie_consent";
 const MARKETING_HOSTS = ["drawiful.app", "www.drawiful.app", "localhost"];
-const MARKETING_PATHS = ["/", "/inscription"];
+const MARKETING_PATHS = ["/", "/decouvrir", "/inscription"];
 
 declare global {
   interface Window {
