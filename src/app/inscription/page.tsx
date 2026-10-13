@@ -3,6 +3,7 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { api, getToken, setToken } from "@/lib/api";
+import { trackMeta } from "@/components/MetaPixel";
 
 /*
   Inscription depuis la landing : compte créé (/api/auth/register), puis
@@ -48,6 +49,11 @@ function InscriptionForm() {
       const token = data?.accessToken || data?.access_token || data?.token;
       if (!token) throw new Error("Compte créé, mais la connexion a échoué. Connecte-toi pour continuer.");
       setToken(token);
+      // Pixel Meta : inscription réussie (seulement si le visiteur a accepté
+      // les cookies). Petite pause pour que l'envoi parte avant la redirection.
+      if (trackMeta("CompleteRegistration", { content_name: plan, status: true })) {
+        await new Promise((r) => setTimeout(r, 400));
+      }
       await goToCheckout();
     } catch (err: any) {
       const msg: string = err?.message || "";
