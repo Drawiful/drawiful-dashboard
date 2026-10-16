@@ -213,6 +213,7 @@ const SKIN = {
   planks:{ base:192, spread:26, g:0.81, b:0.6, grain:'110,76,44', joint:'96,68,40' },
   wallColor:0xf3eee5, wallRoughness:0.92, wallBump:0.028, ceilColor:0xf6f1e8,
   ceilGlow:0.36, plinthColor:0xe2d9ca, plinthRough:0.7, woodAccent:true, wallWash:false, centerSpot:true, minBottom:0.35, sun:7,
+  accentWood:{ base:176, spread:20, g:0.8, b:0.6, groove:'#5a4330' },
   spotColor:0xffe9cc,
   window:{ maxW:3.6, minW:2, sill:0.85, top:3.95, cols:3, rows:2, mull:0.06, frameColor:0x3a3632, frameRough:0.42, frameMetal:0.4, railing:false }
 };
@@ -454,27 +455,41 @@ function makeBumpTexture({ base=128, grain=16, blobs=0, blobColor=null } = {}){
   return tex;
 }
 function makeWoodAccentTexture(){
-  const c = document.createElement('canvas'); c.width=256; c.height=512;
+  // Mur d'accent en lattes de bois verticales séparées par de fines rainures
+  // sombres. Texture haute définition, filtrage anisotrope et veinage doux
+  // (pas de traits d'1 pixel) : pas de scintillement quand on tourne la tête.
+  // Une tuile = 1,2 m de large, 8 lattes de 15 cm.
+  const W = SKIN.accentWood || { base:96, spread:24, g:0.66, b:0.45, groove:'#140c07' };
+  const S = 1024, slats = 8, sw = S/slats, gap = 10;
+  const c = document.createElement('canvas'); c.width = S; c.height = S;
   const ctx = c.getContext('2d');
-  const planks = 8, plankH = 512/planks;
-  for(let i=0;i<planks;i++){
-    const base = 190 + Math.random()*35;
-    ctx.fillStyle = `rgb(${base},${base-28},${base-52})`;
-    ctx.fillRect(0, i*plankH, 256, plankH);
-    for(let g=0; g<8; g++){
-      const gx = Math.random()*256;
-      ctx.strokeStyle = `rgba(0,0,0,${0.06+Math.random()*0.08})`;
-      ctx.lineWidth = 1+Math.random();
+  let seed = 23;
+  const rnd = () => { seed = (seed*16807) % 2147483647; return (seed - 1)/2147483646; };
+  ctx.fillStyle = W.groove; ctx.fillRect(0, 0, S, S);
+  for(let i = 0; i < slats; i++){
+    const x0 = i*sw + gap/2, w = sw - gap;
+    const base = W.base + (rnd() - 0.5)*W.spread;
+    const g = ctx.createLinearGradient(x0, 0, x0 + w, 0);
+    const col = (k) => `rgb(${(base*k)|0},${(base*W.g*k)|0},${(base*W.b*k)|0})`;
+    g.addColorStop(0, col(0.88)); g.addColorStop(0.5, col(1.04)); g.addColorStop(1, col(0.88));
+    ctx.fillStyle = g; ctx.fillRect(x0, 0, w, S);
+    // Veinage dans le sens de la latte : traits larges et très transparents
+    for(let k = 0; k < 14; k++){
+      const gx = x0 + 6 + rnd()*(w - 12), amp = 3 + rnd()*7, ph = rnd()*6;
+      ctx.strokeStyle = `rgba(0,0,0,${0.035 + rnd()*0.05})`;
+      ctx.lineWidth = 2 + rnd()*3;
       ctx.beginPath();
-      ctx.moveTo(gx, i*plankH+2);
-      ctx.bezierCurveTo(gx+10, i*plankH+plankH*0.4, gx-10, i*plankH+plankH*0.6, gx, i*plankH+plankH-2);
+      for(let y = 0; y <= S; y += 32){
+        const xx = gx + Math.sin(y/140 + ph)*amp;
+        if(y === 0) ctx.moveTo(xx, y); else ctx.lineTo(xx, y);
+      }
       ctx.stroke();
     }
   }
-  ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 2;
-  for(let i=0;i<=planks;i++){ ctx.beginPath(); ctx.moveTo(0,i*plankH); ctx.lineTo(256,i*plankH); ctx.stroke(); }
   const tex = new THREE.CanvasTexture(c);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
   return tex;
 }
 /* ---------- Paysage vu à travers la fenêtre ---------- */
@@ -1124,8 +1139,8 @@ function buildRoom(geo, nArt){
       const woodTex = makeWoodAccentTexture();
       const accentDepth = depth/2 - doorZ - 0.3;
       if(accentDepth > 1.2){
-        woodTex.repeat.set(1, accentDepth/1.6);
-        const accentMat = new THREE.MeshStandardMaterial({ map: woodTex, roughness:0.65 });
+        woodTex.repeat.set(accentDepth/1.2, 1);
+        const accentMat = new THREE.MeshStandardMaterial({ map: woodTex, roughness:0.55 });
         const accentWall = new THREE.Mesh(new THREE.PlaneGeometry(accentDepth, height*0.9), accentMat);
         accentWall.position.set(width/2-0.02, height*0.45, (doorZ + depth/2)/2 + 0.15);
         accentWall.rotation.y = -Math.PI/2;
