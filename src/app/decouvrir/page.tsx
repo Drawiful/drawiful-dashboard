@@ -238,7 +238,7 @@ export default function LandingPage() {
           <div>
             <p className="text-[#E3C77A] text-sm">Pour les artistes indépendants et les galeries d'art</p>
             <h1 className="font-display-lp mt-5 text-[44px] leading-[1.02] sm:text-6xl lg:text-[76px] tracking-[-0.01em]">
-              Vos œuvres méritent une vraie galerie.
+              Votre talent mérite son propre monde.
             </h1>
             <p className="mt-6 text-lg text-[#F7F5F0]/80 leading-relaxed max-w-xl">
               Drawiful crée la galerie en ligne de votre travail : visitable en 3D, avec boutique, paiements dans le
