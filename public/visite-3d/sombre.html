@@ -300,7 +300,7 @@ const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 if(!isTouchDevice){
   const bloomPass = new UnrealBloomPass(
-    new THREE.Vector2(window.innerWidth, window.innerHeight), 0.5, 0.5, 0.9
+    new THREE.Vector2(window.innerWidth, window.innerHeight), 0.28, 0.4, 0.95
   );
   composer.addPass(bloomPass);
 }
@@ -1034,9 +1034,9 @@ function buildRoom(geo, nArt){
   // plafonnées pour rester fluides dans les grandes salles et sur mobile.
   if(SKIN.wallWash){
     const washY = height - 0.5;
-    const capN = isTouchDevice ? 1 : 3;
+    const capN = isTouchDevice ? 1 : 2;
     const wallWashSpot = (x,y,z, tx,ty,tz) => {
-      const spot = new THREE.SpotLight(SKIN.spotColor || 0xfff0d2, 9.5, 7.5, Math.PI/4.2, 0.6, 1.3);
+      const spot = new THREE.SpotLight(SKIN.spotColor || 0xfff0d2, isTouchDevice ? 9.5 : 7.5, 7.5, Math.PI/4.2, 0.6, 1.3);
       spot.position.set(x,y,z);
       spot.castShadow = false;
       const target = new THREE.Object3D();
