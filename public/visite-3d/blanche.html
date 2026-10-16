@@ -208,11 +208,12 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 // commun aux trois salles Drawiful.
 const SKIN = {
   // Salle blanche « white cube » chaleureuse : blanc cassé chaud, parquet de
-  // chêne clair à lames larges, plinthe ton sur ton, lumière de musée dorée.
+  // chêne clair à lames larges, sans plinthe (white cube : le mur tombe net sur le parquet, aucun
+  // liseré fin qui scintille en pivotant), lumière de musée dorée.
   haussmann:false, floor:'planks', reflectorColor:0x8c7a64, overlayOpacity:0.86, overlayRoughness:0.5,
   planks:{ base:192, spread:26, g:0.81, b:0.6, grain:'110,76,44', joint:'96,68,40' },
   wallColor:0xf3eee5, wallRoughness:0.92, wallBump:0.028, ceilColor:0xf6f1e8,
-  ceilGlow:0.36, plinthColor:0xe2d9ca, plinthRough:0.7, woodAccent:true, wallWash:false, centerSpot:true, minBottom:0.35, sun:7,
+  ceilGlow:0.36, plinth:false, plinthColor:0xebe5da, plinthRough:0.92, plinthShadow:false, woodAccent:true, wallWash:false, centerSpot:true, minBottom:0.35, sun:7,
   accentWood:{ base:176, spread:20, g:0.8, b:0.6, groove:'#5a4330' },
   spotColor:0xffe9cc,
   window:{ maxW:3.6, minW:2, sill:0.85, top:3.95, cols:3, rows:2, mull:0.06, frameColor:0x3a3632, frameRough:0.42, frameMetal:0.4, railing:false }
@@ -954,7 +955,7 @@ function addMoldings(geo){
   const hs = !!SKIN.haussmann;
   const strips = []; // [face, s0, s1, yCentre, hauteur, saillie, pleineLongueur]
   geo.faces.forEach(f => {
-    if(!f.corniceOnly) strips.push([f, 0, f.len, hs ? 0.08 : 0.045, hs ? 0.16 : 0.09, hs ? 0.025 : 0.03, true]);
+    if(!f.corniceOnly && SKIN.plinth !== false) strips.push([f, 0, f.len, hs ? 0.08 : 0.045, hs ? 0.16 : 0.09, hs ? 0.025 : 0.03, true]);
     if(!hs) return;
     strips.push([f, 0, f.len, geo.H - 0.07, 0.14, 0.12, true]);
     strips.push([f, 0, f.len, geo.H - 0.19, 0.06, 0.075, true]);
@@ -975,6 +976,7 @@ function addMoldings(geo){
       }
     }
   });
+  if(!strips.length) return;
   const mat = new THREE.MeshStandardMaterial({ color: hs ? 0xf6f0e4 : SKIN.plinthColor, roughness: hs ? 0.8 : (SKIN.plinthRough || 0.6) });
   const mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), mat, strips.length);
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), sc = new THREE.Vector3();
@@ -987,7 +989,8 @@ function addMoldings(geo){
     sc.set(a1 - a0, h, d);
     mesh.setMatrixAt(i, m4.compose(p, q, sc));
   });
-  mesh.receiveShadow = true;
+  // Ombres sur un profil aussi fin = moirage quand on pivote : désactivable par salle
+  mesh.receiveShadow = SKIN.plinthShadow !== false;
   roomGroup.add(mesh);
 }
 
