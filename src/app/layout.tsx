@@ -2,6 +2,7 @@ import Script from "next/script";
 import "./globals.css";
 import MetaPixel from "@/components/MetaPixel";
 import AttributionCapture from "@/components/AttributionCapture";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata = {
   title: "Drawiful — Dashboard artiste",
@@ -19,6 +20,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <MetaPixel />
         <AttributionCapture />
+        {/* Statistiques de visites Vercel (sans cookies) : pages vues par adresse */}
+        <Analytics />
         {/* Web component Google pour prévisualiser les fichiers .glb (rotation, zoom) */}
         <Script
           type="module"
