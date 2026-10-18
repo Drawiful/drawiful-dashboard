@@ -210,7 +210,8 @@ const SKIN = {
   // Salle sombre « galerie de nuit » : murs prune-anthracite mats (aubergine
   // Drawiful), parquet chêne fumé verni qui reflète les spots, plinthe laiton
   // qui marque nettement la limite sol / murs, lumière ambrée.
-  haussmann:false, floor:'parquet', reflectorColor:0x5c4a3a, overlayOpacity:0.9, overlayRoughness:0.36,
+  haussmann:false, floor:'marble', floorBump:0, reflectorColor:0x8f877c, overlayOpacity:0.8, overlayRoughness:0.12,
+  marble:{ base:'#e6dfd1', cloudDark:'160,148,130', cloudLight:'255,250,240', vein:'120,108,92', veinAccent:'170,138,84', joint:'110,98,84', jointA:0.16 },
   parquet:{ base:92, spread:30, g:0.68, b:0.47, bg:'#3a2618', grain:'40,22,10', joint:'22,12,6' },
   wallColor:0x2c2430, wallRoughness:0.9, wallBump:0.03, ceilColor:0x120f14,
   ceilGlow:0, plinthColor:0x3a2f2b, plinthRough:0.85, woodAccent:true, wallWash:true, centerSpot:true, minBottom:0.35, sun:4.2,
@@ -844,6 +845,87 @@ function plankTexture(){
   return tex;
 }
 
+/* ---------- Marbre poli (salles sombre et blanche) ---------- */
+let _marbleTex = null;
+function marbleTexture(){
+  if(_marbleTex) return _marbleTex;
+  // Une tuile = 2 x 2 grandes dalles (2,4 m). Tout est dessiné aussi décalé
+  // d'une tuile dans chaque direction : raccord sans couture. Les flous sont
+  // appliqués une seule fois par calque (rapide, même sur mobile).
+  const M = Object.assign({
+    base:'#e9e2d4', cloudDark:'170,158,140', cloudLight:'255,252,246',
+    vein:'128,116,100', veinAccent:'176,146,92', joint:'120,108,92', jointA:0.18
+  }, SKIN.marble || {});
+  const S = 1024, P = 48;
+  const c = document.createElement('canvas'); c.width = S; c.height = S;
+  const ctx = c.getContext('2d');
+  let seed = 23;
+  const rnd = () => { seed = (seed*16807) % 2147483647; return (seed - 1)/2147483646; };
+  // Calque avec marge : le flou « voit » le motif voisin, donc pas de couture.
+  const layer = (draw, blur) => {
+    const L = document.createElement('canvas'); L.width = L.height = S + 2*P;
+    const g = L.getContext('2d');
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    for(const ox of [-S, 0, S]) for(const oy of [-S, 0, S]){ g.save(); g.translate(P + ox, P + oy); draw(g); g.restore(); }
+    if(blur && 'filter' in ctx) ctx.filter = `blur(${blur}px)`;
+    ctx.drawImage(L, -P, -P);
+    ctx.filter = 'none';
+  };
+  ctx.fillStyle = M.base; ctx.fillRect(0, 0, S, S);
+  // Nuages : variations douces de teinte dans la pierre
+  const clouds = Array.from({ length:60 }, () => [rnd()*S, rnd()*S, S*(0.06 + rnd()*0.22), rnd() < 0.55 ? M.cloudDark : M.cloudLight, 0.03 + rnd()*0.07]);
+  layer(g => clouds.forEach(([x, y, r, col, a]) => {
+    const gr = g.createRadialGradient(x, y, 0, x, y, r);
+    gr.addColorStop(0, `rgba(${col},${a})`); gr.addColorStop(1, `rgba(${col},0)`);
+    g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, Math.PI*2); g.fill();
+  }), 0);
+  // Courants larges très diffus (le « mouvement » de la pierre)
+  const drifts = Array.from({ length:5 }, () => [rnd()*S, rnd()*S, 0.6 + (rnd() - 0.5)*0.5, (rnd() - 0.5)*S*0.3, (rnd() - 0.5)*S*0.3]);
+  layer(g => drifts.forEach(([x, y, ang, dx, dy]) => {
+    g.strokeStyle = `rgba(${M.vein},0.07)`; g.lineWidth = S*0.07;
+    g.beginPath(); g.moveTo(x - Math.cos(ang)*S*0.7, y - Math.sin(ang)*S*0.7);
+    g.quadraticCurveTo(x + dx, y + dy, x + Math.cos(ang)*S*0.7, y + Math.sin(ang)*S*0.7); g.stroke();
+  }), 24);
+  // Veines : tracés souples en diagonale, épaisseur variable, rares ramifications
+  const veins = [];
+  const vein = (x, y, ang, steps, w, a, col, depth) => {
+    const pts = [[x, y]]; let turn = 0;
+    for(let s = 0; s < steps; s++){
+      turn = turn*0.85 + (rnd() - 0.5)*0.12; ang += turn;
+      x += Math.cos(ang)*S*0.011; y += Math.sin(ang)*S*0.011; pts.push([x, y]);
+      if(depth < 1 && rnd() < 0.025) vein(x, y, ang + (rnd() < 0.5 ? 0.5 : -0.5), 12 + (rnd()*25|0), w*0.45, a*0.7, col, depth + 1);
+    }
+    veins.push({ pts, w, a, col });
+  };
+  for(let v = 0; v < 7; v++){
+    vein(rnd()*S, rnd()*S, 0.6 + (rnd() - 0.5)*0.6, 70 + (rnd()*60|0),
+         1.2 + rnd()*1.8, 0.35 + rnd()*0.3, v === 3 ? M.veinAccent : M.vein, 0);
+  }
+  const strokePath = (g, pts) => { g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); for(let i = 1; i < pts.length; i++) g.lineTo(pts[i][0], pts[i][1]); g.stroke(); };
+  // voile flou autour des veines
+  layer(g => veins.forEach(({ pts, w, a, col }) => { g.strokeStyle = `rgba(${col},${a*0.25})`; g.lineWidth = w*9; strokePath(g, pts); }), 6);
+  // fil principal, légèrement adouci
+  layer(g => veins.forEach(({ pts, w, a, col }) => {
+    for(let i = 1; i < pts.length; i++){
+      const k = 0.55 + 0.45*Math.sin(i*0.35 + w*3);
+      g.strokeStyle = `rgba(${col},${a*k})`; g.lineWidth = w*(0.6 + k*0.8);
+      g.beginPath(); g.moveTo(pts[i-1][0], pts[i-1][1]); g.lineTo(pts[i][0], pts[i][1]); g.stroke();
+    }
+  }), 0.8);
+  // Joints des dalles, très discrets
+  ctx.strokeStyle = `rgba(${M.joint},${M.jointA})`; ctx.lineWidth = 2;
+  [1, S/2].forEach(p => {
+    ctx.beginPath(); ctx.moveTo(p, 0); ctx.lineTo(p, S); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, p); ctx.lineTo(S, p); ctx.stroke();
+  });
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  _marbleTex = tex;
+  return tex;
+}
+
 /* ---------- Moulures : plinthes (toutes salles) + corniche, cimaise et
    boiseries (Haussmann). Une seule InstancedMesh pour toute la salle. ---------- */
 function addMoldings(geo){
@@ -934,8 +1016,9 @@ function buildRoom(geo, nArt){
   const useReflector = !(isTouchDevice && nArt > 12);
   const parquet = SKIN.floor === 'parquet';
   const planks = SKIN.floor === 'planks';
-  const fTex = parquet ? parquetTexture() : planks ? plankTexture() : floorTex;
-  const tile = parquet ? 1.8 : planks ? 2.4 : 1.4;
+  const marble = SKIN.floor === 'marble';
+  const fTex = parquet ? parquetTexture() : planks ? plankTexture() : marble ? marbleTexture() : floorTex;
+  const tile = parquet ? 1.8 : planks ? 2.4 : marble ? 2.4 : 1.4;
   fTex.repeat.set(width/tile, depth/tile);
   floorBumpTex.repeat.set(width/1.4, depth/1.4);
   if(useReflector){
@@ -956,7 +1039,7 @@ function buildRoom(geo, nArt){
   const floorOverlay = new THREE.Mesh(
     new THREE.PlaneGeometry(width, depth),
     new THREE.MeshStandardMaterial({
-      map: fTex, bumpMap: floorBumpTex, bumpScale: 0.015,
+      map: fTex, bumpMap: floorBumpTex, bumpScale: SKIN.floorBump ?? 0.015,
       roughness: SKIN.overlayRoughness, metalness: 0.05,
       transparent: useReflector, opacity: useReflector ? SKIN.overlayOpacity : 1, depthWrite: !useReflector
     })
@@ -1053,9 +1136,9 @@ function buildRoom(geo, nArt){
   // plafonnées pour rester fluides dans les grandes salles et sur mobile.
   if(SKIN.wallWash){
     const washY = height - 0.5;
-    const capN = isTouchDevice ? 1 : 2;
+    const capN = 1;
     const wallWashSpot = (x,y,z, tx,ty,tz) => {
-      const spot = new THREE.SpotLight(SKIN.spotColor || 0xfff0d2, isTouchDevice ? 9.5 : 7.5, 7.5, Math.PI/4.2, 0.6, 1.3);
+      const spot = new THREE.SpotLight(SKIN.spotColor || 0xfff0d2, 9.5, 7.5, Math.PI/4.2, 0.6, 1.3);
       spot.position.set(x,y,z);
       spot.castShadow = false;
       const target = new THREE.Object3D();
