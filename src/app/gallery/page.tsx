@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { UploadCloud, Check, Lock, ExternalLink } from "lucide-react";
+import { UploadCloud, Check, Lock, ExternalLink, X } from "lucide-react";
 import DashboardShell from "@/components/DashboardShell";
 import { api } from "@/lib/api";
 import { uploadToCloudinary } from "@/lib/cloudinary";
@@ -40,6 +40,7 @@ export default function GalleryPage() {
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    e.target.value = ""; // permet de reprendre le même fichier après « Retirer »
     if (!file) return;
     setUploading(true);
     try {
@@ -51,6 +52,7 @@ export default function GalleryPage() {
 
   async function handleSignatureChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
     setUploadingSignature(true);
     try {
@@ -192,9 +194,19 @@ export default function GalleryPage() {
             )}
             <label className="flex items-center gap-2 px-3.5 py-2.5 rounded-md border border-dashed border-bordure text-sm cursor-pointer text-encre/60">
               <UploadCloud size={16} />
-              {uploading ? "Envoi..." : "Changer la photo"}
+              {uploading ? "Envoi..." : avatarUrl ? "Changer la photo" : "Ajouter une photo"}
               <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
             </label>
+            {avatarUrl && !uploading && (
+              <button
+                type="button"
+                onClick={() => setAvatarUrl("")}
+                className="flex items-center gap-1.5 px-3 py-2.5 rounded-md text-sm text-encre/60 hover:text-red-700"
+              >
+                <X size={15} />
+                Retirer
+              </button>
+            )}
           </div>
         </div>
 
@@ -224,6 +236,16 @@ export default function GalleryPage() {
                 onChange={handleSignatureChange}
               />
             </label>
+            {signatureUrl && !uploadingSignature && (
+              <button
+                type="button"
+                onClick={() => setSignatureUrl("")}
+                className="flex items-center gap-1.5 px-3 py-2.5 rounded-md text-sm text-encre/60 hover:text-red-700"
+              >
+                <X size={15} />
+                Retirer
+              </button>
+            )}
           </div>
         </div>
 
