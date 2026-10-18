@@ -1883,11 +1883,22 @@ if(isTouchDevice){
 
 // Cartels : affichés seulement pour les œuvres proches, vues de face et
 // non cachées par un pilier ou la cloison (sinon ils traversent les murs).
+// Aperçu sur la page d'accueil (petit écran intégré) : un seul cartel à la
+// fois, celui de l'œuvre la plus proche, pour ne pas encombrer la vue.
+const DEMO = (() => {
+  if(new URLSearchParams(location.search).get('demo') === '1') return true;
+  try{
+    if(window.parent === window) return false;
+    const pp = window.parent.location.pathname.replace(/\/+$/, '') || '/';
+    return pp === '/' || pp === '/decouvrir';
+  }catch(e){ return false; }
+})();
 let _labelTick = 0;
 const _lv = new THREE.Vector3();
 function updateLabels(){
   if((_labelTick++) % 4) return;
   const cam = camera.position;
+  let best = null, bestD = Infinity;
   for(const f of frameGroups){
     const s = f.slot;
     if(!s || !f.label) continue;
@@ -1901,7 +1912,9 @@ function updateLabels(){
       raycaster.far = Infinity;
     }
     f.label.visible = vis;
+    if(DEMO && vis && d < bestD){ bestD = d; best = f; }
   }
+  if(DEMO) for(const f of frameGroups){ if(f.label) f.label.visible = f === best && bestD < 4.5; }
 }
 
 /* ---------------------------------------------------------------------- */
