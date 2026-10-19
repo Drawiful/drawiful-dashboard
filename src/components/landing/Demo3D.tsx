@@ -140,7 +140,7 @@ export default function Demo3D() {
             <span className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
             <span className="absolute left-5 right-5 bottom-5 sm:left-8 sm:bottom-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
               <span className="text-white/85 text-sm max-w-sm leading-relaxed">
-                Une vraie galerie Drawiful, avec de vraies œuvres. Déplacez-vous librement, approchez-vous des tableaux.
+                Une vraie galerie Drawiful, avec de vraies œuvres. Déplace-toi librement, approche-toi des tableaux.
               </span>
               <span className="inline-flex items-center gap-3 self-start sm:self-auto rounded-full bg-[#F7F5F0] text-[#1C1A17] pl-5 pr-2 py-2 text-sm font-semibold">
                 Entrer dans la galerie
@@ -154,9 +154,9 @@ export default function Demo3D() {
           </button>
         )}
       </div>
-      <p className="mt-3 text-xs text-white/50">
-        Sur ordinateur : cliquez dans la salle puis marchez avec ZQSD ou les flèches. Sur mobile : glissez pour regarder,
-        touchez le sol pour avancer.
+      <p className="mt-3 text-xs text-white/60 md:hidden">Glisse pour regarder autour de toi, touche le sol pour avancer.</p>
+      <p className="mt-3 text-xs text-white/50 hidden md:block">
+        Clique dans la salle, puis marche avec ZQSD ou les flèches du clavier.
       </p>
     </div>
   );

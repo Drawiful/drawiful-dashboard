@@ -4,44 +4,54 @@ import { Bodoni_Moda, Manrope } from "next/font/google";
 import LandingNav from "@/components/landing/LandingNav";
 import Demo3D from "@/components/landing/Demo3D";
 import CertificateShowcase from "@/components/landing/CertificateShowcase";
+import HeroVideo from "@/components/landing/HeroVideo";
+import StickyCta from "@/components/landing/StickyCta";
 
 /*
   Landing Drawiful (servie sur drawiful.app via le middleware).
   Palette : mur aubergine #2B1E2F · laiton #B8912F · papier #F7F5F0 · encre #1C1A17
             · pierre #77706A · sceau bordeaux #7A2E2B
   Fil conducteur : le cartel de musée (titre, technique, date) sert de légende partout.
+
+  Ordre (version du 19 oct. 2026, pensé pour le trafic Instagram sur mobile) :
+  1. Promesse « 0 % de commission » + vidéo de la visite + bouton d'essai
+  2. Démo 3D interactive   3. Le calcul sur 1 000 €   4. Le constat
+  5. Pour qui, fonctionnalités, étapes, certificat, comparaison
+  6. Tarifs   7. Le fondateur   8. Questions   9. Appel final
+  Sur téléphone, un bouton d'essai reste fixé en bas de l'écran (StickyCta).
 */
 
 const display = Bodoni_Moda({ subsets: ["latin"], variable: "--font-lp-display", display: "swap" });
 const body = Manrope({ subsets: ["latin"], variable: "--font-lp-body", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Drawiful — Votre galerie d'art en ligne, visitable en 3D",
+  title: "Drawiful — 0 % de commission. Ta galerie d'art en 3D, à ton nom.",
   description:
-    "Créez la galerie en ligne de vos œuvres : visite 3D, boutique, paiements internationaux et certificat d'authenticité pour chaque vente. 14 jours d'essai gratuit.",
+    "Expose et vends tes œuvres dans ta propre galerie en ligne, visitable en 3D, avec certificat d'authenticité. 0 % de commission sur tes ventes. 14 jours d'essai gratuit.",
   openGraph: {
-    title: "Drawiful — Votre galerie d'art en ligne, visitable en 3D",
+    title: "Drawiful — 0 % de commission. Ta galerie d'art en 3D, à ton nom.",
     description:
-      "Une galerie à votre nom, visitable en 3D, avec boutique et certificats d'authenticité. 14 jours d'essai gratuit.",
+      "Ta galerie à ton nom, visitable en 3D, avec boutique et certificats d'authenticité. 0 % de commission. 14 jours d'essai gratuit.",
     images: ["/landing/salle-haussmann.jpg"],
     locale: "fr_FR",
     type: "website",
   },
 };
 
-/* Cartel de musée : petite étiquette sous une image */
-function Cartel({ title, detail }: { title: string; detail: string }) {
-  return (
-    <div className="inline-block border-l-2 border-[#B8912F] pl-3">
-      <p className="font-display-lp text-[15px] leading-tight">{title}</p>
-      <p className="text-xs opacity-70 mt-0.5">{detail}</p>
-    </div>
-  );
-}
-
-function CtaPrimary({ href, children, className = "" }: { href: string; children: React.ReactNode; className?: string }) {
+function CtaPrimary({
+  href,
+  children,
+  className = "",
+  id,
+}: {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+  id?: string;
+}) {
   return (
     <Link
+      id={id}
       href={href}
       className={`inline-flex items-center justify-center rounded-full bg-[#B8912F] px-7 py-3.5 text-[15px] font-semibold text-[#1C1A17] hover:bg-[#C9A24A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B8912F] ${className}`}
     >
@@ -67,44 +77,44 @@ const PAINS = [
 
 const PERSONAS = [
   {
-    title: "Vous peignez",
+    title: "Tu peins",
     text: "Chaque toile est accrochée à taille réelle, sous son spot, avec son cartel et son certificat d'authenticité.",
   },
   {
-    title: "Vous dessinez",
-    text: "Illustrations, encres et fusains encadrés, prêts à être commandés depuis votre boutique.",
+    title: "Tu dessines",
+    text: "Illustrations, encres et fusains encadrés, prêts à être commandés depuis ta boutique.",
   },
   {
-    title: "Vous photographiez",
-    text: "Chaque tirage vendu porte un certificat numéroté. Vos éditions limitées gardent leur valeur.",
+    title: "Tu photographies",
+    text: "Chaque tirage vendu porte un certificat numéroté. Tes éditions limitées gardent leur valeur.",
   },
   {
-    title: "Vous dirigez une galerie",
-    text: "Jusqu'à dix artistes sous votre marque, et un tableau de bord pour piloter l'activité.",
+    title: "Tu diriges une galerie",
+    text: "Jusqu'à dix artistes sous ta marque, et un tableau de bord pour piloter l'activité.",
   },
 ];
 
 const FEATURES = [
   {
     title: "Une galerie visitable en 3D",
-    text: "Trois salles au choix : salon haussmannien, white cube ou salle noire. Vos œuvres y sont accrochées à leurs dimensions réelles, éclairées une à une, visitables sur ordinateur comme sur téléphone.",
+    text: "Trois salles au choix : salon haussmannien, white cube ou salle noire. Tes œuvres y sont accrochées à leurs dimensions réelles, éclairées une à une, visitables sur ordinateur comme sur téléphone.",
     big: true,
   },
   {
-    title: "Une boutique à votre image",
-    text: "Six styles de boutique, votre nom, vos couleurs. Panier et paiement intégrés.",
+    title: "Une boutique à ton image",
+    text: "Six styles de boutique, ton nom, tes couleurs. Panier et paiement intégrés.",
   },
   {
-    title: "Votre adresse web, incluse",
-    text: "Votre galerie est en ligne sur votregalerie.drawiful.app. Vous avez déjà un nom de domaine ? Reliez-le en quelques minutes.",
+    title: "Ton adresse web, incluse",
+    text: "Ta galerie est en ligne sur tagalerie.drawiful.app. Tu as déjà un nom de domaine ? Relie-le en quelques minutes.",
   },
   {
     title: "Des certificats d'authenticité",
-    text: "Un certificat numéroté pour chaque œuvre, avec votre signature, vérifiable en ligne.",
+    text: "Un certificat numéroté pour chaque œuvre, avec ta signature, vérifiable en ligne.",
   },
   {
     title: "Paiements dans le monde entier",
-    text: "Vos collectionneurs paient par carte, d'où qu'ils soient. L'argent arrive sur votre compte via Stripe.",
+    text: "Tes collectionneurs paient par carte, d'où qu'ils soient. L'argent arrive sur ton compte via Stripe.",
   },
   {
     title: "L'œuvre chez le collectionneur",
@@ -117,9 +127,9 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  { title: "Ajoutez vos œuvres", text: "Une photo, un titre, un prix et les dimensions réelles. C'est tout." },
-  { title: "Choisissez votre salle", text: "Le style de la boutique et l'ambiance de la galerie 3D. Elle ressemble à votre travail." },
-  { title: "Partagez et vendez", text: "Votre lien sur Instagram, vos cartes de visite, vos e-mails. Chaque vente part avec son certificat." },
+  { title: "Ajoute tes œuvres", text: "Une photo, un titre, un prix et les dimensions réelles. C'est tout." },
+  { title: "Choisis ta salle", text: "Le style de la boutique et l'ambiance de la galerie 3D. Elle ressemble à ton travail." },
+  { title: "Partage et vends", text: "Ton lien sur Instagram, tes cartes de visite, tes e-mails. Chaque vente part avec son certificat." },
 ];
 
 const COMPARISON: { label: string; diy: string; drawiful: string }[] = [
@@ -134,9 +144,9 @@ const PLANS = [
   {
     key: "aspirant",
     name: "Aspirant",
-    pitch: "Pour débuter et exposer vos premières œuvres.",
+    pitch: "Pour débuter et exposer tes premières œuvres.",
     price: 19,
-    features: ["5 œuvres", "Galerie publique", "1 certificat d'authenticité", "Votre adresse drawiful.app"],
+    features: ["5 œuvres", "Galerie publique", "1 certificat d'authenticité", "Ton adresse drawiful.app"],
     missing: ["Boutique en ligne", "Galerie 3D"],
   },
   {
@@ -151,7 +161,7 @@ const PLANS = [
       "Galerie 3D et réalité augmentée",
       "Certificats illimités",
       "Commandes et expéditions",
-      "Votre propre nom de domaine",
+      "Ton propre nom de domaine",
     ],
     missing: [],
   },
@@ -174,35 +184,35 @@ const PLANS = [
 const FAQ = [
   {
     q: "Drawiful prend-il une commission sur mes ventes ?",
-    a: "Non, aucune. Le collectionneur paie directement sur votre compte Stripe. Seuls les frais bancaires de Stripe sont déduits (environ 1,5 % + 0,25 € pour une carte européenne). Vous ne payez que votre abonnement mensuel, quel que soit votre chiffre d'affaires.",
+    a: "Non, aucune. Le collectionneur paie directement sur ton compte Stripe. Seuls les frais bancaires de Stripe sont déduits (environ 1,5 % + 0,25 € pour une carte européenne). Tu ne paies que ton abonnement mensuel, quel que soit ton chiffre d'affaires.",
   },
   {
     q: "Suis-je toujours propriétaire de mes œuvres ?",
-    a: "Oui, entièrement. Drawiful présente et vend vos œuvres en votre nom ; vous gardez tous vos droits sur vos créations.",
+    a: "Oui, entièrement. Drawiful présente et vend tes œuvres en ton nom ; tu gardes tous tes droits sur tes créations.",
   },
   {
     q: "Comment fonctionne le certificat d'authenticité ?",
-    a: "Chaque œuvre reçoit un certificat avec un numéro unique, le détail de l'œuvre et votre signature. Le collectionneur le reçoit avec son achat et peut le vérifier en ligne à tout moment grâce à ce numéro.",
+    a: "Chaque œuvre reçoit un certificat avec un numéro unique, le détail de l'œuvre et ta signature. Le collectionneur le reçoit avec son achat et peut le vérifier en ligne à tout moment grâce à ce numéro.",
   },
   {
     q: "Puis-je vendre à des collectionneurs à l'étranger ?",
-    a: "Oui. Les paiements par carte sont gérés par Stripe : un collectionneur peut acheter depuis l'étranger, et l'argent est versé sur votre compte.",
+    a: "Oui. Les paiements par carte sont gérés par Stripe : un collectionneur peut acheter depuis l'étranger, et l'argent est versé sur ton compte.",
   },
   {
     q: "Ai-je besoin d'un nom de domaine ou d'un hébergeur ?",
-    a: "Non. Votre galerie est en ligne dès l'inscription sur votregalerie.drawiful.app. Si vous possédez déjà un nom de domaine, vous pouvez le relier depuis votre espace.",
+    a: "Non. Ta galerie est en ligne dès l'inscription sur tagalerie.drawiful.app. Si tu possèdes déjà un nom de domaine, tu peux le relier depuis ton espace.",
   },
   {
     q: "Faut-il renseigner une carte bancaire pour l'essai ?",
-    a: "Oui, une carte est demandée au démarrage de l'essai, mais rien n'est prélevé pendant les 14 jours. Vous pouvez annuler avant la fin sans rien payer.",
+    a: "Oui, une carte est demandée au démarrage de l'essai, mais rien n'est prélevé pendant les 14 jours. Tu peux annuler avant la fin sans rien payer.",
   },
   {
     q: "Que se passe-t-il après les 14 jours d'essai ?",
-    a: "L'abonnement démarre au tarif de la formule choisie. Vous recevez un e-mail de rappel avant la fin de l'essai.",
+    a: "L'abonnement démarre au tarif de la formule choisie. Tu reçois un e-mail de rappel avant la fin de l'essai.",
   },
   {
     q: "Y a-t-il un engagement ?",
-    a: "Aucun. Vous changez de formule ou annulez depuis la page Abonnement de votre espace, en quelques clics.",
+    a: "Aucun. Tu changes de formule ou annules depuis la page Abonnement de ton espace, en quelques clics.",
   },
 ];
 
@@ -213,10 +223,6 @@ export default function LandingPage() {
         .lp-root { font-family: var(--font-lp-body), system-ui, sans-serif; }
         .font-display-lp { font-family: var(--font-lp-display), Georgia, serif; font-optical-sizing: auto; }
         .lp-root ::selection { background: #B8912F; color: #1C1A17; }
-        /* Le seul mouvement de la page : la salle "s'allume" au chargement */
-        @keyframes lp-lights { from { opacity: 1; } to { opacity: 0; } }
-        .lp-lights { animation: lp-lights 1.6s cubic-bezier(.2,.7,.2,1) .25s both; }
-        @media (prefers-reduced-motion: reduce) { .lp-lights { animation: none; opacity: 0; } }
         .lp-root details > summary { list-style: none; }
         .lp-root details > summary::-webkit-details-marker { display: none; }
         .lp-root details[open] .lp-plus { transform: rotate(45deg); }
@@ -224,7 +230,7 @@ export default function LandingPage() {
 
       <LandingNav />
 
-      {/* HERO : le mur de la galerie, l'œuvre accrochée, son cartel */}
+      {/* 1. PREMIER ÉCRAN : la promesse de la pub, la visite en vidéo, le bouton */}
       <section className="relative overflow-hidden bg-[#2B1E2F] text-[#F7F5F0]">
         <div
           aria-hidden="true"
@@ -234,92 +240,63 @@ export default function LandingPage() {
               "radial-gradient(60% 55% at 72% 38%, rgba(232,206,150,0.22), transparent 70%), radial-gradient(40% 40% at 15% 100%, rgba(0,0,0,0.35), transparent 70%)",
           }}
         />
-        <div className="relative mx-auto max-w-7xl px-5 sm:px-8 pt-28 sm:pt-36 pb-20 sm:pb-28 grid lg:grid-cols-[1fr_1.15fr] gap-12 lg:gap-16 items-center">
+
+        {/* Téléphone : la vidéo en bandeau, tout en haut ; elle finit sur l'œuvre et son prix */}
+        <div className="md:hidden relative pt-16">
+          <HeroVideo variant="mobile" className="block w-full aspect-[16/11] object-cover bg-[#1C1A17]" />
+          <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#2B1E2F] to-transparent" />
+        </div>
+
+        <div className="relative mx-auto max-w-7xl px-5 sm:px-8 pt-5 md:pt-32 lg:pt-36 pb-12 md:pb-24 grid md:grid-cols-[1.25fr_0.75fr] gap-12 lg:gap-20 items-center">
           <div>
-            <p className="text-[#E3C77A] text-sm">Pour les artistes indépendants et les galeries d'art</p>
-            <h1 className="font-display-lp mt-5 text-[44px] leading-[1.02] sm:text-6xl lg:text-[76px] tracking-[-0.01em]">
-              Votre talent mérite son propre monde.
+            <p className="text-[#E3C77A] text-sm">Pour les artistes qui veulent vendre leurs œuvres</p>
+            <h1 className="font-display-lp mt-3 md:mt-5 text-[36px] leading-[1.05] sm:text-5xl lg:text-[68px] tracking-[-0.01em]">
+              <span className="text-[#E3C77A]">0&nbsp;% de commission.</span> Ta galerie d'art en 3D, à ton nom.
             </h1>
-            <p className="mt-6 text-lg text-[#F7F5F0]/80 leading-relaxed max-w-xl">
-              Drawiful crée la galerie en ligne de votre travail : visitable en 3D, avec boutique, paiements dans le
-              monde entier et un certificat d'authenticité pour chaque vente. Sans compétence technique.
+            <p className="mt-4 md:mt-6 text-base md:text-lg text-[#F7F5F0]/80 leading-relaxed max-w-xl">
+              Expose et vends tes œuvres avec certificat d'authenticité. En ligne en 10 minutes.
             </p>
-            <div className="mt-9 flex flex-col sm:flex-row gap-3 sm:items-center">
-              <CtaPrimary href="/inscription?plan=artiste">Créer ma galerie gratuitement</CtaPrimary>
+            <div className="mt-6 md:mt-9 flex flex-col sm:flex-row gap-3 sm:items-center">
+              <CtaPrimary id="hero-cta" href="/inscription?plan=artiste">
+                Essayer 14 jours gratuits
+              </CtaPrimary>
               <a
                 href="#galerie-3d"
-                className="inline-flex items-center justify-center rounded-full border border-[#F7F5F0]/30 px-7 py-3.5 text-[15px] text-[#F7F5F0] hover:border-[#F7F5F0]/70"
+                className="hidden md:inline-flex items-center justify-center rounded-full border border-[#F7F5F0]/30 px-7 py-3.5 text-[15px] text-[#F7F5F0] hover:border-[#F7F5F0]/70"
               >
-                Visiter une galerie en 3D
+                Visiter la galerie en 3D
               </a>
             </div>
-            <p className="mt-5 text-sm text-[#F7F5F0]/55">14 jours d'essai gratuit, sans engagement.</p>
+            <p className="mt-3 md:mt-4 text-[13px] text-[#F7F5F0]/60">
+              Sans engagement · aucun débit pendant 14 jours · annulable en 1 clic
+            </p>
+            <a href="#galerie-3d" className="md:hidden mt-5 inline-block text-sm text-[#E3C77A] underline underline-offset-4">
+              Ou visite d'abord une vraie galerie en 3D ↓
+            </a>
           </div>
 
-          <figure className="relative">
-            <div className="relative bg-[#1C1A17] p-2.5 sm:p-3.5 shadow-[0_50px_90px_-35px_rgba(0,0,0,0.85)] ring-1 ring-[#B8912F]/40">
-              <div className="relative overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/landing/salle-haussmann.jpg"
-                  alt="Une galerie Drawiful : salon haussmannien, parquet en point de Hongrie, œuvres éclairées par des spots"
-                  className="block w-full h-auto"
-                  width={1800}
-                  height={1012}
-                />
-                <div aria-hidden="true" className="lp-lights absolute inset-0 bg-[#120D14]" />
+          {/* Ordinateur : la vidéo entière, dans un cadre de téléphone */}
+          <figure className="hidden md:block justify-self-center">
+            <div className="relative w-[280px] lg:w-[320px] rounded-[38px] bg-[#1C1A17] p-3 shadow-[0_50px_90px_-35px_rgba(0,0,0,0.85)] ring-1 ring-[#B8912F]/40">
+              <div className="overflow-hidden rounded-[28px]">
+                <HeroVideo className="block w-full aspect-[540/968] object-cover bg-[#1C1A17]" />
               </div>
             </div>
-            <figcaption className="mt-5 text-[#F7F5F0]/90">
-              <Cartel title="Galerie de Erwan, salon haussmannien" detail="Visite 3D Drawiful, 2026" />
+            <figcaption className="mt-5 text-center text-sm text-[#F7F5F0]/70">
+              La galerie de Erwan, filmée sur téléphone
             </figcaption>
           </figure>
         </div>
       </section>
 
-      {/* La promesse en trois faits */}
-      <section className="border-b border-[#1C1A17]/10">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 py-10 grid grid-cols-2 lg:grid-cols-4 gap-8">
-          {[
-            ["3 salles", "d'exposition en 3D"],
-            ["6 styles", "de boutique au choix"],
-            ["1 certificat", "pour chaque œuvre vendue"],
-            ["0 %", "de commission sur vos ventes"],
-          ].map(([a, b]) => (
-            <div key={a}>
-              <p className="font-display-lp text-3xl text-[#2B1E2F]">{a}</p>
-              <p className="text-sm text-[#77706A] mt-1">{b}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* LE CONSTAT */}
-      <section className="mx-auto max-w-7xl px-5 sm:px-8 py-24 sm:py-32 grid lg:grid-cols-[1fr_1.2fr] gap-12 lg:gap-20">
-        <h2 className="font-display-lp text-4xl sm:text-5xl leading-[1.05]">
-          Vendre son art en ligne n'est pas une question de chance, mais de mise en scène.
-        </h2>
-        <div className="flex flex-col gap-10">
-          {PAINS.map((p) => (
-            <div key={p.title} className="grid sm:grid-cols-[220px_1fr] gap-2 sm:gap-8">
-              <h3 className="font-semibold text-[#2B1E2F]">{p.title}</h3>
-              <p className="text-[#4A4540] leading-relaxed">{p.text}</p>
-            </div>
-          ))}
-          <p className="font-display-lp text-2xl text-[#7A2E2B] leading-snug">
-            Drawiful réunit la présentation, la preuve et la vente au même endroit.
-          </p>
-        </div>
-      </section>
-
-      {/* DÉMO 3D EN DIRECT */}
+      {/* 2. DÉMO 3D EN DIRECT */}
       <section id="galerie-3d" className="bg-[#1C1A17] text-[#F7F5F0] scroll-mt-16">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 py-24 sm:py-28">
-          <div className="max-w-2xl mb-10">
-            <h2 className="font-display-lp text-4xl sm:text-5xl leading-[1.05]">Entrez, la galerie est ouverte.</h2>
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 py-16 sm:py-28">
+          <div className="max-w-2xl mb-8 sm:mb-10">
+            <h2 className="font-display-lp text-4xl sm:text-5xl leading-[1.05]">Entre, la galerie est ouverte.</h2>
             <p className="mt-5 text-[#F7F5F0]/70 leading-relaxed">
-              Ce n'est pas une vidéo : c'est une vraie galerie Drawiful, avec les vraies œuvres d'un artiste. Changez de
-              salle, marchez, approchez-vous. Vos collectionneurs vivront exactement la même visite.
+              Cette fois, ce n'est plus une vidéo : c'est la vraie galerie, avec les vraies œuvres d'un artiste. Change de
+              salle, avance, approche-toi. Tes collectionneurs vivront exactement la même visite.
             </p>
           </div>
           <Demo3D />
@@ -337,10 +314,61 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* POUR QUI */}
-      <section className="mx-auto max-w-7xl px-5 sm:px-8 py-24 sm:py-32">
+      {/* 3. 0 % DE COMMISSION : le calcul sur une vente de 1 000 € */}
+      <section id="commission" className="bg-[#2B1E2F] text-[#F7F5F0] scroll-mt-16">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 py-16 sm:py-28 grid lg:grid-cols-[1fr_1.1fr] gap-10 lg:gap-20 items-center">
+          <div>
+            <p className="text-[#E3C77A] text-sm">0 % de commission</p>
+            <h2 className="font-display-lp mt-4 text-4xl sm:text-5xl leading-[1.05]">
+              Tu vends une œuvre 1&nbsp;000&nbsp;€. Combien tu gardes&nbsp;?
+            </h2>
+            <p className="mt-6 text-[#F7F5F0]/75 leading-relaxed max-w-lg">
+              Drawiful ne prend aucune commission sur tes ventes. Le collectionneur paie directement sur ton compte
+              Stripe : seuls les frais bancaires de Stripe sont déduits. Ton abonnement reste le même, que tu vendes une
+              œuvre ou cent.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="rounded-[6px] border border-[#F7F5F0]/15 p-5 sm:p-7">
+              <p className="text-sm text-[#F7F5F0]/60">Plateforme à 30 % de commission</p>
+              <p className="font-display-lp text-4xl sm:text-5xl mt-4 text-[#F7F5F0]/60">700&nbsp;€</p>
+              <p className="text-sm text-[#F7F5F0]/50 mt-3">300 € partent à la plateforme.</p>
+            </div>
+            <div className="rounded-[6px] bg-[#F7F5F0] text-[#1C1A17] p-5 sm:p-7 ring-2 ring-[#B8912F]">
+              <p className="text-sm text-[#77706A]">Avec Drawiful</p>
+              <p className="font-display-lp text-4xl sm:text-5xl mt-4 text-[#2B1E2F]">985&nbsp;€</p>
+              <p className="text-sm text-[#4A4540] mt-3">Environ 15 € de frais Stripe, rien pour Drawiful.</p>
+            </div>
+            <p className="col-span-2 text-xs text-[#F7F5F0]/50 leading-relaxed">
+              Exemple pour une carte bancaire européenne (frais Stripe d'environ 1,5 % + 0,25 €). Les frais varient selon
+              le pays et le type de carte de l'acheteur.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. LE CONSTAT */}
+      <section className="mx-auto max-w-7xl px-5 sm:px-8 py-20 sm:py-32 grid lg:grid-cols-[1fr_1.2fr] gap-12 lg:gap-20">
+        <h2 className="font-display-lp text-4xl sm:text-5xl leading-[1.05]">
+          Vendre son art en ligne n'est pas une question de chance, mais de mise en scène.
+        </h2>
+        <div className="flex flex-col gap-10">
+          {PAINS.map((p) => (
+            <div key={p.title} className="grid sm:grid-cols-[220px_1fr] gap-2 sm:gap-8">
+              <h3 className="font-semibold text-[#2B1E2F]">{p.title}</h3>
+              <p className="text-[#4A4540] leading-relaxed">{p.text}</p>
+            </div>
+          ))}
+          <p className="font-display-lp text-2xl text-[#7A2E2B] leading-snug">
+            Drawiful réunit la présentation, la preuve et la vente au même endroit.
+          </p>
+        </div>
+      </section>
+
+      {/* 5a. POUR QUI */}
+      <section className="mx-auto max-w-7xl px-5 sm:px-8 pb-20 sm:pb-32">
         <h2 className="font-display-lp text-4xl sm:text-5xl leading-[1.05] max-w-2xl">
-          Que vous peigniez, dessiniez ou photographiez.
+          Que tu peignes, dessines ou photographies.
         </h2>
         <div className="mt-14 grid sm:grid-cols-2 gap-x-16 gap-y-12">
           {PERSONAS.map((p) => (
@@ -352,9 +380,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* FONCTIONNALITÉS : accrochage "salon", une grande pièce et des plus petites */}
+      {/* 5b. FONCTIONNALITÉS : accrochage "salon", une grande pièce et des plus petites */}
       <section id="fonctionnalites" className="bg-[#EEEBE4] scroll-mt-16">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 py-24 sm:py-32">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 py-20 sm:py-32">
           <h2 className="font-display-lp text-4xl sm:text-5xl leading-[1.05] max-w-3xl">
             Tout ce qu'il faut pour exposer et vendre, au même endroit.
           </h2>
@@ -388,9 +416,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* COMMENT ÇA MARCHE : une vraie séquence, donc numérotée */}
-      <section className="mx-auto max-w-7xl px-5 sm:px-8 py-24 sm:py-32">
-        <h2 className="font-display-lp text-4xl sm:text-5xl leading-[1.05]">Trois étapes, et votre galerie est ouverte.</h2>
+      {/* 5c. COMMENT ÇA MARCHE : une vraie séquence, donc numérotée */}
+      <section className="mx-auto max-w-7xl px-5 sm:px-8 py-20 sm:py-32">
+        <h2 className="font-display-lp text-4xl sm:text-5xl leading-[1.05]">Trois étapes, et ta galerie est ouverte.</h2>
         <ol className="mt-14 grid md:grid-cols-3 gap-10">
           {STEPS.map((s, i) => (
             <li key={s.title} className="border-t-2 border-[#2B1E2F] pt-6">
@@ -402,18 +430,18 @@ export default function LandingPage() {
         </ol>
       </section>
 
-      {/* CERTIFICAT */}
+      {/* 5d. CERTIFICAT */}
       <section className="bg-white border-y border-[#1C1A17]/10">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 py-24 sm:py-32">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 py-20 sm:py-32">
           <CertificateShowcase />
         </div>
       </section>
 
-      {/* COMPARAISON */}
-      <section className="mx-auto max-w-5xl px-5 sm:px-8 py-24 sm:py-32">
+      {/* 5e. COMPARAISON */}
+      <section className="mx-auto max-w-5xl px-5 sm:px-8 py-20 sm:py-32">
         <h2 className="font-display-lp text-4xl sm:text-5xl leading-[1.05]">Fini le bricolage.</h2>
         <p className="mt-5 text-[#4A4540] max-w-xl leading-relaxed">
-          Ce que la plupart des artistes assemblent à la main, et ce que Drawiful fait pour vous.
+          Ce que la plupart des artistes assemblent à la main, et ce que Drawiful fait pour toi.
         </p>
         <div className="mt-12 overflow-x-auto">
           <table className="w-full min-w-[640px] text-left">
@@ -447,47 +475,14 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 0 % DE COMMISSION : le calcul sur une vente de 1 000 € */}
-      <section id="commission" className="bg-[#2B1E2F] text-[#F7F5F0] scroll-mt-16">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 py-24 sm:py-28 grid lg:grid-cols-[1fr_1.1fr] gap-12 lg:gap-20 items-center">
-          <div>
-            <p className="text-[#E3C77A] text-sm">0 % de commission</p>
-            <h2 className="font-display-lp mt-4 text-4xl sm:text-5xl leading-[1.05]">
-              Vous vendez une œuvre 1 000 €. Combien gardez-vous ?
-            </h2>
-            <p className="mt-6 text-[#F7F5F0]/75 leading-relaxed max-w-lg">
-              Drawiful ne prend aucune commission sur vos ventes. Le collectionneur paie directement sur votre compte
-              Stripe : seuls les frais bancaires de Stripe sont déduits. Votre abonnement reste le même, que vous vendiez
-              une œuvre ou cent.
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="rounded-[6px] border border-[#F7F5F0]/15 p-7">
-              <p className="text-sm text-[#F7F5F0]/60">Plateforme à 30 % de commission</p>
-              <p className="font-display-lp text-5xl mt-4 text-[#F7F5F0]/60">700&nbsp;€</p>
-              <p className="text-sm text-[#F7F5F0]/50 mt-3">300 € partent à la plateforme.</p>
-            </div>
-            <div className="rounded-[6px] bg-[#F7F5F0] text-[#1C1A17] p-7 ring-2 ring-[#B8912F]">
-              <p className="text-sm text-[#77706A]">Avec Drawiful</p>
-              <p className="font-display-lp text-5xl mt-4 text-[#2B1E2F]">985&nbsp;€</p>
-              <p className="text-sm text-[#4A4540] mt-3">Environ 15 € de frais Stripe, rien pour Drawiful.</p>
-            </div>
-            <p className="sm:col-span-2 text-xs text-[#F7F5F0]/50 leading-relaxed">
-              Exemple pour une carte bancaire européenne (frais Stripe d'environ 1,5 % + 0,25 €). Les frais varient selon
-              le pays et le type de carte de l'acheteur.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* TARIFS */}
+      {/* 6. TARIFS */}
       <section id="tarifs" className="bg-[#EEEBE4] scroll-mt-16">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 py-24 sm:py-32">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 py-20 sm:py-32">
           <div className="max-w-2xl">
-            <h2 className="font-display-lp text-4xl sm:text-5xl leading-[1.05]">Choisissez votre formule.</h2>
+            <h2 className="font-display-lp text-4xl sm:text-5xl leading-[1.05]">Choisis ta formule.</h2>
             <p className="mt-5 text-[#4A4540] leading-relaxed">
-              14 jours d'essai gratuit sur chaque formule. Paiement sécurisé, sans engagement : vous changez ou
-              annulez quand vous voulez.
+              14 jours d'essai gratuit sur chaque formule. Une carte est demandée pour démarrer, mais rien n'est prélevé
+              pendant l'essai. Sans engagement : tu changes ou annules quand tu veux.
             </p>
           </div>
           <div className="mt-14 grid lg:grid-cols-3 gap-5 items-stretch">
@@ -555,9 +550,34 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* QUESTIONS */}
-      <section id="questions" className="mx-auto max-w-3xl px-5 sm:px-8 py-24 sm:py-32 scroll-mt-16">
-        <h2 className="font-display-lp text-4xl sm:text-5xl leading-[1.05]">Vos questions.</h2>
+      {/* 7. LE FONDATEUR */}
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 py-20 sm:py-28">
+        <p className="text-sm text-[#77706A]">Qui est derrière Drawiful</p>
+        <blockquote className="mt-4 font-display-lp text-3xl sm:text-4xl leading-[1.15] text-[#2B1E2F]">
+          « Je suis dessinateur. Je voulais exposer mes dessins comme dans une vraie galerie, et je ne trouvais pas
+          l'outil. Alors je l'ai construit. »
+        </blockquote>
+        <p className="mt-6 text-[#4A4540] leading-relaxed">
+          Erwan, fondateur de Drawiful. Ma propre galerie est celle que tu vois dans la vidéo et la démo :{" "}
+          <a
+            href="https://erwan.drawiful.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#7A2E2B] underline underline-offset-4"
+          >
+            erwan.drawiful.app
+          </a>
+          . Une question ? Écris-moi à{" "}
+          <a href="mailto:clients@drawiful.app" className="text-[#7A2E2B] underline underline-offset-4">
+            clients@drawiful.app
+          </a>
+          , je réponds moi-même.
+        </p>
+      </section>
+
+      {/* 8. QUESTIONS */}
+      <section id="questions" className="mx-auto max-w-3xl px-5 sm:px-8 pb-20 sm:pb-32 scroll-mt-16">
+        <h2 className="font-display-lp text-4xl sm:text-5xl leading-[1.05]">Tes questions.</h2>
         <div className="mt-12 border-t border-[#1C1A17]/15">
           {FAQ.map((f) => (
             <details key={f.q} className="group border-b border-[#1C1A17]/15">
@@ -576,25 +596,24 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* APPEL FINAL */}
-      <section className="relative overflow-hidden bg-[#2B1E2F] text-[#F7F5F0]">
+      {/* 9. APPEL FINAL */}
+      <section id="appel-final" className="relative overflow-hidden bg-[#2B1E2F] text-[#F7F5F0]">
         <div
           aria-hidden="true"
           className="absolute inset-0"
           style={{ background: "radial-gradient(50% 70% at 50% 0%, rgba(232,206,150,0.18), transparent 70%)" }}
         />
-        <div className="relative mx-auto max-w-4xl px-5 sm:px-8 py-24 sm:py-32 text-center">
+        <div className="relative mx-auto max-w-4xl px-5 sm:px-8 py-20 sm:py-32 text-center">
           <h2 className="font-display-lp text-4xl sm:text-6xl leading-[1.04]">
-            Votre prochaine exposition commence aujourd'hui.
+            Ta prochaine exposition commence aujourd'hui.
           </h2>
           <p className="mt-6 text-lg text-[#F7F5F0]/75 max-w-2xl mx-auto leading-relaxed">
-            Créez votre galerie en quelques minutes et partagez-la dès ce soir. Nous améliorons Drawiful chaque semaine,
-            avec les retours de nos artistes.
+            Crée ta galerie en 10 minutes et partage-la dès ce soir. 0 % de commission sur tes ventes, pour toujours.
           </p>
           <div className="mt-10">
-            <CtaPrimary href="/inscription?plan=artiste">Créer ma galerie gratuitement</CtaPrimary>
+            <CtaPrimary href="/inscription?plan=artiste">Essayer 14 jours gratuits</CtaPrimary>
           </div>
-          <p className="mt-5 text-sm text-[#F7F5F0]/55">14 jours d'essai gratuit, sans engagement.</p>
+          <p className="mt-5 text-sm text-[#F7F5F0]/55">Sans engagement · aucun débit pendant 14 jours</p>
         </div>
       </section>
 
@@ -615,6 +634,8 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      <StickyCta />
     </div>
   );
 }

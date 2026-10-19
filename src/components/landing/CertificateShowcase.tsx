@@ -59,7 +59,7 @@ export default function CertificateShowcase() {
         </h2>
         <p className="mt-5 text-[#4A4540] leading-relaxed max-w-md">
           Un collectionneur achète plus sereinement quand l'authenticité est prouvée. Chaque œuvre vendue reçoit un
-          certificat numéroté, signé de votre main, consultable en ligne à tout moment.
+          certificat numéroté, signé de ta main, consultable en ligne à tout moment.
         </p>
         <div className="mt-8 flex flex-col gap-3 max-w-md" role="tablist" aria-label="Exemples de certificat">
           {SAMPLES.map((x, k) => (
