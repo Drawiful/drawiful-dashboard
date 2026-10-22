@@ -1871,6 +1871,7 @@ const clock = new THREE.Clock();
 
 if(!isTouch){
   plControls = new PointerLockControls(camera, renderer.domElement);
+  plControls.pointerSpeed = 0.5; // souris : rotation deux fois plus douce
   renderer.domElement.addEventListener('click', () => { if(!renderer.xr.isPresenting) plControls.lock(); });
 
   document.addEventListener('keydown', (e) => {
@@ -1900,10 +1901,10 @@ if(!isTouch){
 
 function updateMovement(delta){
   if(!plControls || !plControls.isLocked) return;
-  const turnSpeed = 1.8; // rad/s
+  const turnSpeed = 0.8; // rad/s
   if(move.turnL) camera.rotation.y += turnSpeed*delta;
   if(move.turnR) camera.rotation.y -= turnSpeed*delta;
-  const speed = 2.3;
+  const speed = 0.7; // ≈ 1,3 m/s : pas de visiteur de musée
   velocity.x -= velocity.x * 5.5 * delta;
   velocity.z -= velocity.z * 5.5 * delta;
   const dir = new THREE.Vector3(Number(move.r)-Number(move.l), 0, Number(move.b)-Number(move.f));
@@ -2025,7 +2026,7 @@ function startFlight(toPos, toTarget, onDone){
   const lens = [0];
   for(let i = 1; i < path.length; i++) lens.push(lens[i-1] + path[i].distanceTo(path[i-1]));
   const total = Math.max(lens[lens.length - 1], 1e-4);
-  flight = { path, lens, total, t:0, dur: THREE.MathUtils.clamp(0.6 + total*0.12, 0.7, 2.2),
+  flight = { path, lens, total, t:0, dur: THREE.MathUtils.clamp(1.3 + total*0.42, 1.6, 5.5),
              fromTarget: currentLookTarget(), toTarget: toTarget.clone(), onDone };
   if(orbitControls) orbitControls.enabled = false;
 }
@@ -2194,13 +2195,13 @@ if(isTouchDevice){
     if(touchState.pts.size === 1){
       if(!touchState.moved) return;
       _eul.setFromQuaternion(camera.quaternion, 'YXZ');
-      _eul.y -= dx*0.0045;   // glisser vers la droite = tourner la tête à droite
-      _eul.x = THREE.MathUtils.clamp(_eul.x - dy*0.0045, -1.1, 1.1); // glisser vers le haut = lever les yeux
+      _eul.y -= dx*0.0026;   // glisser vers la droite = tourner la tête à droite
+      _eul.x = THREE.MathUtils.clamp(_eul.x - dy*0.0026, -1.1, 1.1); // glisser vers le haut = lever les yeux
       _eul.z = 0;
       camera.quaternion.setFromEuler(_eul);
     } else if(touchState.pts.size === 2){
       const d = pinchDistance();
-      walkForward((d - touchState.pinch)*0.014);
+      walkForward((d - touchState.pinch)*0.005);
       touchState.pinch = d;
     }
   });
