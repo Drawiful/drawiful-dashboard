@@ -378,7 +378,7 @@ function addSpotFixture(pos, tgt){
 }
 let trackSpotIndex = 0;
 function addTrackSpot(x,y,z, targetX,targetY,targetZ, opts = {}){
-  const spot = new THREE.SpotLight(0xfff0d2, 12, opts.distance || 8, opts.angle || Math.PI/6, 0.6, 1.2);
+  const spot = new THREE.SpotLight(0xfff0d2, 7, opts.distance || 8, opts.angle || Math.PI/6, 0.8, 1.2);
   spot.position.set(x,y,z);
   // Ombres portées réservées à quelques spots (voir MAX_SHADOW_SPOTS) :
   // au-delà, les GPU mobiles refusent le shader (trop de textures d'ombre).
@@ -1631,10 +1631,10 @@ if(!isTouch){
 
 function updateMovement(delta){
   if(!plControls || !plControls.isLocked) return;
-  const turnSpeed = 1.8; // rad/s
+  const turnSpeed = 1.2; // rad/s
   if(move.turnL) camera.rotation.y += turnSpeed*delta;
   if(move.turnR) camera.rotation.y -= turnSpeed*delta;
-  const speed = 2.3;
+  const speed = 0.95; // ≈ 1,7 m/s : pas de visiteur de musée
   velocity.x -= velocity.x * 5.5 * delta;
   velocity.z -= velocity.z * 5.5 * delta;
   const dir = new THREE.Vector3(Number(move.r)-Number(move.l), 0, Number(move.b)-Number(move.f));
@@ -1756,7 +1756,7 @@ function startFlight(toPos, toTarget, onDone){
   const lens = [0];
   for(let i = 1; i < path.length; i++) lens.push(lens[i-1] + path[i].distanceTo(path[i-1]));
   const total = Math.max(lens[lens.length - 1], 1e-4);
-  flight = { path, lens, total, t:0, dur: THREE.MathUtils.clamp(0.6 + total*0.12, 0.7, 2.2),
+  flight = { path, lens, total, t:0, dur: THREE.MathUtils.clamp(1.0 + total*0.3, 1.3, 4.2),
              fromTarget: currentLookTarget(), toTarget: toTarget.clone(), onDone };
   if(orbitControls) orbitControls.enabled = false;
 }
@@ -1931,7 +1931,7 @@ if(isTouchDevice){
       camera.quaternion.setFromEuler(_eul);
     } else if(touchState.pts.size === 2){
       const d = pinchDistance();
-      walkForward((d - touchState.pinch)*0.014);
+      walkForward((d - touchState.pinch)*0.008);
       touchState.pinch = d;
     }
   });

@@ -383,7 +383,7 @@ function addSpotFixture(pos, tgt){
 }
 let trackSpotIndex = 0;
 function addTrackSpot(x,y,z, targetX,targetY,targetZ, opts = {}){
-  const spot = new THREE.SpotLight(SKIN.spotColor || 0xfff0d2, 13, opts.distance || 8, opts.angle || Math.PI/6, 0.6, 1.2);
+  const spot = new THREE.SpotLight(SKIN.spotColor || 0xfff0d2, 7.5, opts.distance || 8, opts.angle || Math.PI/6, 0.8, 1.2);
   spot.position.set(x,y,z);
   // Ombres portées réservées à quelques spots (voir MAX_SHADOW_SPOTS) :
   // au-delà, les GPU mobiles refusent le shader (trop de textures d'ombre).
