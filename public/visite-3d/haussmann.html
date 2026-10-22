@@ -203,13 +203,15 @@ import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
 // Identité de la salle (matières, fenêtre, décor). Le reste du code est
 // commun aux trois salles Drawiful.
 const SKIN = {
-  haussmann:true, floor:'parquet', reflectorColor:0x6b5a48, overlayOpacity:0.82, overlayRoughness:0.45,
-  wallColor:0xefe7d8, wallRoughness:0.95, wallBump:0.032, ceilColor:0xf1ece2,
-  ceilGlow:0.3, plinthColor:0xf3eee4, woodAccent:false, wallWash:false, centerSpot:false, minBottom:0.95, sun:7,
+  haussmann:true, floor:'parquet',
+  parquet:{ base:150, spread:36, g:0.76, b:0.56, bg:'#6e5238', grain:'70,46,26', joint:'45,30,18' }, reflectorColor:0x6b5a48, overlayOpacity:0.9, overlayRoughness:0.45,
+  wallColor:0xefe7d8, wallRoughness:0.95, wallBump:0.4, ceilColor:0xf1ece2,
+  ceilGlow:0.16, plinthColor:0xf3eee4, woodAccent:false, wallWash:false, centerSpot:false, minBottom:0.95, sun:7,
   // Porte-fenêtre à petits bois (2 vantaux) donnant sur un balcon en fer forgé
   window:{ maxW:2.2, minW:1.2, sill:0.12, top:4.3, cols:4, rows:5, mull:0.04, frameColor:0xf1ede4, frameRough:0.55, frameMetal:0, railing:true }
 };
@@ -257,7 +259,15 @@ if(urlGalleryName) document.getElementById('galleryTitle').textContent = urlGall
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0c0b0a);
 
-const camera = new THREE.PerspectiveCamera(65, window.innerWidth/window.innerHeight, 0.05, 100);
+// Champ de vision proche de l'œil humain : 50° vertical en paysage (pas
+// d'effet grand-angle « jeu vidéo ») ; en portrait on garde ~62° horizontal
+// pour voir assez de mur, sans dépasser 68° vertical (œuvres assez grandes à l'écran).
+function fovFor(aspect){
+  if(aspect >= 1) return 50;
+  const v = 2*Math.atan(Math.tan(THREE.MathUtils.degToRad(62)/2)/aspect);
+  return THREE.MathUtils.clamp(THREE.MathUtils.radToDeg(v), 50, 68);
+}
+const camera = new THREE.PerspectiveCamera(fovFor(window.innerWidth/window.innerHeight), window.innerWidth/window.innerHeight, 0.05, 100);
 camera.position.set(0, 1.65, 4);
 
 const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
@@ -265,7 +275,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 1.06;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.xr.enabled = true;
@@ -280,6 +290,7 @@ document.body.appendChild(labelRenderer.domElement);
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth/window.innerHeight;
+  camera.fov = fovFor(camera.aspect);
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
   labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -301,6 +312,28 @@ if(!isTouchDevice){
   composer.addPass(bloomPass);
 }
 composer.addPass(new OutputPass());
+
+// Étalonnage « cinéma » : léger S de contraste, chaleur, vignettage doux et
+// grain de pellicule animé. Une seule passe plein écran, légère sur mobile.
+const gradePass = new ShaderPass({
+  uniforms:{ tDiffuse:{ value:null }, uTime:{ value:0 },
+    uVign:{ value:0.32 }, uGrain:{ value:0.02 }, uWarm:{ value:0.012 }, uContrast:{ value:1.05 } },
+  vertexShader:`varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader:`
+    uniform sampler2D tDiffuse; uniform float uTime, uVign, uGrain, uWarm, uContrast; varying vec2 vUv;
+    float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)))*43758.5453); }
+    void main(){
+      vec3 c = texture2D(tDiffuse, vUv).rgb;
+      c = clamp((c - 0.5)*uContrast + 0.5, 0.0, 1.0);
+      c = mix(c, c*c*(3.0-2.0*c), 0.18);
+      c *= vec3(1.0 + uWarm, 1.0 + uWarm*0.35, 1.0 - uWarm);
+      vec2 d = vUv - 0.5; d.x *= 1.15;
+      c *= 1.0 - uVign*smoothstep(0.22, 0.82, length(d)*1.35);
+      c += (h(vUv*vec2(1733.0,977.0) + fract(uTime*7.3)) - 0.5)*uGrain;
+      gl_FragColor = vec4(c, 1.0);
+    }`
+});
+composer.addPass(gradePass);
 composer.addPass(new SMAAPass(window.innerWidth, window.innerHeight));
 
 /* ---------------------------------------------------------------------- */
@@ -315,21 +348,53 @@ const fill = new THREE.DirectionalLight(0xfff1d6, 0.15);
 fill.position.set(2,5,2);
 scene.add(fill);
 
+
+const _fixMat = new THREE.MeshStandardMaterial({ color:0x1a1a1a, roughness:0.45, metalness:0.6 });
+const _fixLens = new THREE.MeshBasicMaterial({ color:0xfff1d8 });
+const _fixCan = new THREE.CylinderGeometry(0.045, 0.038, 0.16, 16, 1, false);
+const _fixLensGeo = new THREE.CircleGeometry(0.036, 16);
+const _fixStem = new THREE.CylinderGeometry(0.008, 0.008, 1, 6);
+const _fixRail = new THREE.BoxGeometry(1, 0.03, 0.045);
+let fixtureGroup = null;
+function addSpotFixture(pos, tgt){
+  if(!fixtureGroup){ fixtureGroup = new THREE.Group(); scene.add(fixtureGroup); }
+  const ceilY = pos.y + 0.15;
+  const dir = new THREE.Vector3().subVectors(tgt, pos).normalize();
+  // rail parallèle au mur éclairé
+  const rail = new THREE.Mesh(_fixRail, _fixMat);
+  rail.scale.x = 0.9;
+  rail.position.set(pos.x, ceilY - 0.016, pos.z);
+  rail.rotation.y = Math.atan2(dir.x, dir.z) + Math.PI/2;
+  fixtureGroup.add(rail);
+  const stem = new THREE.Mesh(_fixStem, _fixMat);
+  stem.scale.y = 0.12; stem.position.set(pos.x, ceilY - 0.09, pos.z);
+  fixtureGroup.add(stem);
+  const can = new THREE.Group();
+  const body = new THREE.Mesh(_fixCan, _fixMat); body.rotation.x = Math.PI/2; can.add(body);
+  const lens = new THREE.Mesh(_fixLensGeo, _fixLens); lens.position.z = 0.081; can.add(lens);
+  can.position.set(pos.x, pos.y, pos.z);
+  can.lookAt(tgt);
+  fixtureGroup.add(can);
+}
 let trackSpotIndex = 0;
 function addTrackSpot(x,y,z, targetX,targetY,targetZ, opts = {}){
-  const spot = new THREE.SpotLight(0xfff0d2, 9, opts.distance || 8, opts.angle || Math.PI/6, 0.45, 1.2);
+  const spot = new THREE.SpotLight(0xfff0d2, 12, opts.distance || 8, opts.angle || Math.PI/6, 0.6, 1.2);
   spot.position.set(x,y,z);
   // Ombres portées réservées à quelques spots (voir MAX_SHADOW_SPOTS) :
   // au-delà, les GPU mobiles refusent le shader (trop de textures d'ombre).
   spot.castShadow = !!opts.shadow;
   trackSpotIndex++;
-  spot.shadow.mapSize.set(512,512);
+  spot.shadow.mapSize.set(isTouchDevice ? 512 : 1024, isTouchDevice ? 512 : 1024);
+  spot.shadow.radius = 4;
   spot.shadow.bias = -0.0015;
   const target = new THREE.Object3D();
   target.position.set(targetX,targetY,targetZ);
   scene.add(target);
   spot.target = target;
   scene.add(spot);
+
+  // Projecteur sur rail visible au plafond (comme dans une vraie galerie)
+  if(false) addSpotFixture(spot.position, target.position);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -344,8 +409,8 @@ function finishEnvLoad(envTexture){
   } else {
     // Pas de HDRI disponible (réseau restreint, ex. preview) : on compense
     // avec un éclairage direct un peu plus fort pour garder une salle bien exposée.
-    hemiLight.intensity = 0.55;
-    fill.intensity = 0.35;
+    hemiLight.intensity = 0.5;
+    fill.intensity = 0.28;
   }
   document.getElementById('loading').classList.add('hidden');
 }
@@ -473,8 +538,96 @@ function makeWoodAccentTexture(){
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
   return tex;
 }
-const wallBumpTex = makeBumpTexture({ base:130, grain:34, blobs:110 });
-const wallRoughTex = makeBumpTexture({ base:150, grain:26, blobs:70 });
+
+// Plâtre peint réaliste : bruit fractal doux (ondulations de l'enduit),
+// passes de taloche, petites piqûres et reprises. Trois textures 1024 px
+// générées une fois : relief (bumpMap), nuances de teinte (map) et
+// variations de brillance (roughnessMap). Tuile de 3 m, sans couture.
+function makePlasterTextures(kind){
+  const S = 1024;
+  let seed = 101;
+  const rnd = () => { seed = (seed*16807) % 2147483647; return (seed - 1)/2147483646; };
+  // bruit de valeur périodique (raccord sans couture)
+  const grid = (n) => { const g = new Float32Array(n*n); for(let i=0;i<n*n;i++) g[i] = rnd(); return g; };
+  const octs = [4, 8, 16, 32, 64, 128].map(n => ({ n, g: grid(n) }));
+  const sm = t => t*t*(3-2*t);
+  const val = (o, x, y) => {
+    const n = o.n, fx = x*n, fy = y*n;
+    const x0 = Math.floor(fx), y0 = Math.floor(fy), tx = sm(fx - x0), ty = sm(fy - y0);
+    const g = o.g, i = (a, b) => g[((b % n + n) % n)*n + ((a % n + n) % n)];
+    const a = i(x0,y0) + (i(x0+1,y0) - i(x0,y0))*tx;
+    const b = i(x0,y0+1) + (i(x0+1,y0+1) - i(x0,y0+1))*tx;
+    return a + (b - a)*ty;
+  };
+  const wH = [0.34, 0.24, 0.16, 0.12, 0.08, 0.06], wT = [0.5, 0.3, 0.12, 0.05, 0.03, 0];
+  const R = 256; // calcul en basse définition puis interpolation (rapide)
+  const lowH = new Float32Array(R*R), lowT = new Float32Array(R*R);
+  for(let y=0;y<R;y++) for(let x=0;x<R;x++){
+    let h = 0, t = 0;
+    for(let k=0;k<octs.length;k++){ const v = val(octs[k], x/R, y/R); h += v*wH[k]; t += v*wT[k]; }
+    lowH[y*R+x] = h; lowT[y*R+x] = t;
+  }
+  const c = document.createElement('canvas'); c.width = c.height = S;
+  const ctx = c.getContext('2d');
+  // relief : image basse déf. agrandie (lisse) + grain fin + taloche
+  const lc = document.createElement('canvas'); lc.width = lc.height = R;
+  const lctx = lc.getContext('2d'), li = lctx.createImageData(R, R);
+  for(let i=0;i<R*R;i++){ const v = Math.max(0, Math.min(255, (lowH[i]-0.5)*420 + 128)); li.data[i*4]=li.data[i*4+1]=li.data[i*4+2]=v; li.data[i*4+3]=255; }
+  lctx.putImageData(li, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  for(const dx of [-S, 0, S]) for(const dy of [-S, 0, S]) ctx.drawImage(lc, dx, dy, S, S);
+  // passes de taloche : arcs larges et très doux, dupliqués aux bords
+  ctx.lineCap = 'round';
+  for(let i=0;i<70;i++){
+    const x = rnd()*S, y = rnd()*S, r = 60 + rnd()*160, a0 = rnd()*6.28, a1 = a0 + 0.6 + rnd()*1.2;
+    const light = rnd() > 0.5;
+    ctx.strokeStyle = light ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+    ctx.lineWidth = 10 + rnd()*26;
+    for(const dx of [-S, 0, S]) for(const dy of [-S, 0, S]){
+      ctx.beginPath(); ctx.arc(x+dx, y+dy, r, a0, a1); ctx.stroke();
+    }
+  }
+  const img = ctx.getImageData(0, 0, S, S), d = img.data;
+  for(let i=0;i<S*S;i++){
+    let v = d[i*4] + (rnd() - 0.5)*18;               // grain de l'enduit
+    if(rnd() < 0.0009) v -= 40 + rnd()*40;           // piqûres
+    v = Math.max(0, Math.min(255, v));
+    d[i*4] = d[i*4+1] = d[i*4+2] = v;
+  }
+  ctx.putImageData(img, 0, 0);
+  const bump = new THREE.CanvasTexture(c);
+  bump.wrapS = bump.wrapT = THREE.RepeatWrapping; bump.anisotropy = 4;
+
+  // teinte : nuances très légères (reprises de peinture), autour du blanc
+  const cc = document.createElement('canvas'); cc.width = cc.height = R;
+  const cx = cc.getContext('2d'), ci = cx.createImageData(R, R);
+  const amp = kind === 'dark' ? 34 : 22;
+  for(let i=0;i<R*R;i++){
+    const t = (lowT[i] - 0.5);
+    const v = 236 + t*amp, w = (lowH[i]-0.5)*6;
+    ci.data[i*4]   = Math.min(255, v + 4 + w);
+    ci.data[i*4+1] = Math.min(255, v + 2 + w);
+    ci.data[i*4+2] = Math.min(255, v - 1 + w);
+    ci.data[i*4+3] = 255;
+  }
+  cx.putImageData(ci, 0, 0);
+  const color = new THREE.CanvasTexture(cc);
+  color.colorSpace = THREE.SRGBColorSpace;
+  color.wrapS = color.wrapT = THREE.RepeatWrapping;
+
+  // brillance : les zones lissées par la taloche brillent un peu plus
+  const rc = document.createElement('canvas'); rc.width = rc.height = R;
+  const rx = rc.getContext('2d'), ri = rx.createImageData(R, R);
+  for(let i=0;i<R*R;i++){ const v = 215 + (lowT[i]-0.5)*-90; ri.data[i*4]=ri.data[i*4+1]=ri.data[i*4+2]=v; ri.data[i*4+3]=255; }
+  rx.putImageData(ri, 0, 0);
+  const rough = new THREE.CanvasTexture(rc);
+  rough.wrapS = rough.wrapT = THREE.RepeatWrapping;
+  return { bump, color, rough };
+}
+const PLASTER = makePlasterTextures('white');
+const wallBumpTex = PLASTER.bump;
+const wallRoughTex = PLASTER.rough;
+const wallColorTex = PLASTER.color;
 const floorBumpTex = makeBumpTexture({ base:128, grain:22, blobs:0 });
 
 /* --- Grandes galeries : plan de la salle, accrochage sur tous les murs ---
@@ -838,6 +991,72 @@ function addChandelier(x, z, H){
   roomGroup.add(g);
 }
 
+
+/* UV en mètres pour tous les murs (plans et volumes) : l'enduit garde la même
+   échelle partout, sans étirement sur les piliers ni sur la cloison. */
+function wallWorldUV(g){
+  if(g.userData.worldUV) return; g.userData.worldUV = true;
+  const uv = g.attributes.uv, P = g.parameters || {}, T = 3;
+  if(g.type === 'PlaneGeometry'){
+    for(let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i)*P.width/T, uv.getY(i)*P.height/T);
+  } else if(g.type === 'BoxGeometry'){
+    const w = P.width, h = P.height, d = P.depth;
+    const dims = [[d,h],[d,h],[w,d],[w,d],[w,h],[w,h]];
+    for(let i = 0; i < uv.count; i++){ const f = dims[Math.floor(i/4)] || [1,1]; uv.setXY(i, uv.getX(i)*f[0]/T, uv.getY(i)*f[1]/T); }
+  } else return;
+  uv.needsUpdate = true;
+}
+
+
+/* ---------- Ombres de contact : jonctions mur/sol et mur/plafond ----------
+   Dégradés sombres très doux (comme l'occlusion ambiante d'une vraie pièce),
+   quelques plans transparents seulement : aucun coût d'ombre temps réel. */
+let _aoTex = null;
+function aoGradient(){
+  if(_aoTex) return _aoTex;
+  const c = document.createElement('canvas'); c.width = 4; c.height = 128;
+  const ctx = c.getContext('2d');
+  const g = ctx.createLinearGradient(0, 0, 0, 128);
+  // alphaMap lit le canal vert : niveaux de gris opaques
+  g.addColorStop(0, 'rgb(255,255,255)');
+  g.addColorStop(0.25, 'rgb(115,115,115)');
+  g.addColorStop(0.6, 'rgb(26,26,26)');
+  g.addColorStop(1, 'rgb(0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 4, 128);
+  _aoTex = new THREE.CanvasTexture(c);
+  return _aoTex;
+}
+function addContactShadows(geo){
+  const k = 0.3;
+  const mk = (op) => new THREE.MeshBasicMaterial({ color:0x000000, alphaMap:aoGradient(), transparent:true,
+    opacity:op, depthWrite:false, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2 });
+  const matFloor = mk(k), matWall = mk(k*0.85), matCeil = mk(k*0.7);
+  const up = new THREE.Vector3(0, 1, 0);
+  geo.faces.forEach(f => {
+    if(f.id.startsWith('lintel')) return;
+    const L = f.len, mx = f.a.x + f.dir.x*L/2, mz = f.a.z + f.dir.z*L/2;
+    const yaw = Math.atan2(f.n.x, f.n.z);
+    // bas du mur (dégradé vers le haut)
+    const wb = new THREE.Mesh(new THREE.PlaneGeometry(L, 0.32), matWall);
+    wb.position.set(mx + f.n.x*0.003, 0.16, mz + f.n.z*0.003);
+    wb.rotation.y = yaw; wb.rotation.z = Math.PI; // texture : opaque côté sol
+    wb.rotation.order = 'YXZ';
+    roomGroup.add(wb);
+    // sol le long du mur (dégradé vers la pièce)
+    if(f.id !== 'window'){
+      const fl = new THREE.Mesh(new THREE.PlaneGeometry(L, 0.42), matFloor);
+      fl.rotation.order = 'YXZ'; fl.rotation.y = yaw; fl.rotation.x = -Math.PI/2;
+      fl.position.set(mx + f.n.x*0.21, 0.004, mz + f.n.z*0.21);
+      roomGroup.add(fl);
+    }
+    // haut du mur, sous le plafond
+    const wt = new THREE.Mesh(new THREE.PlaneGeometry(L, 0.5), matCeil);
+    wt.position.set(mx + f.n.x*0.003, geo.H - 0.25, mz + f.n.z*0.003);
+    wt.rotation.y = yaw;
+    roomGroup.add(wt);
+  });
+}
+
 function buildRoom(geo, nArt){
   scene.remove(roomGroup);
   roomGroup = new THREE.Group();
@@ -882,12 +1101,11 @@ function buildRoom(geo, nArt){
   floorOverlay.receiveShadow = true;
   roomGroup.add(floorOverlay);
 
-  wallBumpTex.repeat.set(width/2.2, height/2.2);
-  wallRoughTex.repeat.set(width/2.2, height/2.2);
+  // UV des murs en mètres (voir wallWorldUV) : pas de répétition à régler ici
   const wallMat = new THREE.MeshStandardMaterial({
     color: SKIN.wallColor, roughness: SKIN.wallRoughness,
     bumpMap: wallBumpTex, bumpScale: SKIN.wallBump,
-    roughnessMap: wallRoughTex
+    roughnessMap: wallRoughTex, map: wallColorTex
   });
   // Les spots éclairent vers le bas : sans un léger éclat propre, le plafond
   // d'une salle claire paraît gris foncé (salle sombre : ceilGlow = 0).
@@ -1020,7 +1238,7 @@ function buildRoom(geo, nArt){
     const holeGeo = new THREE.ShapeGeometry(shape);
     const hp = holeGeo.attributes.position, hu = holeGeo.attributes.uv;
     for(let i=0;i<hp.count;i++){
-      hu.setXY(i, (hp.getX(i)+depth/2)/depth, (hp.getY(i)+height/2)/height);
+      hu.setXY(i, (hp.getX(i)+depth/2)/3, (hp.getY(i)+height/2)/3);
     }
     hu.needsUpdate = true;
     leftWall.geometry = holeGeo;
@@ -1156,7 +1374,9 @@ function buildRoom(geo, nArt){
     addBlocker(new THREE.PlaneGeometry(width+2, height+1), 0, height/2, depth/2+0.05, 0, 0);
   }
 
+  roomGroup.traverse(m => { if(m.isMesh && m.material && m.material.bumpMap === wallBumpTex) wallWorldUV(m.geometry); });
   addMoldings(geo);
+  addContactShadows(geo);
 
   scene.add(roomGroup);
 }
@@ -1199,6 +1419,20 @@ function makeGeneratedArtTexture(seed){
   return tex;
 }
 
+
+// Ombre portée douce du cadre sur le mur (décalée vers le bas : lumière
+// venant du plafond). Précalculée : réaliste même sans ombre temps réel.
+let _frameShadowTex = null;
+function frameShadowTexture(){
+  if(_frameShadowTex) return _frameShadowTex;
+  const S = 256, c = document.createElement('canvas'); c.width = c.height = S;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, S, S);
+  ctx.filter = 'blur(14px)';
+  ctx.fillStyle = '#fff'; ctx.fillRect(34, 34, S-68, S-68);
+  _frameShadowTex = new THREE.CanvasTexture(c);
+  return _frameShadowTex;
+}
 function createFrame(art){
   const w = Math.max(0.25, (art.widthCm||60)/100);
   const h = Math.max(0.25, (art.heightCm||45)/100);
@@ -1217,6 +1451,14 @@ function createFrame(art){
   const frame = new THREE.Mesh(new THREE.BoxGeometry(w+border*2, h+border*2, 0.04), frameMat);
   frame.castShadow = true;
   group.add(frame);
+
+  const shadowPlane = new THREE.Mesh(
+    new THREE.PlaneGeometry((w+border*2)*1.16 + 0.1, (h+border*2)*1.16 + 0.12),
+    new THREE.MeshBasicMaterial({ color:0x000000, alphaMap:frameShadowTexture(), transparent:true,
+      opacity:0.45, depthWrite:false })
+  );
+  shadowPlane.position.set(0, -0.05, -0.056);
+  group.add(shadowPlane);
 
   const matMat = new THREE.MeshStandardMaterial({ color:0xf7f4ec, roughness:0.95 });
   const passe = new THREE.Mesh(new THREE.PlaneGeometry(w+border, h+border), matMat);
@@ -1392,9 +1634,9 @@ function updateMovement(delta){
   const turnSpeed = 1.8; // rad/s
   if(move.turnL) camera.rotation.y += turnSpeed*delta;
   if(move.turnR) camera.rotation.y -= turnSpeed*delta;
-  const speed = 3.2;
-  velocity.x -= velocity.x * 8 * delta;
-  velocity.z -= velocity.z * 8 * delta;
+  const speed = 2.3;
+  velocity.x -= velocity.x * 5.5 * delta;
+  velocity.z -= velocity.z * 5.5 * delta;
   const dir = new THREE.Vector3(Number(move.r)-Number(move.l), 0, Number(move.b)-Number(move.f));
   if(dir.lengthSq()>0) dir.normalize();
   velocity.x -= dir.x * speed * delta * 10;
@@ -1863,6 +2105,7 @@ renderer.setAnimationLoop((timestamp, frame) => {
     }
     updateFocus();
     updateLabels();
+    gradePass.uniforms.uTime.value = timestamp*0.001;
     composer.render();
   }
   labelRenderer.render(scene, camera);
