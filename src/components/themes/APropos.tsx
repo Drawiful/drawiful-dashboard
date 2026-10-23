@@ -56,7 +56,7 @@ export function GalerieBlancheAPropos({ artist, slug, cartCount = 0 }: AProposPr
   );
 }
 
-// Fond sombre ? (sert à garder la signature lisible sur Atelier Sombre / Noir & Or)
+// Fond sombre ? (sert à garder la signature lisible sur Noir & Or)
 function isDark(color: string) {
   if (!color.startsWith("#")) return false;
   const h = color.slice(1);
@@ -67,14 +67,13 @@ function isDark(color: string) {
   return 0.299 * r + 0.587 * g + 0.114 * b < 128;
 }
 
-// ---------- Version pilotée par skins.ts (les 6 thèmes du sélecteur) ----------
+// ---------- Version pilotée par skins.ts (les 3 thèmes du sélecteur) ----------
 export function ThemedAPropos({ skin, artist, slug, cartCount = 0 }: AProposProps & { skin: Skin }) {
   const dark = isDark(skin.bg);
 
   // Le portrait reprend la forme des cadres du thème.
   let avatar: CSSProperties = { width: 120, height: 120, borderRadius: "50%" };
   if (skin.layout === "swiss") avatar = { width: 120, height: 120, borderRadius: 0 };
-  if (skin.layout === "arch") avatar = { width: 120, height: 150, borderRadius: "999px 999px 0 0" };
   if (skin.layout === "capsule") avatar = { width: 110, height: 150, borderRadius: 999 };
 
   return (
@@ -143,7 +142,7 @@ export function ThemedAPropos({ skin, artist, slug, cartCount = 0 }: AProposProp
               style={{
                 display: "inline-block",
                 padding: dark ? "14px 26px" : 0,
-                background: dark ? skin.ink : "transparent",
+                background: dark ? skin.mat : "transparent",
                 borderRadius: dark && skin.radius ? 16 : 0,
               }}
             >

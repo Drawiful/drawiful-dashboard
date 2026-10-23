@@ -5,7 +5,7 @@ import DashboardShell from "@/components/DashboardShell";
 import { api } from "@/lib/api";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
-import { THEME_OPTIONS as THEMES } from "@/components/themes/skins";
+import { THEME_OPTIONS as THEMES, DEFAULT_THEME, normalizeThemeId } from "@/components/themes/skins";
 
 export default function GalleryPage() {
   const [galleryName, setGalleryName] = useState("");
@@ -15,7 +15,7 @@ export default function GalleryPage() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [signatureUrl, setSignatureUrl] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
-  const [theme, setTheme] = useState("galerie-blanche");
+  const [theme, setTheme] = useState(DEFAULT_THEME);
   const [legalMentionsText, setLegalMentionsText] = useState("");
   const [termsOfSaleText, setTermsOfSaleText] = useState("");
   const [privacyPolicyText, setPrivacyPolicyText] = useState("");
@@ -32,7 +32,8 @@ export default function GalleryPage() {
     setAvatarUrl(profile.avatarUrl ?? "");
     setSignatureUrl(profile.signatureUrl ?? "");
     setWebsiteUrl(profile.websiteUrl ?? "");
-    setTheme(profile.theme ?? "galerie-blanche");
+    // Ancien thème (retiré) : on présélectionne le thème qui le remplace.
+    setTheme(normalizeThemeId(profile.theme));
     setLegalMentionsText(profile.legalMentionsText ?? "");
     setTermsOfSaleText(profile.termsOfSaleText ?? "");
     setPrivacyPolicyText(profile.privacyPolicyText ?? "");

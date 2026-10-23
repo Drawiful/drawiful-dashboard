@@ -13,8 +13,8 @@ import { formatDimensions } from "@/lib/dimensions";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Les 3 salles sont des pages statiques dans public/visite-3d/.
-// Ambiance : Atelier Sombre + Noir & Or -> sombre ; Blanc Pur + Terre & Argile
-// + Sauge Botanique -> blanche ; Maison Haussmann -> haussmann (voir skins.ts).
+// Ambiance : Noir & Or -> sombre ; Blanc Pur -> blanche ;
+// Maison Haussmann -> haussmann (voir skins.ts).
 const ROOMS = {
   haussmann: "/visite-3d/haussmann.html",
   blanche: "/visite-3d/blanche.html",

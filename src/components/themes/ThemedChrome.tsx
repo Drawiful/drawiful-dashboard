@@ -5,7 +5,8 @@ import type { CSSProperties, ReactNode } from "react";
 import type { Skin } from "./skins";
 import { withAlpha } from "./skins";
 
-export const PAD = "clamp(20px,4vw,56px)";
+export const PAD = "clamp(20px,4vw,48px)";
+export const MAXW = 1360;
 
 export function money(cents: number, currency: string) {
   return new Intl.NumberFormat("fr-FR", { style: "currency", currency }).format(cents / 100);
@@ -27,7 +28,27 @@ export function roman(n: number) {
   return out;
 }
 
-export function btnStyle(skin: Skin, variant: "primary" | "outline" | "accent" = "primary"): CSSProperties {
+// Conteneur centré, même largeur maximale sur toutes les pages des thèmes.
+export function wrap(extra: CSSProperties = {}): CSSProperties {
+  return { maxWidth: MAXW, margin: "0 auto", paddingLeft: PAD, paddingRight: PAD, boxSizing: "border-box", ...extra };
+}
+
+// Petites capitales (menu, étiquettes, boutons) dans la police du thème.
+export function capsStyle(skin: Skin, size = 12): CSSProperties {
+  return {
+    fontFamily: skin.caps,
+    fontSize: skin.layout === "salon" ? size + 2 : size,
+    fontWeight: 400,
+    letterSpacing: skin.capsSpacing,
+    textTransform: skin.layout === "salon" ? "none" : "uppercase",
+  };
+}
+
+export function Eyebrow({ skin, children, color, style }: { skin: Skin; children: ReactNode; color?: string; style?: CSSProperties }) {
+  return <p style={{ margin: 0, ...capsStyle(skin, 11), color: color ?? (skin.layout === "swiss" ? skin.muted : skin.link), ...style }}>{children}</p>;
+}
+
+export function btnStyle(skin: Skin, variant: "primary" | "outline" | "accent" | "link" = "primary"): CSSProperties {
   const base: CSSProperties = {
     display: "inline-flex",
     alignItems: "center",
@@ -36,12 +57,9 @@ export function btnStyle(skin: Skin, variant: "primary" | "outline" | "accent" =
     minHeight: 52,
     padding: "0 30px",
     boxSizing: "border-box",
-    borderRadius: skin.pill ? 999 : 0,
-    fontFamily: skin.body,
-    fontWeight: 600,
-    fontSize: skin.upper ? 13 : 15,
-    letterSpacing: skin.upper ? "0.14em" : "0",
-    textTransform: skin.upper ? "uppercase" : "none",
+    borderRadius: 0,
+    ...capsStyle(skin, 12),
+    fontWeight: skin.layout === "capsule" ? 500 : 400,
     textDecoration: "none",
     cursor: "pointer",
     lineHeight: 1,
@@ -50,46 +68,71 @@ export function btnStyle(skin: Skin, variant: "primary" | "outline" | "accent" =
     return { ...base, background: skin.accent, color: skin.onAccent, border: `1px solid ${skin.accent}` };
   }
   if (variant === "accent") {
-    return { ...base, background: "transparent", color: skin.link, border: `1px solid ${skin.decor}` };
+    return { ...base, background: "transparent", color: skin.link, border: `1px solid ${skin.hairline}` };
+  }
+  if (variant === "link") {
+    return { ...base, minHeight: 44, padding: "0 0 4px", justifyContent: "flex-start", background: "transparent", color: skin.link, border: "none", borderBottom: `1px solid ${skin.hairline}` };
   }
   return { ...base, background: "transparent", color: skin.ink, border: `1px solid ${skin.ink}` };
 }
 
+// Décors Maison Haussmann : plâtre du mur, moulures en relief, cadre doré
+// sculpté. Des classes CSS plutôt que des styles en ligne, pour les
+// dégradés et ombres multiples.
+// Sur mobile, les œuvres alignées en bas (Blanc Pur) ne gardent pas la hauteur
+// réservée : sinon une œuvre en paysage laisse un grand vide au-dessus d'elle.
+const BASE_CSS = `@media (max-width:640px){.dw-media-end{height:auto!important}}`;
+
+const SALON_CSS = `
+.dw-mur{background-color:#EFE8DC;background-image:url('/themes/plaster-cream.png');background-repeat:repeat;background-size:360px 360px}
+.dw-mur-profond{background-color:#E7DDCB;background-image:linear-gradient(rgba(110,80,40,.08),rgba(110,80,40,.08)),url('/themes/plaster-cream.png');background-repeat:repeat;background-size:auto,360px 360px}
+.dw-moulure{box-shadow:inset 1px 1px 0 rgba(255,255,255,.85),inset -1px -1px 0 rgba(120,92,55,.30),1px 1px 0 rgba(120,92,55,.22),-1px -1px 0 rgba(255,255,255,.7),2px 3px 6px rgba(80,60,35,.10)}
+.dw-moulure-int{box-shadow:inset 1px 1px 0 rgba(120,92,55,.26),inset -1px -1px 0 rgba(255,255,255,.8),inset 3px 4px 10px rgba(80,60,35,.06)}
+.dw-cadre-dore{padding:18px;background:linear-gradient(135deg,#6E4F1F 0%,#D9BC7A 18%,#8E6B2E 34%,#E8CF92 50%,#9A7536 66%,#D9BC7A 82%,#6E4F1F 100%);box-shadow:inset 0 0 0 2px #5B4018,inset 0 0 0 4px #E8CF92,inset 0 0 0 6px #8A6A2F,inset 0 0 0 9px rgba(255,236,190,.55),inset 0 0 0 11px #6E4F1F,0 2px 3px rgba(42,33,27,.35),0 30px 55px rgba(42,33,27,.38)}
+.dw-passe{box-shadow:inset 0 0 0 1px rgba(122,90,38,.35),inset 3px 3px 8px rgba(42,33,27,.14)}
+.dw-plaque{background:linear-gradient(180deg,#D9BC7A,#A8874A);box-shadow:0 4px 10px rgba(42,33,27,.25)}
+@media (max-width:640px){.dw-cadre-dore{padding:12px}}
+`;
+
 export function ThemedPage({ skin, children }: { skin: Skin; children: ReactNode }) {
   return (
     <div
+      className={skin.layout === "salon" ? "dw-mur" : undefined}
       style={{
         minHeight: "100vh",
-        background: skin.bg,
+        backgroundColor: skin.bg,
         color: skin.ink,
         fontFamily: skin.body,
         fontWeight: skin.bodyWeight,
-        fontSize: 16,
-        lineHeight: 1.6,
+        fontSize: skin.layout === "salon" ? 18 : 16,
+        lineHeight: 1.65,
         overflowX: "hidden",
       }}
     >
-      <style>{`@import url('${skin.fontsHref}');`}</style>
+      <style>{`@import url('${skin.fontsHref}');${BASE_CSS}${skin.layout === "salon" ? SALON_CSS : ""}`}</style>
       {children}
     </div>
   );
 }
 
-function DiamondBand({ skin, uid, style }: { skin: Skin; uid: string; style?: CSSProperties }) {
-  const id = `diamonds-${uid}`;
+function Diamond({ skin }: { skin: Skin }) {
+  return <span aria-hidden="true" style={{ display: "block", width: 6, height: 6, transform: "rotate(45deg)", background: skin.decor, flex: "none" }} />;
+}
+
+// Losange entre deux filets (Maison Haussmann).
+export function Ornament({ skin, width = 80 }: { skin: Skin; width?: number }) {
   return (
-    <svg width="100%" height="20" aria-hidden="true" style={{ display: "block", ...style }}>
-      <defs>
-        <pattern id={id} width="30" height="20" patternUnits="userSpaceOnUse">
-          <path d="M15 3 L26 10 L15 17 L4 10 Z" fill="none" stroke={skin.decor} strokeWidth="1.2" />
-          <circle cx="15" cy="10" r="1.4" fill={skin.decor} />
-        </pattern>
-      </defs>
-      <rect width="100%" height="20" fill={`url(#${id})`} />
-      <line x1="0" y1="0.5" x2="100%" y2="0.5" stroke={skin.decor} strokeWidth="1" />
-      <line x1="0" y1="19.5" x2="100%" y2="19.5" stroke={skin.decor} strokeWidth="1" />
-    </svg>
+    <div aria-hidden="true" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
+      <span style={{ display: "block", width, height: 1, background: skin.decor }} />
+      <span style={{ display: "block", width: 8, height: 8, transform: "rotate(45deg)", border: `1px solid ${skin.decor}` }} />
+      <span style={{ display: "block", width, height: 1, background: skin.decor }} />
+    </div>
   );
+}
+
+function initials(name: string) {
+  const parts = (name || "G").trim().split(/\s+/).filter(Boolean);
+  return ((parts[0]?.[0] ?? "G") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
 }
 
 // ---------- Barre de navigation ----------
@@ -107,191 +150,87 @@ export function ThemedHeader({
   // Affiche le lien "Visite 3D" (artistes avec accès 3D uniquement).
   has3d?: boolean;
 }) {
-  const initial = (galleryName || "G").trim().charAt(0).toUpperCase();
-  const navText: CSSProperties = {
+  const navItem: CSSProperties = {
     display: "inline-flex",
     alignItems: "center",
+    gap: 6,
     minHeight: 44,
-    padding: "0 14px",
-    color: skin.muted,
-    fontSize: skin.upper ? 13 : 15,
-    fontWeight: 600,
-    letterSpacing: skin.upper ? "0.16em" : "0",
-    textTransform: skin.upper ? "uppercase" : "none",
+    ...capsStyle(skin, 12),
+    color: skin.layout === "capsule" ? skin.muted : skin.ink,
     textDecoration: "none",
   };
-  const cartBase: CSSProperties = {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 10,
-    minHeight: 44,
-    color: skin.ink,
-    fontSize: skin.upper ? 13 : 15,
-    fontWeight: 600,
-    letterSpacing: skin.upper ? "0.16em" : "0",
-    textTransform: skin.upper ? "uppercase" : "none",
-    textDecoration: "none",
-  };
-  let cartStyle: CSSProperties = cartBase;
-  if (skin.layout === "capsule") {
-    cartStyle = { ...cartBase, padding: "0 22px", borderRadius: 999, border: `1px solid ${skin.decor}` };
-  } else if (skin.layout === "bento") {
-    cartStyle = { ...cartBase, padding: "0 8px 0 20px", borderRadius: 999, background: skin.surface, border: `1px solid ${skin.border}` };
-  } else if (skin.layout === "arch") {
-    cartStyle = { ...cartBase, padding: "0 18px", borderRadius: 999, background: skin.surface };
-  } else if (skin.layout === "soft") {
-    cartStyle = { ...cartBase, padding: "0 20px", borderRadius: 999, background: skin.accent, color: skin.onAccent };
-  }
-
+  const cartLabel = `Panier${cartCount > 0 ? ` (${cartCount})` : ""}`;
+  const cart = (
+    <Link href={`/g/${slug}/panier`} style={{ ...navItem, color: skin.layout === "capsule" ? skin.link : skin.ink }} className="hover:opacity-70">
+      <ShoppingBag size={15} strokeWidth={1.4} />
+      {cartLabel}
+    </Link>
+  );
   const links = (
     <>
-      <Link href={`/g/${slug}`} style={navText} className="hover:underline">
+      <Link href={`/g/${slug}`} style={navItem} className="hover:opacity-70">
         Boutique
       </Link>
-      <Link href={`/g/${slug}/a-propos`} style={navText} className="hover:underline">
-        À propos
-      </Link>
       {has3d && (
-        <Link href={`/g/${slug}/visite-3d`} style={{ ...navText, gap: 6 }} className="hover:underline">
-          <Box size={15} />
+        <Link href={`/g/${slug}/visite-3d`} style={navItem} className="hover:opacity-70">
+          <Box size={14} strokeWidth={1.4} />
           Visite 3D
         </Link>
       )}
+      <Link href={`/g/${slug}/a-propos`} style={navItem} className="hover:opacity-70">
+        L'artiste
+      </Link>
     </>
   );
-  const cart = (
-    <Link href={`/g/${slug}/panier`} style={cartStyle} className="hover:opacity-80">
-      <ShoppingBag size={17} />
-      Panier
-      {cartCount > 0 && skin.layout === "bento" && (
-        <span
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minWidth: 28,
-            height: 28,
-            borderRadius: "50%",
-            background: skin.accent,
-            color: skin.onAccent,
-            fontSize: 13,
-            fontWeight: 800,
-          }}
-        >
-          {cartCount}
-        </span>
-      )}
-      {cartCount > 0 && skin.layout !== "bento" ? ` (${cartCount})` : ""}
-    </Link>
-  );
 
-  // Haussmann : nom centré, navigation de part et d'autre, frise de losanges.
+  // Maison Haussmann : monogramme, nom gravé, menu centré entre deux filets.
   if (skin.layout === "salon") {
     return (
-      <header style={{ padding: `28px ${PAD} 0` }}>
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "8px 24px" }}>
-          <nav style={{ flex: "1 1 200px", display: "flex", flexWrap: "wrap", gap: "4px 12px" }}>{links}</nav>
-          <Link
-            href={`/g/${slug}`}
-            style={{
-              flex: "0 1 auto",
-              textAlign: "center",
-              fontFamily: skin.display,
-              fontStyle: "italic",
-              fontWeight: 500,
-              fontSize: "clamp(30px,3.4vw,42px)",
-              lineHeight: 1,
-              color: skin.ink,
-              textDecoration: "none",
-            }}
-          >
-            {galleryName}
-          </Link>
-          <nav style={{ flex: "1 1 200px", display: "flex", justifyContent: "flex-end" }}>{cart}</nav>
+      <header style={wrap({ paddingTop: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 16 })}>
+        <div style={{ width: "100%", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+          <span style={{ ...capsStyle(skin, 12), color: skin.muted }}>Galerie d'art</span>
+          {cart}
         </div>
-        <DiamondBand skin={skin} uid="header" style={{ marginTop: 18 }} />
+        <Link href={`/g/${slug}`} style={{ textDecoration: "none", color: skin.ink, display: "flex", flexDirection: "column", alignItems: "center", gap: 14, textAlign: "center" }}>
+          <span
+            aria-hidden="true"
+            style={{ width: 72, height: 72, borderRadius: "50%", border: `1px solid ${skin.decor}`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 0 0 4px ${skin.bg}, 0 0 0 5px ${withAlpha("#C9B27E", 1)}` }}
+          >
+            <span style={{ fontFamily: skin.display, fontStyle: "italic", fontSize: 28, color: skin.link }}>{initials(galleryName)}</span>
+          </span>
+          <span style={{ fontFamily: skin.caps, fontSize: "clamp(22px,3vw,30px)", letterSpacing: "0.2em", paddingLeft: "0.2em" }}>{galleryName}</span>
+        </Link>
+        <nav style={{ width: "100%", borderTop: `1px solid ${skin.border}`, borderBottom: `1px solid ${skin.border}`, display: "flex", flexWrap: "wrap", justifyContent: "center", alignItems: "center", gap: "0 28px" }}>
+          <Link href={`/g/${slug}`} style={navItem} className="hover:opacity-70">
+            La collection
+          </Link>
+          {has3d && (
+            <>
+              <Diamond skin={skin} />
+              <Link href={`/g/${slug}/visite-3d`} style={navItem} className="hover:opacity-70">
+                Le salon en 3D
+              </Link>
+            </>
+          )}
+          <Diamond skin={skin} />
+          <Link href={`/g/${slug}/a-propos`} style={navItem} className="hover:opacity-70">
+            L'artiste
+          </Link>
+        </nav>
       </header>
     );
   }
 
-  // Sauge : barre flottante en pilule.
-  if (skin.layout === "soft") {
-    return (
-      <div style={{ padding: "20px clamp(16px,3vw,40px) 0" }}>
-        <header
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "12px 24px",
-            padding: "8px 12px 8px 26px",
-            border: `1px solid ${skin.border}`,
-            borderRadius: 999,
-            background: skin.surface,
-          }}
-        >
-          <Link href={`/g/${slug}`} style={{ fontFamily: skin.display, fontWeight: 500, fontSize: 23, color: skin.ink, textDecoration: "none" }}>
-            {galleryName}
-          </Link>
-          <nav style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "4px 8px" }}>
-            {links}
-            {cart}
-          </nav>
-        </header>
-      </div>
-    );
-  }
-
-  let name: ReactNode;
-  if (skin.layout === "bento") {
-    name = (
-      <Link href={`/g/${slug}`} style={{ display: "inline-flex", alignItems: "center", gap: 12, fontFamily: skin.display, fontWeight: 800, fontSize: 22, letterSpacing: "-0.02em", color: skin.ink, textDecoration: "none" }}>
-        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 38, height: 38, borderRadius: "50%", background: skin.accent, color: skin.onAccent, fontSize: 19, fontWeight: 800 }}>
-          {initial}
-        </span>
-        {galleryName}
-      </Link>
-    );
-  } else if (skin.layout === "capsule") {
-    name = (
-      <Link href={`/g/${slug}`} style={{ display: "inline-flex", alignItems: "center", gap: 14, fontFamily: skin.display, fontSize: 24, color: skin.ink, textDecoration: "none" }}>
-        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 44, height: 44, borderRadius: "50%", border: `1px solid ${skin.decor}`, color: skin.decor, fontSize: 21 }}>
-          {initial}
-        </span>
-        {galleryName}
-      </Link>
-    );
-  } else if (skin.layout === "arch") {
-    name = (
-      <Link href={`/g/${slug}`} style={{ fontFamily: skin.display, fontSize: 24, color: skin.ink, textDecoration: "none" }}>
-        {galleryName}
-      </Link>
-    );
-  } else {
-    name = (
-      <Link href={`/g/${slug}`} style={{ fontWeight: 600, fontSize: 16, color: skin.ink, textDecoration: "none" }}>
-        {galleryName}
-      </Link>
-    );
-  }
-
-  const bar: CSSProperties = {
-    display: "flex",
-    flexWrap: "wrap",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: "12px 24px",
-    padding: `22px ${PAD}`,
-  };
-  if (skin.layout === "swiss") bar.borderBottom = `1px solid ${skin.ink}`;
-  if (skin.layout === "arch") bar.borderBottom = `1px solid ${skin.border}`;
-  const navFont: CSSProperties = skin.layout === "swiss" ? { fontFamily: skin.mono, textTransform: "uppercase", letterSpacing: "0.06em" } : {};
-
+  // Blanc Pur et Noir & Or : nom à gauche, menu en petites capitales.
   return (
-    <header style={bar}>
-      {name}
-      <nav style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "4px 8px", ...navFont }}>
+    <header style={wrap({ paddingTop: 26, paddingBottom: 26, display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "8px 24px" })}>
+      <Link
+        href={`/g/${slug}`}
+        style={{ fontFamily: skin.display, fontWeight: skin.layout === "capsule" ? 500 : 400, fontSize: 28, lineHeight: 1.1, letterSpacing: "0.01em", color: skin.ink, textDecoration: "none" }}
+      >
+        {galleryName}
+      </Link>
+      <nav style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0 32px" }}>
         {links}
         {cart}
       </nav>
@@ -306,29 +245,25 @@ export function ThemedFooter({ skin, slug }: { skin: Skin; slug: string }) {
     alignItems: "center",
     minHeight: 44,
     color: skin.muted,
-    fontSize: skin.upper ? 13 : 14,
-    fontWeight: skin.upper ? 600 : 500,
-    letterSpacing: skin.upper ? "0.14em" : "0",
-    textTransform: skin.upper ? "uppercase" : "none",
+    fontSize: 13,
     textDecoration: "none",
   };
   return (
-    <footer style={{ padding: `0 ${PAD} 36px` }}>
-      {skin.layout === "salon" && <DiamondBand skin={skin} uid="footer" style={{ marginBottom: 20 }} />}
+    <footer style={wrap({ paddingBottom: 40 })}>
       <div
         style={{
           display: "flex",
           flexWrap: "wrap",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: "12px 32px",
-          paddingTop: skin.layout === "salon" ? 0 : 28,
-          borderTop: skin.layout === "salon" ? "none" : `1px solid ${skin.border}`,
-          fontSize: 14,
+          gap: "8px 32px",
+          paddingTop: 20,
+          borderTop: `1px solid ${skin.border}`,
+          fontSize: 13,
           color: skin.muted,
         }}
       >
-        <nav style={{ display: "flex", flexWrap: "wrap", gap: "4px 28px" }}>
+        <nav style={{ display: "flex", flexWrap: "wrap", gap: "0 24px" }}>
           <Link href={`/g/${slug}/mentions-legales`} style={item} className="hover:underline">
             Mentions légales
           </Link>
@@ -339,7 +274,10 @@ export function ThemedFooter({ skin, slug }: { skin: Skin; slug: string }) {
             Confidentialité
           </Link>
         </nav>
-        <span>Galerie propulsée par Drawiful</span>
+        <span>
+          Galerie propulsée par{" "}
+          <span style={{ fontFamily: skin.display, fontStyle: skin.layout === "salon" ? "italic" : "normal", fontSize: 17, color: skin.ink }}>Drawiful</span>
+        </span>
       </div>
     </footer>
   );
@@ -354,10 +292,9 @@ export function ThreeDBadge({ skin, locked }: { skin: Skin; locked: boolean }) {
         alignItems: "center",
         gap: 6,
         padding: "4px 10px",
-        borderRadius: 999,
         fontSize: 11,
-        fontWeight: 600,
-        letterSpacing: "0.08em",
+        fontWeight: 500,
+        letterSpacing: "0.12em",
         textTransform: "uppercase",
         background: withAlpha(skin.bg.startsWith("#") ? skin.bg : "#000000", 0.9),
         color: locked ? skin.muted : skin.ink,
@@ -370,87 +307,144 @@ export function ThreeDBadge({ skin, locked }: { skin: Skin; locked: boolean }) {
   );
 }
 
-// ---------- Cadre d'une œuvre, selon la mise en page du thème ----------
+// ---------- Une œuvre « accrochée », selon le thème ----------
+// Blanc Pur : passe-partout blanc et ombre douce sur le mur.
+// Noir & Or : passe-partout ivoire sous un halo de lumière.
+// Maison Haussmann : cadre doré sculpté et passe-partout creusé.
 export function ArtworkMedia({
   skin,
   src,
   alt,
   height,
   badge,
+  align = "center",
 }: {
   skin: Skin;
   src: string;
   alt: string;
   height: number;
   badge?: ReactNode;
+  // Alignement vertical dans la hauteur réservée (Blanc Pur : œuvres posées sur une même ligne).
+  align?: "center" | "end";
 }) {
-  const img: CSSProperties = {
-    maxWidth: "100%",
-    maxHeight: "100%",
-    display: "block",
-    objectFit: "contain",
-    boxShadow: "0 10px 24px rgba(0,0,0,0.28)",
-  };
-  const center: CSSProperties = {
+  const box: CSSProperties = {
     display: "flex",
-    alignItems: "center",
+    alignItems: align === "end" ? "flex-end" : "center",
     justifyContent: "center",
+    height,
     boxSizing: "border-box",
-    overflow: "hidden",
   };
 
+  const boxClass = align === "end" ? "dw-media-end" : undefined;
   let frame: ReactNode;
-  switch (skin.layout) {
-    case "bento":
-      frame = (
-        <div style={{ ...center, height, borderRadius: 18, background: skin.media, border: `1px solid ${skin.border}`, padding: 18 }}>
-          <img src={src} alt={alt} style={img} />
-        </div>
-      );
-      break;
-    case "capsule":
-      frame = (
-        <div style={{ ...center, height, borderRadius: 999, background: skin.media, border: `1px solid ${withAlpha(skin.decor, 0.45)}`, padding: `${Math.round(height * 0.2)}px 26px` }}>
-          <img src={src} alt={alt} style={img} />
-        </div>
-      );
-      break;
-    case "arch":
-      frame = (
-        <div style={{ ...center, height, alignItems: "flex-end", borderRadius: "999px 999px 0 0", background: skin.media, padding: `${Math.round(height * 0.12)}px 22px 22px` }}>
-          <img src={src} alt={alt} style={img} />
-        </div>
-      );
-      break;
-    case "swiss":
-      frame = (
-        <div style={{ ...center, height, border: `1px solid ${skin.border}`, background: skin.media, padding: 24 }}>
-          <img src={src} alt={alt} style={{ ...img, boxShadow: "none" }} />
-        </div>
-      );
-      break;
-    case "soft":
-      frame = (
-        <div style={{ ...center, height, borderRadius: 18, background: skin.media, padding: 18 }}>
-          <img src={src} alt={alt} style={{ ...img, borderRadius: 6 }} />
-        </div>
-      );
-      break;
-    case "salon":
-    default:
-      frame = (
-        <div style={{ border: `1px solid ${skin.decor}`, padding: 12, background: skin.bg, boxSizing: "border-box" }}>
-          <div style={{ ...center, height: height - 26, background: skin.media, border: `1px solid ${skin.border}`, padding: 20 }}>
-            <img src={src} alt={alt} style={img} />
-          </div>
-        </div>
-      );
+  if (skin.layout === "salon") {
+    frame = (
+      <div style={box}>
+        <span className="dw-cadre-dore" style={{ display: "block", maxWidth: "100%", boxSizing: "border-box" }}>
+          <span className="dw-passe" style={{ display: "block", background: skin.mat, padding: 20 }}>
+            <img src={src} alt={alt} style={{ display: "block", maxWidth: "100%", maxHeight: height - 80, objectFit: "contain" }} />
+          </span>
+        </span>
+      </div>
+    );
+  } else if (skin.layout === "capsule") {
+    frame = (
+      <div
+        style={{
+          ...box,
+          padding: "48px 24px",
+          background: `radial-gradient(ellipse 42% 40% at 50% 40%, ${withAlpha("#E8D6B0", 0.13)}, ${withAlpha("#E8D6B0", 0)} 100%), radial-gradient(ellipse 55% 45% at 50% 55%, #1A1012, ${skin.bg} 100%)`,
+        }}
+      >
+        <img
+          src={src}
+          alt={alt}
+          style={{
+            display: "block",
+            maxWidth: "100%",
+            maxHeight: "100%",
+            objectFit: "contain",
+            background: skin.mat,
+            padding: 14,
+            boxSizing: "border-box",
+            boxShadow: `0 0 0 1px ${withAlpha("#C8AE7D", 0.3)}, 0 50px 90px rgba(0,0,0,0.8)`,
+          }}
+        />
+      </div>
+    );
+  } else {
+    frame = (
+      <div className={boxClass} style={box}>
+        <img
+          src={src}
+          alt={alt}
+          style={{
+            display: "block",
+            maxWidth: "100%",
+            maxHeight: "100%",
+            objectFit: "contain",
+            background: skin.mat,
+            padding: 16,
+            boxSizing: "border-box",
+            boxShadow: "0 2px 4px rgba(20,18,17,0.06), 0 22px 40px rgba(20,18,17,0.11)",
+          }}
+        />
+      </div>
+    );
   }
 
   return (
     <div style={{ position: "relative" }}>
       {frame}
       {badge && <div style={{ position: "absolute", top: 12, right: 12 }}>{badge}</div>}
+    </div>
+  );
+}
+
+// ---------- Cartel de musée sous une œuvre ----------
+export function Cartel({
+  skin,
+  title,
+  lines,
+  price,
+  kicker,
+  center = false,
+}: {
+  skin: Skin;
+  title: string;
+  lines: (string | null | undefined)[];
+  price?: string;
+  kicker?: string;
+  center?: boolean;
+}) {
+  const meta = lines.filter(Boolean) as string[];
+  if (skin.layout === "salon") {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "12px 26px", border: `1px solid ${skin.decor}`, background: "#F3ECDF", textAlign: "center", minWidth: 200, maxWidth: "100%", boxSizing: "border-box" }}>
+        {kicker && <span style={{ ...capsStyle(skin, 10), color: skin.link }}>{kicker}</span>}
+        <span style={{ fontFamily: skin.display, fontStyle: "italic", fontSize: 21, lineHeight: 1.25 }}>{title}</span>
+        {meta.map((m) => (
+          <span key={m} style={{ fontSize: 16, color: skin.muted }}>
+            {m}
+          </span>
+        ))}
+        {price && <span style={{ ...capsStyle(skin, 13), color: skin.ink, paddingTop: 4 }}>{price}</span>}
+      </div>
+    );
+  }
+  const dark = skin.layout === "capsule";
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", gap: 20, alignItems: "flex-start", textAlign: center ? "center" : "left" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 3, paddingLeft: 14, borderLeft: `1px solid ${dark ? skin.hairline : skin.ink}`, minWidth: 0 }}>
+        {kicker && <span style={{ ...capsStyle(skin, 10), color: dark ? skin.link : skin.muted }}>{kicker}</span>}
+        <span style={{ fontFamily: skin.display, fontStyle: "italic", fontSize: 22, lineHeight: 1.2, color: skin.ink }}>{title}</span>
+        {meta.map((m) => (
+          <span key={m} style={{ fontSize: 14, color: skin.muted }}>
+            {m}
+          </span>
+        ))}
+      </div>
+      {price && <span style={{ fontSize: 15, fontWeight: 400, whiteSpace: "nowrap", color: skin.ink }}>{price}</span>}
     </div>
   );
 }
