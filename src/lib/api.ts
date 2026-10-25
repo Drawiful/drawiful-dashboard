@@ -64,7 +64,7 @@ export const api = {
   updateMyProfile: (data: Record<string, unknown>) =>
     request("/api/artists/me/profile", { method: "PATCH", body: JSON.stringify(data) }),
 
-  // Adresse de la galerie (<slug>.drawiful.app) et domaine personnalisé
+  // Adresse de la galerie (<slug>.drawiful.art) et domaine personnalisé
   getMyDomain: () => request("/api/artists/me/domain"),
   setMyDomain: (domain: string) =>
     request("/api/artists/me/domain", { method: "PUT", body: JSON.stringify({ domain }) }),

@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ROOT_DOMAIN } from "@/lib/domain";
 
 /*
   Aiguillage des adresses de galerie :
-  - sagalerie.drawiful.app/...      -> /g/sagalerie/...
+  - sagalerie.drawiful.art/...      -> /g/sagalerie/...
   - www.sagalerie.com/... (vérifié) -> /g/<slug de la galerie>/...
-  - drawiful.app/                   -> landing (/decouvrir) ; le reste du site = tableau de bord
-  - www.drawiful.app                -> redirigé vers drawiful.app
+  - drawiful.art/                   -> landing (/decouvrir) ; le reste du site = tableau de bord
+  - www.drawiful.art                -> redirigé vers drawiful.art
+  - *.drawiful.app (ancien domaine) -> redirigé en 308 vers *.drawiful.art (next.config.js)
   - drawiful-dashboard.vercel.app   -> tableau de bord, inchangé
   Les fichiers statiques (/_next, /visite-3d/*.html, images…) ne passent pas ici.
 */
 
-const ROOT_DOMAIN = (process.env.NEXT_PUBLIC_ROOT_DOMAIN || "drawiful.app").toLowerCase();
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Sous-domaines qui ne sont jamais des galeries
@@ -76,7 +77,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // 1) Adresse par défaut : <slug>.drawiful.app
+  // 1) Adresse par défaut : <slug>.drawiful.art
   if (host.endsWith(`.${ROOT_DOMAIN}`)) {
     const sub = host.slice(0, -(ROOT_DOMAIN.length + 1));
     if (!sub || sub.includes(".") || RESERVED.has(sub)) return NextResponse.next();

@@ -1,3 +1,4 @@
+import { gallerySlugFromHost } from "@/lib/domain";
 /*
   Provenance des visiteurs : on retient d'où vient la première visite
   (paramètres utm des liens de bio et des pubs, ou site d'origine) pour
@@ -63,11 +64,12 @@ export function captureAttribution() {
       if (host && host !== own) {
         const known = KNOWN_REFERRERS.find(([re]) => re.test(host));
         // Arrivé depuis la galerie d'un artiste Drawiful (lien « Créé avec Drawiful »…)
-        const fromGallery = host.endsWith(".drawiful.app");
+        const gallerySlug = gallerySlugFromHost(host);
+        const fromGallery = !!gallerySlug;
         data = {
           signupSource: fromGallery ? "galerie-artiste" : known ? known[1] : host,
           signupMedium: "referral",
-          signupCampaign: fromGallery ? host.replace(/\.drawiful\.app$/, "") : undefined,
+          signupCampaign: gallerySlug || undefined,
         };
       }
     } catch {

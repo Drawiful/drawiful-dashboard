@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Check, ArrowRight, Copy, ExternalLink, X } from "lucide-react";
+import { galleryUrl as galleryUrlFor } from "@/lib/domain";
 
 /*
   Premiers pas : guide l'artiste de l'inscription à une galerie prête à vendre.
@@ -73,7 +74,7 @@ export default function GettingStarted({ profile }: { profile: any }) {
   if (!profile) return null;
   const steps = onboardingSteps(profile);
   const doneCount = steps.filter((s) => s.done).length;
-  const galleryUrl = `https://${profile.slug}.drawiful.app`;
+  const galleryUrl = galleryUrlFor(profile.slug);
 
   async function copyLink() {
     try {

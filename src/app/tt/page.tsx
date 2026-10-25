@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-// Lien court pour la bio tiktok : drawiful.app/tt
+// Lien court pour la bio tiktok : drawiful.art/tt
 // Redirige vers la landing en gardant la source pour les statistiques.
 export const dynamic = "force-dynamic";
 

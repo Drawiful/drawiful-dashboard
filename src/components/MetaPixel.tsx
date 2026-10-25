@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { ROOT_DOMAIN } from "@/lib/domain";
 
 /*
   Pixel Meta (publicités Instagram / Facebook).
 
   - Chargé uniquement sur les pages Drawiful destinées aux futurs artistes
-    (page d'accueil et inscription sur drawiful.app). Jamais dans le dashboard
+    (page d'accueil et inscription sur drawiful.art). Jamais dans le dashboard
     ni sur les galeries des artistes : leurs visiteurs ne sont pas suivis.
   - Chargé uniquement après accord du visiteur (bandeau cookies), comme
     l'exige le RGPD pour un traceur publicitaire.
@@ -14,7 +15,7 @@ import { usePathname } from "next/navigation";
 
 export const META_PIXEL_ID = "2820169321731713";
 const CONSENT_KEY = "drawiful_cookie_consent";
-const MARKETING_HOSTS = ["drawiful.app", "www.drawiful.app", "localhost"];
+const MARKETING_HOSTS = [ROOT_DOMAIN, `www.${ROOT_DOMAIN}`, "localhost"];
 const MARKETING_PATHS = ["/", "/decouvrir", "/inscription"];
 
 declare global {

@@ -4,6 +4,7 @@ import { UploadCloud, Check, Lock, ExternalLink, X } from "lucide-react";
 import DashboardShell from "@/components/DashboardShell";
 import { api } from "@/lib/api";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { ROOT_DOMAIN, galleryUrl } from "@/lib/domain";
 
 import { THEME_OPTIONS as THEMES, DEFAULT_THEME, normalizeThemeId } from "@/components/themes/skins";
 
@@ -156,17 +157,17 @@ export default function GalleryPage() {
               }
               className="min-w-0 flex-1 py-2.5 text-sm outline-none text-right"
             />
-            <span className="pr-3.5 text-sm text-encre/40">.drawiful.app</span>
+            <span className="pr-3.5 text-sm text-encre/40">.{ROOT_DOMAIN}</span>
           </div>
           {slug !== savedSlug && savedSlug ? (
             <p className="text-xs mt-1.5 text-argile">
-              Attention : l'ancienne adresse ({savedSlug}.drawiful.app) ne fonctionnera plus. Pense à
+              Attention : l'ancienne adresse ({savedSlug}.{ROOT_DOMAIN}) ne fonctionnera plus. Pense à
               mettre à jour tes liens en bio.
             </p>
           ) : (
             savedSlug && (
               <a
-                href={`https://${savedSlug}.drawiful.app`}
+                href={galleryUrl(savedSlug)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs mt-1.5 text-aubergine hover:underline"

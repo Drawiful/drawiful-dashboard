@@ -8,7 +8,7 @@ import HeroVideo from "@/components/landing/HeroVideo";
 import StickyCta from "@/components/landing/StickyCta";
 
 /*
-  Landing Drawiful (servie sur drawiful.app via le middleware).
+  Landing Drawiful (servie sur drawiful.art via le middleware).
   Palette : mur aubergine #2B1E2F · laiton #B8912F · papier #F7F5F0 · encre #1C1A17
             · pierre #77706A · sceau bordeaux #7A2E2B
   Fil conducteur : le cartel de musée (titre, technique, date) sert de légende partout.
@@ -106,7 +106,7 @@ const FEATURES = [
   },
   {
     title: "Ton adresse web, incluse",
-    text: "Ta galerie est en ligne sur tagalerie.drawiful.app. Tu as déjà un nom de domaine ? Relie-le en quelques minutes.",
+    text: "Ta galerie est en ligne sur tagalerie.drawiful.art. Tu as déjà un nom de domaine ? Relie-le en quelques minutes.",
   },
   {
     title: "Des certificats d'authenticité",
@@ -146,7 +146,7 @@ const PLANS = [
     name: "Aspirant",
     pitch: "Pour débuter et exposer tes premières œuvres.",
     price: 19,
-    features: ["5 œuvres", "Galerie publique", "1 certificat d'authenticité", "Ton adresse drawiful.app"],
+    features: ["5 œuvres", "Galerie publique", "1 certificat d'authenticité", "Ton adresse drawiful.art"],
     missing: ["Boutique en ligne", "Galerie 3D"],
   },
   {
@@ -200,7 +200,7 @@ const FAQ = [
   },
   {
     q: "Ai-je besoin d'un nom de domaine ou d'un hébergeur ?",
-    a: "Non. Ta galerie est en ligne dès l'inscription sur tagalerie.drawiful.app. Si tu possèdes déjà un nom de domaine, tu peux le relier depuis ton espace.",
+    a: "Non. Ta galerie est en ligne dès l'inscription sur tagalerie.drawiful.art. Si tu possèdes déjà un nom de domaine, tu peux le relier depuis ton espace.",
   },
   {
     q: "Faut-il renseigner une carte bancaire pour l'essai ?",
@@ -303,12 +303,12 @@ export default function LandingPage() {
           <p className="mt-6 text-sm text-[#F7F5F0]/70">
             Envie de voir aussi la boutique de cet artiste ?{" "}
             <a
-              href="https://erwan.drawiful.app"
+              href="https://erwan.drawiful.art"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#E3C77A] underline underline-offset-4 hover:text-[#F7F5F0]"
             >
-              Ouvrir erwan.drawiful.app
+              Ouvrir erwan.drawiful.art
             </a>
           </p>
         </div>
@@ -560,12 +560,12 @@ export default function LandingPage() {
         <p className="mt-6 text-[#4A4540] leading-relaxed">
           Erwan, fondateur de Drawiful. Ma propre galerie est celle que tu vois dans la vidéo et la démo :{" "}
           <a
-            href="https://erwan.drawiful.app"
+            href="https://erwan.drawiful.art"
             target="_blank"
             rel="noopener noreferrer"
             className="text-[#7A2E2B] underline underline-offset-4"
           >
-            erwan.drawiful.app
+            erwan.drawiful.art
           </a>
           . Une question ? Écris-moi à{" "}
           <a href="mailto:clients@drawiful.app" className="text-[#7A2E2B] underline underline-offset-4">
