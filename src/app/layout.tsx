@@ -7,9 +7,10 @@ import { Analytics } from "@vercel/analytics/next";
 export const metadata = {
   title: "Drawiful — Dashboard artiste",
   description: "Gère ta galerie, tes œuvres et ton abonnement",
-  // Vérification du domaine drawiful.app dans Meta Business Suite
+  // Vérification des domaines dans Meta Business Suite (une balise par domaine) :
+  // drawiful.app, puis drawiful.art
   other: {
-    "facebook-domain-verification": "iq2ccolroyqrk60lttmac4mw6ez72d",
+    "facebook-domain-verification": ["iq2ccolroyqrk60lttmac4mw6ez72d", "0lglfml7jlx68nslqwoz5nufqgazpw"],
   },
 };
 
