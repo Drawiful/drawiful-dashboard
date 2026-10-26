@@ -100,43 +100,50 @@ export default function MetaPixel() {
 
   if (!eligible || consent !== null) return null;
 
+  // Bandeau compact en HAUT de l'écran : en bas, il recouvrait le bouton
+  // « Essayer 14 jours gratuits » du premier écran et le bouton fixe mobile
+  // (constaté le 26 oct. 2026 sur un écran de 390 × 680, taille courante
+  // dans le navigateur intégré d'Instagram).
   return (
     <div
       role="dialog"
       aria-label="Cookies"
       style={{
         position: "fixed",
+        top: "calc(8px + env(safe-area-inset-top, 0px))",
         left: "50%",
-        bottom: "calc(16px + env(safe-area-inset-bottom, 0px))",
         transform: "translateX(-50%)",
         zIndex: 1000,
-        width: "min(560px, calc(100vw - 32px))",
+        width: "min(640px, calc(100vw - 16px))",
         boxSizing: "border-box",
-        padding: "16px 18px",
-        borderRadius: 14,
+        padding: "10px 12px",
+        borderRadius: 12,
         background: "#2B1E2F",
         color: "#F7F5F0",
-        boxShadow: "0 12px 32px rgba(0,0,0,0.25)",
-        fontSize: 14,
-        lineHeight: 1.5,
+        boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+        border: "1px solid rgba(247,245,240,0.12)",
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        fontSize: 13,
+        lineHeight: 1.4,
       }}
     >
-      <p style={{ margin: 0 }}>
-        Drawiful utilise un cookie de mesure Meta pour savoir quelles publicités vous ont amené ici. Rien n'est
-        déposé sans votre accord.
+      <p style={{ margin: 0, flex: 1, minWidth: 0 }}>
+        Un cookie Meta mesure quelle publicité vous a amené ici. Rien n'est déposé sans votre accord.
       </p>
-      <div style={{ display: "flex", gap: 10, marginTop: 12, justifyContent: "flex-end", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
         <button
           type="button"
           onClick={() => choose("denied")}
           style={{
-            padding: "9px 16px",
+            padding: "7px 12px",
             borderRadius: 999,
             border: "1px solid rgba(247,245,240,0.4)",
             background: "transparent",
             color: "inherit",
             cursor: "pointer",
-            fontSize: 14,
+            fontSize: 13,
           }}
         >
           Refuser
@@ -145,14 +152,14 @@ export default function MetaPixel() {
           type="button"
           onClick={() => choose("granted")}
           style={{
-            padding: "9px 16px",
+            padding: "7px 12px",
             borderRadius: 999,
             border: 0,
             background: "#F7F5F0",
             color: "#2B1E2F",
             fontWeight: 600,
             cursor: "pointer",
-            fontSize: 14,
+            fontSize: 13,
           }}
         >
           Accepter
