@@ -49,7 +49,7 @@ export function Table({ head, rows, caption }: { head: string[]; rows: ReactNode
   return (
     <figure className="my-8">
       <div className="overflow-x-auto rounded-xl border border-[#1C1A17]/10 bg-white">
-        <table className="w-full min-w-[520px] border-collapse text-left text-[14px] leading-snug">
+        <table className={`w-full border-collapse text-left text-[14px] leading-snug ${head.length > 2 ? "min-w-[520px]" : ""}`}>
           <thead>
             <tr className="bg-[#2B1E2F] text-[#F7F5F0]">
               {head.map((h) => (
