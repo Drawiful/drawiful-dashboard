@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { Bodoni_Moda, Manrope } from "next/font/google";
 import { SITE_URL } from "@/lib/blog";
+import SocialLinks from "@/components/SocialLinks";
 
 // Mêmes polices et couleurs que la landing (src/app/decouvrir/page.tsx)
 const display = Bodoni_Moda({ subsets: ["latin"], variable: "--font-lp-display", display: "swap" });
@@ -52,6 +53,7 @@ export default function BlogLayout({ children }: { children: ReactNode }) {
           <div>
             <p className="font-display-lp text-2xl text-[#F7F5F0]">Drawiful</p>
             <p className="mt-2 text-sm">La galerie en ligne des artistes indépendants.</p>
+            <SocialLinks className="mt-4 -ml-2.5" />
           </div>
           <div className="flex flex-col gap-2 text-sm sm:items-end">
             <Link href="/" className="hover:text-[#F7F5F0]">

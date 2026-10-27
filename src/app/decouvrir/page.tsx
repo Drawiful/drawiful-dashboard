@@ -6,6 +6,7 @@ import Demo3D from "@/components/landing/Demo3D";
 import CertificateShowcase from "@/components/landing/CertificateShowcase";
 import HeroVideo from "@/components/landing/HeroVideo";
 import StickyCta from "@/components/landing/StickyCta";
+import SocialLinks from "@/components/SocialLinks";
 
 /*
   Landing Drawiful (servie sur drawiful.art via le middleware).
@@ -622,6 +623,7 @@ export default function LandingPage() {
           <div>
             <p className="font-display-lp text-2xl text-[#F7F5F0]">Drawiful</p>
             <p className="text-sm mt-2">La galerie en ligne des artistes indépendants.</p>
+            <SocialLinks className="mt-4 -ml-2.5" />
           </div>
           <div className="flex flex-col sm:items-end gap-2 text-sm">
             <a href="mailto:clients@drawiful.app" className="hover:text-[#F7F5F0]">
