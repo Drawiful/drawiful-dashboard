@@ -2,9 +2,10 @@
 import { useEffect, useRef, useState } from "react";
 
 /*
-  Boucle muette de 6 s tournée dans une vraie galerie Drawiful (salon haussmannien).
-  - Sur téléphone : version recadrée en bandeau (hero-visite-mobile.mp4), qui suit la marche
-    puis descend sur la fiche de l'œuvre et son prix, en haut du premier écran.
+  Boucle muette de 12 s filmée dans une vraie galerie Drawiful (salle Noir & Or), en plan-séquence
+  automatique (mode cinéma des salles 3D : ?capture=2&cinema=1&record=1, voir public/visite-3d).
+  - Sur téléphone : version recadrée en bandeau (hero-visite-mobile.mp4), qui traverse la salle
+    jusqu'à l'œuvre, puis affiche sa fiche et son prix, en haut du premier écran.
   - Sur ordinateur : la vidéo entière, dans un cadre de téléphone, à droite du texte.
   Les deux versions sont dans la page, mais seule celle qui est affichée est téléchargée :
   l'image fixe s'affiche tout de suite, la vidéo prend le relais dès qu'elle est prête.
@@ -51,7 +52,7 @@ export default function HeroVideo({
       loop
       playsInline
       preload={src ? "auto" : "none"}
-      aria-label="Visite d'une galerie Drawiful sur téléphone : on avance dans le salon haussmannien jusqu'à une œuvre, sa fiche et son prix s'affichent"
+      aria-label="Visite d'une galerie Drawiful en 3D : la caméra traverse la salle jusqu'à une œuvre, puis sa fiche et son prix s'affichent"
     />
   );
 }
