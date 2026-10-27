@@ -2574,13 +2574,21 @@ async function cineRecord(){
   console.log('[cinema] œuvre finale :', cine.feat.art.title, '— fichier :', a.download);
 }
 
-// Démarrage : salle construite + images des œuvres chargées (30 s au plus)
+// Démarrage : salle construite + images des œuvres chargées
 let cineWaitStart = 0, cineT0 = 0;
 function cineTick(timestamp){
   if(cineState === 'waiting'){
     if(!roomGeo || !frameGroups.length){ composer.render(); return; }
     if(!cineWaitStart) cineWaitStart = timestamp;
-    if(!cineArtReady() && timestamp - cineWaitStart < 30000){ composer.render(); return; }
+    // Toutes les images doivent être chargées (2 min au plus : certaines photos pèsent plusieurs Mo)
+    const waitMax = CINE_RECORD ? 120000 : 30000;
+    if(!cineArtReady() && timestamp - cineWaitStart < waitMax){
+      if(CINE_RECORD){
+        const done = frameGroups.filter(f => f.canvasMesh.material && f.canvasMesh.material.map).length;
+        cineStatus(`Chargement des œuvres… ${done}/${frameGroups.length}`);
+      }
+      composer.render(); return;
+    }
     cine = cinePlan();
     cineApply(0);
     if(CINE_RECORD){

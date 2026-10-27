@@ -219,7 +219,10 @@ export default function Visite3DPage() {
     );
   }
 
-  const room = ROOMS[skin?.ambiance3d ?? "blanche"];
+  // ?salle=haussmann|blanche|sombre : force une salle (vidéos marketing, mode cinéma)
+  const forced = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("salle") : null;
+  const room =
+    forced && forced in ROOMS ? ROOMS[forced as keyof typeof ROOMS] : ROOMS[skin?.ambiance3d ?? "blanche"];
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "#0c0b0a" }}>
