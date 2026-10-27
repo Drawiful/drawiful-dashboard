@@ -3,6 +3,8 @@ import { ROOT_DOMAIN } from "@/lib/domain";
 import VendreSansCommission from "@/content/blog/vendre-oeuvres-en-ligne-sans-commission";
 import CertificatAuthenticite from "@/content/blog/certificat-authenticite-oeuvre-art";
 import PrixOeuvre from "@/content/blog/fixer-prix-oeuvre-art";
+import CreerSite from "@/content/blog/creer-site-vendre-tableaux";
+import Galerie3D from "@/content/blog/galerie-art-virtuelle-3d";
 
 /*
   Articles du blog (drawiful.art/blog). Pour en ajouter un :
@@ -25,6 +27,30 @@ export type BlogPost = {
 export const SITE_URL = `https://${ROOT_DOMAIN}`;
 
 export const POSTS: BlogPost[] = [
+  {
+    slug: "creer-site-vendre-tableaux",
+    title: "Créer un site pour vendre ses tableaux, sans compétences techniques",
+    seoTitle: "Créer un site pour vendre ses tableaux : le guide simple",
+    description:
+      "Plateforme, créateur de site, WordPress ou solution pour artistes : comment créer ton site pour vendre tes tableaux, et ce qu'il doit contenir.",
+    excerpt:
+      "Les 4 options pour avoir ton propre site, ce que chaque page doit contenir et les 7 étapes pour le mettre en ligne cette semaine.",
+    date: "2026-10-27",
+    readingMinutes: 8,
+    Content: CreerSite,
+  },
+  {
+    slug: "galerie-art-virtuelle-3d",
+    title: "Galerie d'art virtuelle en 3D : comment exposer ses œuvres en ligne",
+    seoTitle: "Galerie d'art virtuelle 3D : exposer ses œuvres en ligne",
+    description:
+      "Visite 360°, outils d'exposition virtuelle ou galerie 3D reliée à une boutique : comment créer ton exposition en ligne et la faire visiter.",
+    excerpt:
+      "Les trois façons de créer une exposition virtuelle, les critères pour choisir et les conseils pour qu'elle fasse vendre.",
+    date: "2026-10-27",
+    readingMinutes: 7,
+    Content: Galerie3D,
+  },
   {
     slug: "vendre-oeuvres-en-ligne-sans-commission",
     title: "Vendre ses œuvres d'art en ligne sans commission : le guide 2026",
