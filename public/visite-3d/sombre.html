@@ -1552,6 +1552,14 @@ function buildRoom(geo, nArt){
 /* 5. ŒUVRES                                                               */
 /* ---------------------------------------------------------------------- */
 const textureLoader = new THREE.TextureLoader();
+
+// Versions allégées des photos Cloudinary pour la 3D (≤ 2048 px, format et
+// qualité automatiques) : quelques centaines de Ko au lieu de plusieurs Mo.
+function lightImageUrl(url){
+  if(!/^https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\//.test(url || '')) return url;
+  if(/\/upload\/[^/]*(w_|c_limit|q_auto)/.test(url)) return url;   // déjà transformée
+  return url.replace('/image/upload/', '/image/upload/c_limit,w_2048,h_2048,q_auto,f_auto/');
+}
 textureLoader.crossOrigin = 'anonymous';
 let frameGroups = []; // { group, data, mesh }
 let loadedCount = 0;
@@ -1661,7 +1669,7 @@ function createFrame(art){
   if((art.imageUrl || '').startsWith('generated:')){
     applyArtTexture(makeGeneratedArtTexture(parseInt(art.imageUrl.split(':')[1], 10) || 1));
   } else {
-    textureLoader.load(art.imageUrl, applyArtTexture, undefined, () => { /* garde le placeholder si l'image échoue */ });
+    textureLoader.load(lightImageUrl(art.imageUrl), applyArtTexture, undefined, () => { /* garde le placeholder si l'image échoue */ });
   }
 
   const labelDiv = document.createElement('div');
@@ -2261,8 +2269,8 @@ function onXRFrame(timestamp, frame){
 // /g/<slug>/visite-3d?capture=2&cinema=1 : plan-séquence automatique, lent et
 // fluide (caméra « sur rail », sans point de visée ni rotation brusque), qui
 // traverse la salle puis s'approche d'une œuvre et affiche sa fiche.
-// &record=1 : enregistre ce plan image par image (1080 × 1920, 30 i/s, sans
-// saccade quelle que soit la machine) et télécharge la vidéo.
+// &record=1 : enregistre ce plan image par image (1080 × 1920, 30 i/s) et
+// télécharge une archive .tar des images, assemblées ensuite en vidéo.
 // &cinemaArt=N : choisit l'œuvre finale (numéro dans l'ordre de visite).
 const cineParam = (k) => {
   const own = new URLSearchParams(location.search).get(k);
@@ -2429,22 +2437,44 @@ function cineStatus(text){
   el.textContent = text;
 }
 
+// Archive TAR (sans compression) : une image JPEG par trame, nommée 0000.jpg…
+function cineTar(files){
+  const enc = new TextEncoder();
+  const parts = [];
+  const field = (buf, off, len, str) => { const s = enc.encode(str); buf.set(s.subarray(0, len), off); };
+  for(const f of files){
+    const h = new Uint8Array(512);
+    field(h, 0, 100, f.name);
+    field(h, 100, 8, '0000644\0');
+    field(h, 108, 8, '0000000\0');
+    field(h, 116, 8, '0000000\0');
+    field(h, 124, 12, f.data.length.toString(8).padStart(11, '0') + '\0');
+    field(h, 136, 12, Math.floor(Date.now()/1000).toString(8).padStart(11, '0') + '\0');
+    field(h, 148, 8, '        ');
+    field(h, 156, 1, '0');
+    field(h, 257, 6, 'ustar\0');
+    field(h, 263, 2, '00');
+    let sum = 0; for(let i = 0; i < 512; i++) sum += h[i];
+    field(h, 148, 8, sum.toString(8).padStart(6, '0') + '\0 ');
+    parts.push(h, f.data);
+    const pad = (512 - (f.data.length % 512)) % 512;
+    if(pad) parts.push(new Uint8Array(pad));
+  }
+  parts.push(new Uint8Array(1024));
+  return new Blob(parts, { type: 'application/x-tar' });
+}
+
+// Enregistrement image par image : chaque trame est rendue puis sauvegardée en
+// JPEG avant de passer à la suivante. Aucune image ne peut être sautée, même
+// sur un ordinateur lent ; le montage vidéo se fait ensuite à partir des images.
 async function cineRecord(){
   cineState = 'recording';
   renderer.setAnimationLoop(null);                  // c'est l'enregistrement qui pilote les images
   const rec = document.createElement('canvas');
   rec.width = CINE_W; rec.height = CINE_H;
   const ctx = rec.getContext('2d');
-  const stream = rec.captureStream(0);
-  const track = stream.getVideoTracks()[0];
-  const mime = ['video/mp4;codecs=avc1.640033', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm']
-    .find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m));
-  const mr = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 24_000_000 });
-  const chunks = [];
-  mr.ondataavailable = e => { if(e.data && e.data.size) chunks.push(e.data); };
-  const stopped = new Promise(r => { mr.onstop = r; });
-  mr.start();
   const total = Math.round(CINE_DUR*CINE_FPS);
+  const files = [];
   let cardBottom = 0;
   for(let i = 0; i < total; i++){
     const t = i/CINE_FPS;
@@ -2453,21 +2483,16 @@ async function cineRecord(){
     composer.render();
     ctx.drawImage(renderer.domElement, 0, 0, CINE_W, CINE_H);
     cardBottom = cineCard(ctx, t) || cardBottom;
-    track.requestFrame();
-    if(i % 10 === 0) cineStatus(`Enregistrement… ${Math.round(100*i/total)} %`);
-    await new Promise(r => setTimeout(r, 50));
+    const blob = await new Promise(r => rec.toBlob(r, 'image/jpeg', 0.93));
+    files.push({ name: String(i).padStart(4, '0') + '.jpg', data: new Uint8Array(await blob.arrayBuffer()) });
+    if(i % 5 === 0) cineStatus(`Enregistrement… ${Math.round(100*i/total)} % (image ${i}/${total})`);
   }
-  await new Promise(r => setTimeout(r, 300));
-  mr.stop();
-  await stopped;
-  const ext = mime.includes('mp4') ? 'mp4' : 'webm';
-  const blob = new Blob(chunks, { type: mime });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `drawiful-cinema-${total}f-c${cardBottom}.${ext}`;
+  a.href = URL.createObjectURL(cineTar(files));
+  a.download = `drawiful-cinema-${total}images-c${cardBottom}.tar`;
   document.body.appendChild(a);
   a.click();
-  cineStatus(`Vidéo téléchargée (${a.download})`);
+  cineStatus(`Terminé : ${a.download} téléchargé`);
   console.log('[cinema] œuvre finale :', cine.feat.art.title, '— fichier :', a.download);
 }
 
