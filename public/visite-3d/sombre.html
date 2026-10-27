@@ -225,6 +225,7 @@ const SKIN = {
 // masque tout l'habillage (titre, boutons, point de visée, aides) et fait
 // passer la salle au-dessus des éléments de la page (bandeau d'aperçu, retour).
 // ?capture=2 masque aussi les cartels sous les œuvres.
+// ?capture=2&cinema=1 : plan-séquence automatique pour la vidéo de la landing (section 9bis).
 const CAPTURE = (() => {
   const own = new URLSearchParams(location.search).get('capture');
   if(own) return own;
@@ -2255,11 +2256,258 @@ function onXRFrame(timestamp, frame){
 }
 
 /* ---------------------------------------------------------------------- */
+/* 9bis. MODE CINÉMA — vidéo de présentation de la landing                 */
+/* ---------------------------------------------------------------------- */
+// /g/<slug>/visite-3d?capture=2&cinema=1 : plan-séquence automatique, lent et
+// fluide (caméra « sur rail », sans point de visée ni rotation brusque), qui
+// traverse la salle puis s'approche d'une œuvre et affiche sa fiche.
+// &record=1 : enregistre ce plan image par image (1080 × 1920, 30 i/s, sans
+// saccade quelle que soit la machine) et télécharge la vidéo.
+// &cinemaArt=N : choisit l'œuvre finale (numéro dans l'ordre de visite).
+const cineParam = (k) => {
+  const own = new URLSearchParams(location.search).get(k);
+  if(own) return own;
+  try{ return new URLSearchParams(window.parent.location.search).get(k); }catch(e){ return null; }
+};
+const CINEMA = cineParam('cinema') === '1';
+const CINE_RECORD = CINEMA && cineParam('record') === '1';
+const CINE_W = 1080, CINE_H = 1920, CINE_FPS = 30;
+const CINE_MOVE = 9.6;      // durée du déplacement (s)
+const CINE_DUR = 13;        // durée totale : déplacement + plan fixe sur l'œuvre (s)
+const CINE_CARD_AT = 9.4;   // apparition de la fiche (s)
+let cine = null;            // plan calculé, une fois la salle et les images prêtes
+let cineState = CINEMA ? 'waiting' : 'off';
+
+if(CINEMA){
+  document.body.classList.add('capture', 'capture-nolabels');
+  document.body.style.background = '#000';
+  if(plControls) plControls.disconnect();          // aucune prise en main à la souris
+  if(orbitControls) orbitControls.enabled = false;
+}
+
+// Rendu à taille fixe (portrait 9:16), affiché centré dans la fenêtre
+function cineFitCanvas(){
+  renderer.setPixelRatio(1);
+  renderer.setSize(CINE_W, CINE_H, false);
+  composer.setPixelRatio(1);
+  composer.setSize(CINE_W, CINE_H);
+  camera.aspect = CINE_W/CINE_H;
+  camera.fov = 62;                                  // focale « portrait », sans effet grand-angle
+  camera.updateProjectionMatrix();
+  const scale = Math.min(window.innerWidth/CINE_W, window.innerHeight/CINE_H);
+  const c = renderer.domElement.style;
+  c.width = Math.round(CINE_W*scale) + 'px';
+  c.height = Math.round(CINE_H*scale) + 'px';
+  c.position = 'fixed';
+  c.left = Math.round((window.innerWidth - CINE_W*scale)/2) + 'px';
+  c.top = Math.round((window.innerHeight - CINE_H*scale)/2) + 'px';
+}
+if(CINEMA){
+  cineFitCanvas();
+  window.addEventListener('resize', cineFitCanvas);  // passe après le réglage d'origine
+}
+
+const cineEase = x => x*x*x*(x*(x*6 - 15) + 10);   // départ et arrivée en douceur
+const cineEaseSine = x => -(Math.cos(Math.PI*x) - 1)/2;
+
+function cineArtReady(){
+  return frameGroups.every(f => {
+    const m = f.canvasMesh.material;
+    return m && (m.map || !(f.art.imageUrl || '').length);
+  });
+}
+
+function cinePlan(){
+  const g = roomGeo;
+  const inMain = f => zoneOf(f.slot.z) === 1;
+  // Couloir central libre entre les avancées de mur de la grande salle
+  let corridor = g.W/2 - 0.7;
+  (roomBounds.obstacles || []).forEach(o => {
+    if(o.minZ > g.doorZ - 0.3) return;               // cloison de la deuxième salle
+    if(o.minX > 0) corridor = Math.min(corridor, o.minX - 0.55);
+    if(o.maxX < 0) corridor = Math.min(corridor, -o.maxX - 0.55);
+  });
+  corridor = Math.max(0.3, corridor);
+
+  // Œuvre finale : &cinemaArt=N, sinon celle du mur du fond la plus centrée
+  let feat = null;
+  const wanted = parseInt(cineParam('cinemaArt') || '', 10);
+  if(wanted >= 1 && wanted <= frameGroups.length) feat = frameGroups[wanted - 1];
+  if(!feat){
+    const back = frameGroups.filter(f => inMain(f) && f.slot.n.z > 0.7);
+    const pool = back.length ? back : frameGroups.filter(inMain);
+    feat = (pool.length ? pool : frameGroups).slice()
+      .sort((a, b) => Math.abs(a.slot.x) - Math.abs(b.slot.x))[0];
+  }
+  const s = feat.slot;
+  const desired = THREE.MathUtils.clamp(Math.max(s.fw, s.fh)*1.3 + 1.0, 2.0, 4.4);
+  const free = freeAlong(s.x, s.z, s.n.x, s.n.z, desired + 0.6) - 0.45;
+  const dist = Math.max(1.2, Math.min(desired, free));
+  const endPos = confinePoint(new THREE.Vector3(s.x + s.n.x*dist, 1.6, s.z + s.n.z*dist));
+  // On vise un peu sous l'œuvre : elle s'affiche dans le tiers haut, la fiche dessous
+  const halfH = dist*Math.tan(THREE.MathUtils.degToRad(31));
+  const endTarget = new THREE.Vector3(s.x, s.y - 0.32*halfH, s.z);
+
+  // Ouverture : une œuvre d'un mur latéral, vue de biais depuis l'autre côté du couloir
+  const z0 = Math.min(g.zP1 - 0.75, endPos.z + 10);
+  const sideArts = frameGroups.filter(f => f !== feat && inMain(f) && Math.abs(f.slot.n.x) > 0.7
+    && f.slot.z < z0 - 2 && f.slot.z > endPos.z);
+  const open = sideArts.sort((a, b) => Math.abs(a.slot.z - (z0 - 5)) - Math.abs(b.slot.z - (z0 - 5)))[0];
+  const x0 = open ? -Math.sign(open.slot.x)*Math.min(corridor, 0.9) : 0;
+  const clampX = x => THREE.MathUtils.clamp(x, -corridor, corridor);
+  const p0 = confinePoint(new THREE.Vector3(x0, 1.56, z0));
+  const p1 = confinePoint(new THREE.Vector3(clampX(THREE.MathUtils.lerp(x0, endPos.x, 0.65)), 1.6,
+                                            THREE.MathUtils.lerp(z0, endPos.z, 0.55)));
+  const t0 = open ? new THREE.Vector3(open.slot.x, 1.55, open.slot.z)
+                  : new THREE.Vector3(0, 1.55, THREE.MathUtils.lerp(z0, s.z, 0.8));
+  const t1 = new THREE.Vector3(THREE.MathUtils.lerp(t0.x, s.x, 0.6), 1.55, THREE.MathUtils.lerp(t0.z, s.z, 0.8));
+  return {
+    feat, endPos, endTarget,
+    pos: new THREE.CatmullRomCurve3([p0, p1, endPos], false, 'centripetal'),
+    look: new THREE.CatmullRomCurve3([t0, t1, endTarget], false, 'centripetal'),
+    pushDir: new THREE.Vector3().subVectors(endTarget, endPos).setY(0).normalize(),
+  };
+}
+
+const _cLook = new THREE.Vector3();
+function cineApply(t){
+  const P = cine;
+  if(t <= CINE_MOVE){
+    camera.position.copy(P.pos.getPoint(cineEase(t/CINE_MOVE)));
+    _cLook.copy(P.look.getPoint(cineEaseSine(Math.min(1, t/(CINE_MOVE*0.96)))));
+  } else {
+    // Plan fixe : très léger rapprochement, pour garder la vie dans l'image
+    const k = cineEaseSine(Math.min(1, (t - CINE_MOVE)/(CINE_DUR - CINE_MOVE)));
+    camera.position.copy(P.endPos).addScaledVector(P.pushDir, 0.12*k);
+    _cLook.copy(P.endTarget);
+  }
+  camera.lookAt(_cLook);
+}
+
+// Fiche de l'œuvre dessinée dans l'image (le HTML n'est pas filmé)
+function cineCard(ctx, t){
+  const a = THREE.MathUtils.clamp((t - CINE_CARD_AT)/0.7, 0, 1);
+  if(a <= 0) return null;
+  const art = cine.feat.art;
+  // Bas de l'œuvre à l'écran, pour placer la fiche juste dessous
+  const s = cine.feat.slot;
+  const v = new THREE.Vector3(s.x, s.y - s.fh/2, s.z).project(camera);
+  const artBottom = (1 - v.y)/2*CINE_H;
+  const w = 820, h = 300, x = (CINE_W - w)/2;
+  const y = Math.min(CINE_H - h - 120, Math.max(artBottom + 70, CINE_H*0.52)) + (1 - cineEase(a))*24;
+  ctx.save();
+  ctx.globalAlpha = cineEase(a);
+  ctx.fillStyle = 'rgba(15,13,11,0.78)';
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, 6); ctx.fill();
+  ctx.strokeStyle = 'rgba(212,180,92,0.35)'; ctx.lineWidth = 2; ctx.stroke();
+  const serif = "'Playfair Display', Georgia, 'Times New Roman', serif";
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = '#c9c2b3'; ctx.font = `italic 32px ${serif}`;
+  ctx.fillText(art.artist || '', x + 52, y + 74);
+  ctx.fillStyle = '#ffffff'; ctx.font = `50px ${serif}`;
+  let title = art.title || '';
+  while(ctx.measureText(title).width > w - 104 && title.length > 4) title = title.slice(0, -2).trimEnd() + '…';
+  ctx.fillText(title, x + 52, y + 136);
+  ctx.fillStyle = '#b8912f'; ctx.fillRect(x + 52, y + 164, 72, 2);
+  ctx.fillStyle = '#a9a397'; ctx.font = "30px Inter, system-ui, -apple-system, 'Segoe UI', sans-serif";
+  ctx.fillText(art.meta || '', x + 52, y + 214);
+  ctx.fillStyle = '#d4b45c'; ctx.font = `40px ${serif}`;
+  ctx.fillText(art.price || '', x + 52, y + 266);
+  ctx.restore();
+  return Math.round(y + h);
+}
+
+function cineStatus(text){
+  let el = document.getElementById('cineStatus');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'cineStatus';
+    el.style.cssText = 'position:fixed;left:12px;top:12px;z-index:99;padding:8px 12px;border-radius:6px;' +
+      'background:rgba(0,0,0,.7);color:#f5f1e8;font:13px system-ui,sans-serif';
+    document.body.appendChild(el);
+  }
+  el.textContent = text;
+}
+
+async function cineRecord(){
+  cineState = 'recording';
+  renderer.setAnimationLoop(null);                  // c'est l'enregistrement qui pilote les images
+  const rec = document.createElement('canvas');
+  rec.width = CINE_W; rec.height = CINE_H;
+  const ctx = rec.getContext('2d');
+  const stream = rec.captureStream(0);
+  const track = stream.getVideoTracks()[0];
+  const mime = ['video/mp4;codecs=avc1.640033', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm']
+    .find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m));
+  const mr = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 24_000_000 });
+  const chunks = [];
+  mr.ondataavailable = e => { if(e.data && e.data.size) chunks.push(e.data); };
+  const stopped = new Promise(r => { mr.onstop = r; });
+  mr.start();
+  const total = Math.round(CINE_DUR*CINE_FPS);
+  let cardBottom = 0;
+  for(let i = 0; i < total; i++){
+    const t = i/CINE_FPS;
+    cineApply(t);
+    gradePass.uniforms.uTime.value = t;
+    composer.render();
+    ctx.drawImage(renderer.domElement, 0, 0, CINE_W, CINE_H);
+    cardBottom = cineCard(ctx, t) || cardBottom;
+    track.requestFrame();
+    if(i % 10 === 0) cineStatus(`Enregistrement… ${Math.round(100*i/total)} %`);
+    await new Promise(r => setTimeout(r, 50));
+  }
+  await new Promise(r => setTimeout(r, 300));
+  mr.stop();
+  await stopped;
+  const ext = mime.includes('mp4') ? 'mp4' : 'webm';
+  const blob = new Blob(chunks, { type: mime });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `drawiful-cinema-${total}f-c${cardBottom}.${ext}`;
+  document.body.appendChild(a);
+  a.click();
+  cineStatus(`Vidéo téléchargée (${a.download})`);
+  console.log('[cinema] œuvre finale :', cine.feat.art.title, '— fichier :', a.download);
+}
+
+// Démarrage : salle construite + images des œuvres chargées (30 s au plus)
+let cineWaitStart = 0, cineT0 = 0;
+function cineTick(timestamp){
+  if(cineState === 'waiting'){
+    if(!roomGeo || !frameGroups.length){ composer.render(); return; }
+    if(!cineWaitStart) cineWaitStart = timestamp;
+    if(!cineArtReady() && timestamp - cineWaitStart < 30000){ composer.render(); return; }
+    cine = cinePlan();
+    cineApply(0);
+    if(CINE_RECORD){
+      cineStatus('Préparation de l’enregistrement…');
+      setTimeout(cineRecord, 1500);                   // laisse les ombres et les spots se poser
+      cineState = 'armed';
+    } else {
+      cineState = 'playing';
+      cineT0 = timestamp;
+    }
+    composer.render();
+    return;
+  }
+  if(cineState === 'playing'){
+    const t = ((timestamp - cineT0)/1000) % (CINE_DUR + 1.5);   // aperçu en boucle
+    cineApply(Math.min(t, CINE_DUR));
+    gradePass.uniforms.uTime.value = timestamp*0.001;
+    composer.render();
+    return;
+  }
+  composer.render();                                // 'armed' : image fixe en attendant
+}
+
+/* ---------------------------------------------------------------------- */
 /* 10. BOUCLE DE RENDU                                                     */
 /* ---------------------------------------------------------------------- */
 // La salle est construite à la réception des œuvres (section 6).
 
 renderer.setAnimationLoop((timestamp, frame) => {
+  if(CINEMA){ cineTick(timestamp); return; }    // mode cinéma (section 9bis)
   const delta = Math.min(clock.getDelta(), 0.05);
   if(renderer.xr.isPresenting){
     // En RA, rendu direct (pas de post-traitement sur le flux caméra du visiteur)
