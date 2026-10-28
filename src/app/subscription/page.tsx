@@ -21,6 +21,8 @@ type Plan = {
   amount: number | null;
   currency: string | null;
   interval: string | null;
+  onQuote?: boolean; // Gallery : sur devis, pas d'abonnement en ligne
+  contact?: string;
 };
 
 function formatPrice(plan: Plan) {
@@ -136,20 +138,31 @@ export default function SubscriptionPage() {
               return (
                 <div key={plan.key} className="rounded-md border border-bordure p-6 flex flex-col">
                   <p className="font-display text-xl text-encre mb-1">{plan.name}</p>
-                  <p className="text-sm text-encre/70 mb-5">{price ?? "Prix affiché au paiement"}</p>
+                  <p className="text-sm text-encre/70 mb-5">
+                    {plan.onQuote ? "Sur devis, selon le nombre d'artistes" : price ?? "Prix affiché au paiement"}
+                  </p>
 
                   <p className={`flex items-center gap-2 text-sm mb-6 ${with3d ? "text-encre" : "text-encre/50"}`}>
                     <Box size={15} className={with3d ? "text-ocre" : ""} />
                     {with3d ? "Visite 3D de ta galerie incluse" : "Sans visite 3D"}
                   </p>
 
-                  <button
-                    onClick={() => handleChoose(plan.key)}
-                    disabled={choosing !== null}
-                    className="mt-auto w-full py-2.5 rounded-md bg-aubergine text-ocre text-sm font-medium disabled:opacity-60"
-                  >
-                    {choosing === plan.key ? "Redirection..." : `Choisir ${plan.name}`}
-                  </button>
+                  {plan.onQuote ? (
+                    <a
+                      href={`mailto:${plan.contact || "clients@drawiful.app"}?subject=${encodeURIComponent(`Formule ${plan.name} — demande de devis`)}`}
+                      className="mt-auto w-full py-2.5 rounded-md border border-aubergine text-aubergine text-sm font-medium text-center"
+                    >
+                      Demander un devis
+                    </a>
+                  ) : (
+                    <button
+                      onClick={() => handleChoose(plan.key)}
+                      disabled={choosing !== null}
+                      className="mt-auto w-full py-2.5 rounded-md bg-aubergine text-ocre text-sm font-medium disabled:opacity-60"
+                    >
+                      {choosing === plan.key ? "Redirection..." : `Choisir ${plan.name}`}
+                    </button>
+                  )}
                 </div>
               );
             })}

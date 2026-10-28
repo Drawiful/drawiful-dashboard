@@ -18,6 +18,8 @@ export default function PaymentsSetupBanner({ profile }: { profile: any }) {
   }, [accountId]);
 
   if (!profile || profile.stripeOnboardingDone) return null;
+  // Formule sans boutique (Aspirant) : rien à configurer pour l'instant
+  if (profile.limits && !profile.limits.shop) return null;
 
   async function start() {
     setLoading(true);

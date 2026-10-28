@@ -51,7 +51,8 @@ export function onboardingSteps(profile: any): Step[] {
       cta: "Activer",
       done: !!profile.stripeOnboardingDone,
     },
-  ];
+    // Formule sans boutique (Aspirant) : pas d'étape paiements
+  ].filter((s) => s.key !== "payments" || !profile.limits || profile.limits.shop);
 }
 
 export function onboardingComplete(profile: any) {

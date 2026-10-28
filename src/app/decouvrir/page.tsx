@@ -146,9 +146,9 @@ const PLANS = [
     key: "aspirant",
     name: "Aspirant",
     pitch: "Pour débuter et exposer tes premières œuvres.",
-    price: 19,
+    price: 19 as number | null,
     features: ["5 œuvres", "Galerie publique", "1 certificat d'authenticité", "Ton adresse drawiful.art"],
-    missing: ["Boutique en ligne", "Galerie 3D"],
+    missing: ["Boutique en ligne", "Galerie 3D", "Ton propre nom de domaine"],
   },
   {
     key: "artiste",
@@ -170,7 +170,8 @@ const PLANS = [
     key: "studio",
     name: "Gallery",
     pitch: "Pour les galeries et collectifs multi-artistes.",
-    price: 149,
+    price: null, // sur devis
+
     features: [
       "Tout le plan Artiste",
       "Jusqu'à 10 artistes",
@@ -482,8 +483,9 @@ export default function LandingPage() {
           <div className="max-w-2xl">
             <h2 className="font-display-lp text-4xl sm:text-5xl leading-[1.05]">Choisis ta formule.</h2>
             <p className="mt-5 text-[#4A4540] leading-relaxed">
-              14 jours d'essai gratuit sur chaque formule. Une carte est demandée pour démarrer, mais rien n'est prélevé
-              pendant l'essai. Sans engagement : tu changes ou annules quand tu veux.
+              14 jours d'essai gratuit sur les formules Aspirant et Artiste. Une carte est demandée pour démarrer, mais
+              rien n'est prélevé pendant l'essai. Sans engagement : tu changes ou annules quand tu veux. Pour une galerie ou
+              un collectif, la formule Gallery est sur devis.
             </p>
           </div>
           <div className="mt-14 grid lg:grid-cols-3 gap-5 items-stretch">
@@ -503,10 +505,17 @@ export default function LandingPage() {
                 )}
                 <h3 className="font-display-lp text-3xl">{p.name}</h3>
                 <p className={`mt-2 text-sm ${p.featured ? "text-[#F7F5F0]/70" : "text-[#77706A]"}`}>{p.pitch}</p>
-                <p className="mt-7 flex items-baseline gap-1.5">
-                  <span className="font-display-lp text-6xl">{p.price}&nbsp;€</span>
-                  <span className={p.featured ? "text-[#F7F5F0]/60" : "text-[#77706A]"}>par mois</span>
-                </p>
+                {p.price != null ? (
+                  <p className="mt-7 flex items-baseline gap-1.5">
+                    <span className="font-display-lp text-6xl">{p.price}&nbsp;€</span>
+                    <span className={p.featured ? "text-[#F7F5F0]/60" : "text-[#77706A]"}>par mois</span>
+                  </p>
+                ) : (
+                  <p className="mt-7 flex flex-col">
+                    <span className="font-display-lp text-5xl leading-[1.15]">Sur devis</span>
+                    <span className="text-sm text-[#77706A] mt-1">Selon le nombre d'artistes et vos besoins</span>
+                  </p>
+                )}
                 <ul className="mt-7 flex flex-col gap-2.5 text-[15px] flex-1">
                   {p.features.map((f) => (
                     <li key={f} className="flex gap-3">
@@ -535,16 +544,25 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Link
-                  href={`/inscription?plan=${p.key}`}
-                  className={`mt-9 inline-flex justify-center rounded-full px-6 py-3.5 text-[15px] font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B8912F] ${
-                    p.featured
-                      ? "bg-[#B8912F] text-[#1C1A17] hover:bg-[#C9A24A]"
-                      : "border border-[#2B1E2F] text-[#2B1E2F] hover:bg-[#2B1E2F] hover:text-[#F7F5F0]"
-                  }`}
-                >
-                  Essayer {p.name} 14 jours
-                </Link>
+                {p.price != null ? (
+                  <Link
+                    href={`/inscription?plan=${p.key}`}
+                    className={`mt-9 inline-flex justify-center rounded-full px-6 py-3.5 text-[15px] font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B8912F] ${
+                      p.featured
+                        ? "bg-[#B8912F] text-[#1C1A17] hover:bg-[#C9A24A]"
+                        : "border border-[#2B1E2F] text-[#2B1E2F] hover:bg-[#2B1E2F] hover:text-[#F7F5F0]"
+                    }`}
+                  >
+                    Essayer {p.name} 14 jours
+                  </Link>
+                ) : (
+                  <a
+                    href={`mailto:clients@drawiful.app?subject=${encodeURIComponent("Formule Gallery — demande de devis")}&body=${encodeURIComponent("Bonjour,\n\nNom de la galerie ou du collectif :\nNombre d'artistes :\nSite ou Instagram :\nVos besoins :\n\nMerci !")}`}
+                    className="mt-9 inline-flex justify-center rounded-full px-6 py-3.5 text-[15px] font-semibold border border-[#2B1E2F] text-[#2B1E2F] hover:bg-[#2B1E2F] hover:text-[#F7F5F0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B8912F]"
+                  >
+                    Demander un devis
+                  </a>
+                )}
               </div>
             ))}
           </div>

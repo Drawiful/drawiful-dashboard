@@ -90,8 +90,8 @@ export default function ArtworkForm({
         await api.createArtwork(payload);
       }
       onSaved();
-    } catch {
-      setError("Impossible d'enregistrer l'œuvre");
+    } catch (err: any) {
+      setError(err?.message || "Impossible d'enregistrer l'œuvre");
     } finally {
       setSaving(false);
     }

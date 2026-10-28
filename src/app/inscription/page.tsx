@@ -21,7 +21,6 @@ import { getAttribution } from "@/lib/attribution";
 const PLANS = [
   { key: "aspirant", name: "Aspirant", price: 19, line: "5 œuvres, galerie publique" },
   { key: "artiste", name: "Artiste", price: 49, line: "Boutique, galerie 3D, certificats illimités" },
-  { key: "studio", name: "Gallery", price: 149, line: "Jusqu'à 10 artistes, galeries 3D illimitées" },
 ];
 
 function firstChargeDate() {
@@ -109,7 +108,7 @@ function InscriptionForm() {
     </p>
   );
 
-  // Formule : une ligne, « Changer » ouvre les 3 choix
+  // Formule : une ligne, « Changer » ouvre les choix (Gallery est sur devis, hors inscription)
   const planPicker = (
     <div className="rounded-xl border border-[#1C1A17]/12 bg-white/70">
       <div className="flex items-center justify-between gap-3 px-4 py-3">
@@ -157,6 +156,12 @@ function InscriptionForm() {
               </span>
             </label>
           ))}
+          <p className="px-3 pt-2 pb-1 text-xs text-[#77706A]">
+            Une galerie ou un collectif ? La formule Gallery est sur devis :{" "}
+            <a href="mailto:clients@drawiful.app?subject=Formule%20Gallery%20%E2%80%94%20demande%20de%20devis" className="underline underline-offset-2">
+              clients@drawiful.app
+            </a>
+          </p>
         </fieldset>
       )}
     </div>
