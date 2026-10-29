@@ -55,22 +55,22 @@ export default function Article() {
           ],
           [
             "Outil d'exposition virtuelle (Artsteps, Kunstmatrix…)",
-            "Tu choisis une salle, tu y places tes images et tu partages un lien. Certains proposent une version de base gratuite",
+            "Vous choisissez une salle, vous y placez vos images et vous partagez un lien. Certains proposent une version de base gratuite",
             "Les artistes qui veulent tester une exposition ponctuelle, ou les associations",
           ],
           [
             "Galerie 3D reliée à une boutique",
-            "La salle se crée à partir de tes œuvres en ligne, et chaque tableau mène à sa fiche avec bouton d'achat",
+            "La salle se crée à partir de vos œuvres en ligne, et chaque tableau mène à sa fiche avec bouton d'achat",
             "Les artistes qui veulent vendre, pas seulement montrer",
           ],
         ]}
-        caption="Les fonctionnalités et les tarifs de chaque outil évoluent : vérifie-les au moment de choisir."
+        caption="Les fonctionnalités et les tarifs de chaque outil évoluent : vérifiez-les au moment de choisir."
       />
 
       <h2>Les critères pour bien choisir</h2>
       <ol>
         <li>
-          <strong>Elle fonctionne sur téléphone, sans application.</strong> La plupart de tes visiteurs cliqueront
+          <strong>Elle fonctionne sur téléphone, sans application.</strong> La plupart de vos visiteurs cliqueront
           depuis Instagram ou un e-mail, sur leur téléphone. Une visite qui demande d'installer une application ou un
           ordinateur puissant perd l'essentiel de son public.
         </li>
@@ -79,40 +79,40 @@ export default function Article() {
           l'autre ; une navigation libre ressemble davantage à une vraie visite.
         </li>
         <li>
-          <strong>Les œuvres sont à leur taille réelle.</strong> Vérifie que l'outil utilise les dimensions que tu
-          indiques, et pas seulement la taille de l'image.
+          <strong>Les œuvres sont à leur taille réelle.</strong> Vérifiez que l'outil utilise les dimensions que vous
+          indiquez, et pas seulement la taille de l'image.
         </li>
         <li>
           <strong>Elle se charge vite.</strong> Au-delà de quelques secondes d'attente, beaucoup de visiteurs
           abandonnent avant même d'entrer.
         </li>
         <li>
-          <strong>On peut acheter.</strong> Chaque œuvre devrait mener à sa fiche : prix, détails, paiement. Sinon, ton
-          visiteur conquis doit t'écrire, attendre, négocier… et beaucoup ne le feront pas.
+          <strong>On peut acheter.</strong> Chaque œuvre devrait mener à sa fiche : prix, détails, paiement. Sinon, votre
+          visiteur conquis doit vous écrire, attendre, négocier… et beaucoup ne le feront pas.
         </li>
         <li>
-          <strong>Elle est à ton nom.</strong> Une adresse à ton nom se retient et se partage bien mieux qu'un lien
+          <strong>Elle est à votre nom.</strong> Une adresse à votre nom se retient et se partage bien mieux qu'un lien
           généré automatiquement.
         </li>
       </ol>
 
       <h2>Réussir son exposition virtuelle</h2>
-      <h3>Choisis une sélection cohérente</h3>
+      <h3>Choisissez une sélection cohérente</h3>
       <p>
-        Comme dans une vraie galerie, mieux vaut 8 à 15 œuvres qui dialoguent entre elles que 50 œuvres entassées. Pense
+        Comme dans une vraie galerie, mieux vaut 8 à 15 œuvres qui dialoguent entre elles que 50 œuvres entassées. Pensez
         au parcours : par quelle œuvre le visiteur entre-t-il ? Laquelle découvre-t-il au fond de la salle ?
       </p>
-      <h3>Soigne tes photos</h3>
+      <h3>Soignez vos photos</h3>
       <p>
-        En 3D, les défauts de photo se voient encore plus : bords penchés, reflets, couleurs fausses. Photographie tes
-        œuvres bien de face, à la lumière du jour indirecte, sans cadre vitré si possible, puis recadre au plus près.
+        En 3D, les défauts de photo se voient encore plus : bords penchés, reflets, couleurs fausses. Photographiez vos
+        œuvres bien de face, à la lumière du jour indirecte, sans cadre vitré si possible, puis recadrez au plus près.
       </p>
-      <h3>Indique des dimensions exactes</h3>
+      <h3>Indiquez des dimensions exactes</h3>
       <p>
         Une œuvre de 30 × 40 cm affichée comme un grand format crée une déception à la réception. L'échelle exacte est
         justement ce qui rend la 3D crédible.
       </p>
-      <h3>Accompagne chaque œuvre d'un cartel</h3>
+      <h3>Accompagnez chaque œuvre d'un cartel</h3>
       <p>
         Titre, année, technique, dimensions et prix : les mêmes informations qu'en galerie. Quelques lignes sur l'histoire
         de l'œuvre aident aussi le visiteur à s'y attacher.
@@ -125,26 +125,26 @@ export default function Article() {
           qu'elle ne se décrit.
         </li>
         <li>
-          <strong>Un vernissage virtuel</strong> : annonce une date d'ouverture, fais un live où tu fais visiter la salle
-          et réponds aux questions.
+          <strong>Un vernissage virtuel</strong> : annoncez une date d'ouverture, faites un live où vous faites visiter la salle
+          et répondez aux questions.
         </li>
         <li>
-          <strong>Un QR code en exposition physique</strong>, pour que les visiteurs retrouvent tes œuvres et puissent
+          <strong>Un QR code en exposition physique</strong>, pour que les visiteurs retrouvent vos œuvres et puissent
           acheter plus tard.
         </li>
         <li>
-          <strong>Ta newsletter et tes anciens acheteurs</strong>, à qui tu offres une visite en avant-première.
+          <strong>Votre newsletter et vos anciens acheteurs</strong>, à qui vous offrez une visite en avant-première.
         </li>
       </ul>
       <p>
-        Une galerie virtuelle complète ton site : elle donne envie, la fiche de l'œuvre fait vendre. Si tu n'as pas
-        encore de site, voici <Link href="/blog/creer-site-vendre-tableaux">comment créer un site pour vendre tes
+        Une galerie virtuelle complète votre site : elle donne envie, la fiche de l'œuvre fait vendre. Si vous n'avez pas
+        encore de site, voici <Link href="/blog/creer-site-vendre-tableaux">comment créer un site pour vendre vos
         tableaux</Link>.
       </p>
 
       <DrawifulCta
-        title="Ta galerie 3D, reliée à ta boutique"
-        text="Avec Drawiful, ta galerie 3D se crée automatiquement à partir de tes œuvres : trois salles au choix selon ton thème, dont un salon haussmannien, des œuvres accrochées à leur taille réelle, visite fluide sur téléphone, et chaque tableau mène à sa fiche avec paiement par carte. Sans commission sur tes ventes."
+        title="Votre galerie 3D, reliée à votre boutique"
+        text="Avec Drawiful, votre galerie 3D se crée automatiquement à partir de vos œuvres : trois salles au choix selon votre thème, dont un salon haussmannien, des œuvres accrochées à leur taille réelle, visite fluide sur téléphone, et chaque tableau mène à sa fiche avec paiement par carte. Sans commission sur vos ventes."
       />
 
       <Note>

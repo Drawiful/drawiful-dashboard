@@ -147,7 +147,7 @@ export default function GalleryPage() {
         </div>
 
         <div>
-          <label className="block text-sm mb-1.5 text-encre/80">Adresse de ta galerie</label>
+          <label className="block text-sm mb-1.5 text-encre/80">Adresse de votre galerie</label>
           <div className="flex items-center rounded-md border border-bordure bg-white overflow-hidden">
             <span className="pl-3.5 text-sm text-encre/40">https://</span>
             <input
@@ -161,8 +161,8 @@ export default function GalleryPage() {
           </div>
           {slug !== savedSlug && savedSlug ? (
             <p className="text-xs mt-1.5 text-argile">
-              Attention : l'ancienne adresse ({savedSlug}.{ROOT_DOMAIN}) ne fonctionnera plus. Pense à
-              mettre à jour tes liens en bio.
+              Attention : l'ancienne adresse ({savedSlug}.{ROOT_DOMAIN}) ne fonctionnera plus. Pensez à
+              mettre à jour vos liens en bio.
             </p>
           ) : (
             savedSlug && (
@@ -217,7 +217,7 @@ export default function GalleryPage() {
             Signature manuscrite (optionnel)
           </label>
           <p className="text-xs text-encre/50 mb-2">
-            Affichée sur tes certificats d'authenticité. Sans image, ton nom s'affiche dans une
+            Affichée sur vos certificats d'authenticité. Sans image, votre nom s'affiche dans une
             police manuscrite à la place.
           </p>
           <div className="flex items-center gap-4">
@@ -263,8 +263,8 @@ export default function GalleryPage() {
         <div className="pt-2 border-t border-bordure">
           <h3 className="font-display text-xl text-encre mt-5 mb-1">Pages légales</h3>
           <p className="text-xs text-encre/50 mb-4">
-            Laisse un champ vide pour afficher le modèle générique par défaut sur ta galerie
-            publique. Renseigne-le pour le remplacer par ton propre texte.
+            Laissez un champ vide pour afficher le modèle générique par défaut sur votre galerie
+            publique. Renseignez-le pour le remplacer par votre propre texte.
           </p>
 
           <div className="space-y-5">

@@ -39,11 +39,11 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-platre px-4">
       <div className="w-full max-w-sm">
         <h1 className="font-display text-3xl text-encre mb-1">Drawiful</h1>
-        <p className="text-sm text-encre/60 mb-8">Connecte-toi à ta galerie</p>
+        <p className="text-sm text-encre/60 mb-8">Connectez-vous à votre galerie</p>
 
         {resetDone && (
           <p role="status" className="text-sm text-sauge mb-6">
-            Ton mot de passe a été modifié. Connecte-toi avec le nouveau.
+            Votre mot de passe a été modifié. Connectez-vous avec le nouveau.
           </p>
         )}
 

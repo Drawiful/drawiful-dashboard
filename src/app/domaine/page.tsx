@@ -79,7 +79,7 @@ export default function DomainPage() {
   function saveDomain(e: React.FormEvent) {
     e.preventDefault();
     if (!domain.trim()) return;
-    run("domain", () => api.setMyDomain(domain.trim()), "Domaine enregistré. Crée maintenant les lignes DNS ci-dessous.");
+    run("domain", () => api.setMyDomain(domain.trim()), "Domaine enregistré. Créez maintenant les lignes DNS ci-dessous.");
   }
 
   if (!status) {
@@ -97,7 +97,7 @@ export default function DomainPage() {
       <div className="max-w-2xl">
         <h2 className="font-display text-4xl text-encre mb-2">Adresse & domaine</h2>
         <p className="text-sm text-encre/60 mb-8">
-          Ta galerie a toujours une adresse Drawiful. Tu peux aussi y relier ton propre nom de domaine.
+          Votre galerie a toujours une adresse Drawiful. Vous pouvez aussi y relier votre propre nom de domaine.
         </p>
 
         {error && <p className="mb-6 text-sm text-argile">{error}</p>}
@@ -133,7 +133,7 @@ export default function DomainPage() {
           </form>
           {slugChanged && (
             <p className="text-xs text-encre/50 mt-3">
-              Attention : l'ancienne adresse ne fonctionnera plus. Pense à mettre à jour tes liens (Instagram, cartes de visite…).
+              Attention : l'ancienne adresse ne fonctionnera plus. Pensez à mettre à jour vos liens (Instagram, cartes de visite…).
             </p>
           )}
         </section>
@@ -153,8 +153,8 @@ export default function DomainPage() {
             )}
           </div>
           <p className="text-sm text-encre/60 mb-4">
-            Exemple : <span className="text-encre">www.sagalerie.com</span>. Achète ton domaine chez l'hébergeur de ton choix
-            (OVH, Namecheap, Gandi…), puis saisis-le ici.
+            Exemple : <span className="text-encre">www.sagalerie.com</span>. Achetez votre domaine chez l'hébergeur de votre choix
+            (OVH, Namecheap, Gandi…), puis saisissez-le ici.
           </p>
 
           <form onSubmit={saveDomain} className="flex flex-col sm:flex-row gap-3">
@@ -177,7 +177,7 @@ export default function DomainPage() {
           {status.customDomain && !status.verified && (
             <div className="mt-6">
               <p className="text-sm text-encre mb-3">
-                Chez ton hébergeur de domaine, crée {status.records.length > 1 ? "ces lignes" : "cette ligne"} dans la zone DNS
+                Chez votre hébergeur de domaine, créez {status.records.length > 1 ? "ces lignes" : "cette ligne"} dans la zone DNS
                 de <strong>{status.customDomain}</strong> :
               </p>
               <div className="overflow-x-auto">
@@ -216,7 +216,7 @@ export default function DomainPage() {
 
           {status.customDomain && status.verified && (
             <p className="text-sm text-encre mt-5">
-              Ta galerie est en ligne sur{" "}
+              Votre galerie est en ligne sur{" "}
               <a
                 href={`https://${status.customDomain}`}
                 target="_blank"
@@ -241,11 +241,11 @@ export default function DomainPage() {
                         const s: DomainStatus = await api.verifyMyDomain();
                         if (!s.verified) {
                           throw new Error(
-                            "Pas encore détecté. Vérifie les lignes DNS ; la propagation peut prendre jusqu'à quelques heures.",
+                            "Pas encore détecté. Vérifiez les lignes DNS ; la propagation peut prendre jusqu'à quelques heures.",
                           );
                         }
                       },
-                      "Domaine vérifié : ta galerie est en ligne !",
+                      "Domaine vérifié : votre galerie est en ligne !",
                     )
                   }
                   disabled={busy === "verify"}
@@ -257,7 +257,7 @@ export default function DomainPage() {
               <button
                 type="button"
                 onClick={() => {
-                  if (window.confirm(`Déconnecter ${status.customDomain} de ta galerie ?`)) {
+                  if (window.confirm(`Déconnecter ${status.customDomain} de votre galerie ?`)) {
                     run("remove", () => api.removeMyDomain(), "Domaine déconnecté.");
                   }
                 }}

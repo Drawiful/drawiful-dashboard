@@ -6,19 +6,19 @@ export default function Article() {
     <>
       <p>
         Un certificat d'authenticité transforme une image en œuvre. Pour l'acheteur, c'est la preuve qu'il possède une
-        pièce originale de ta main ; pour toi, c'est un gage de sérieux qui justifie ton prix et protège la valeur de
-        ton travail dans le temps, y compris à la revente.
+        pièce originale de votre main ; pour vous, c'est un gage de sérieux qui justifie votre prix et protège la valeur de
+        votre travail dans le temps, y compris à la revente.
       </p>
       <p>
         Voici ce qu'un bon certificat doit contenir, ce que dit la réglementation en France, les mots à employer (et
-        ceux à éviter), ainsi qu'un modèle que tu peux recopier.
+        ceux à éviter), ainsi qu'un modèle que vous pouvez recopier.
       </p>
 
       <KeyPoints>
         <ul>
           <li>Un certificat identifie une œuvre précise : titre, date, technique, dimensions, photo et numéro unique.</li>
           <li>Il doit être daté et signé à la main par l'artiste.</li>
-          <li>Écris « œuvre originale réalisée par [ton nom] » : en France, certaines formules ont une portée juridique précise.</li>
+          <li>Écrivez « œuvre originale réalisée par [votre nom] » : en France, certaines formules ont une portée juridique précise.</li>
           <li>Un numéro unique vérifiable en ligne rend le certificat beaucoup plus difficile à falsifier.</li>
         </ul>
       </KeyPoints>
@@ -33,12 +33,12 @@ export default function Article() {
       </p>
       <p>
         Dans la pratique, les acheteurs attendent un certificat, les galeries le demandent, et il devient indispensable
-        le jour où l'œuvre est revendue. Le plus simple est donc d'en remettre un à chaque vente, avec ta facture : tu
-        réponds d'avance à la demande éventuelle de l'acheteur, et tu le rassures dès l'achat.
+        le jour où l'œuvre est revendue. Le plus simple est donc d'en remettre un à chaque vente, avec votre facture : vous
+        répondez d'avance à la demande éventuelle de l'acheteur, et vous le rassurez dès l'achat.
       </p>
       <Note>
         Cet article donne des repères généraux, pas un conseil juridique. Pour une situation particulière (œuvre de
-        grande valeur, succession, édition limitée complexe), rapproche-toi d'un juriste spécialisé.
+        grande valeur, succession, édition limitée complexe), rapprochez-vous d'un juriste spécialisé.
       </Note>
 
       <h2>Les mots qui engagent</h2>
@@ -58,8 +58,8 @@ export default function Article() {
         ]}
       />
       <p>
-        Pour tes propres œuvres, la formule la plus claire est donc : <strong>« Œuvre originale réalisée par
-        [prénom nom] »</strong>. Si tu proposes des reproductions (tirages, impressions), indique-le clairement : un
+        Pour vos propres œuvres, la formule la plus claire est donc : <strong>« Œuvre originale réalisée par
+        [prénom nom] »</strong>. Si vous proposez des reproductions (tirages, impressions), indiquez-le clairement : un
         tirage n'est jamais une œuvre originale, même s'il est signé.
       </p>
 
@@ -67,7 +67,7 @@ export default function Article() {
       <p>Un certificat sérieux permet d'identifier une œuvre précise sans aucune ambiguïté :</p>
       <ul>
         <li>
-          <strong>Ton identité</strong> : nom d'artiste et, idéalement, nom civil.
+          <strong>Votre identité</strong> : nom d'artiste et, idéalement, nom civil.
         </li>
         <li>
           <strong>Le titre de l'œuvre</strong>, ou « Sans titre » suivi d'une référence.
@@ -91,23 +91,23 @@ export default function Article() {
           <strong>Une photo de l'œuvre</strong>, imprimée sur le certificat.
         </li>
         <li>
-          <strong>Un numéro de certificat unique</strong>, que tu reportes aussi au dos de l'œuvre.
+          <strong>Un numéro de certificat unique</strong>, que vous reportez aussi au dos de l'œuvre.
         </li>
         <li>
           <strong>Une déclaration d'authenticité</strong>, datée, avec le lieu.
         </li>
         <li>
-          <strong>Ta signature manuscrite</strong>, de préférence identique à celle qui figure sur l'œuvre.
+          <strong>Votre signature manuscrite</strong>, de préférence identique à celle qui figure sur l'œuvre.
         </li>
       </ul>
       <p>
-        Tu peux ajouter des informations utiles à l'acheteur : conseils de conservation, encadrement d'origine, historique
-        des expositions. En revanche, évite d'y inscrire le prix : le certificat accompagne l'œuvre toute sa vie, y
+        Vous pouvez ajouter des informations utiles à l'acheteur : conseils de conservation, encadrement d'origine, historique
+        des expositions. En revanche, évitez d'y inscrire le prix : le certificat accompagne l'œuvre toute sa vie, y
         compris lors d'une revente ou d'un don.
       </p>
 
       <h2>Modèle de certificat d'authenticité</h2>
-      <p>Tu peux recopier et adapter ce texte :</p>
+      <p>Vous pouvez recopier et adapter ce texte :</p>
       <pre>{`CERTIFICAT D'AUTHENTICITÉ — N° [AAAA-0001]
 
 Je soussigné(e) [Prénom Nom], artiste [nom d'artiste si différent],
@@ -127,13 +127,13 @@ Fait à [ville], le [date]
 
 Signature de l'artiste :`}</pre>
 
-      <h2>Rendre ton certificat difficile à falsifier</h2>
+      <h2>Rendre votre certificat difficile à falsifier</h2>
       <p>
         Un document Word imprimé se recopie en deux minutes. Quelques précautions simples changent tout :
       </p>
       <ul>
         <li>
-          <strong>Un numéro unique</strong>, inscrit sur le certificat et au dos de l'œuvre, et noté dans ton propre
+          <strong>Un numéro unique</strong>, inscrit sur le certificat et au dos de l'œuvre, et noté dans votre propre
           registre (titre, date, acheteur).
         </li>
         <li>
@@ -163,7 +163,7 @@ Signature de l'artiste :`}</pre>
 
       <DrawifulCta
         title="Des certificats numérotés, vérifiables en ligne"
-        text="Avec Drawiful, chaque œuvre peut recevoir un certificat d'authenticité numéroté, avec ta signature et une page de vérification publique accessible par QR code. Ton acheteur peut prouver l'authenticité de son œuvre à tout moment."
+        text="Avec Drawiful, chaque œuvre peut recevoir un certificat d'authenticité numéroté, avec votre signature et une page de vérification publique accessible par QR code. Votre acheteur peut prouver l'authenticité de son œuvre à tout moment."
       />
     </>
   );

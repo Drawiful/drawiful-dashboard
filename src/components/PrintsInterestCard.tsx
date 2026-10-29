@@ -39,7 +39,7 @@ export default function PrintsInterestCard() {
       await api.registerInterest({ feature: "tirages", formats, priceRange: price || undefined });
       setState("done");
     } catch {
-      setError("L'envoi n'a pas abouti. Réessaie dans un instant.");
+      setError("L'envoi n'a pas abouti. Réessayez dans un instant.");
       setState("form");
     }
   }

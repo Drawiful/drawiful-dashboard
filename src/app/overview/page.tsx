@@ -29,15 +29,25 @@ const statusLabels: Record<string, string> = {
 export default function OverviewPage() {
   const [profile, setProfile] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
+  const [welcome, setWelcome] = useState(false);
 
   useEffect(() => {
     api.getOrderStats().then(setStats).catch(() => {});
+    // Arrivée juste après l'inscription (/overview?bienvenue=1)
+    if (new URLSearchParams(window.location.search).get("bienvenue") === "1") setWelcome(true);
   }, []);
 
   const artworks = profile?.artworks ?? [];
   const published = artworks.filter((a: any) => a.status === "PUBLISHED").length;
   const subscription = profile?.subscription;
-  const remaining = daysLeft(subscription?.currentPeriodEnd);
+  const limits = profile?.limits;
+  const onFreeTrial = !subscription && limits?.access === "trial";
+  const remaining = onFreeTrial ? limits.trialDaysLeft : daysLeft(subscription?.currentPeriodEnd);
+  const statusText = subscription
+    ? statusLabels[subscription.status] ?? subscription.status
+    : onFreeTrial
+      ? "Essai gratuit"
+      : "—";
 
   return (
     <DashboardShell onProfileLoaded={setProfile}>
@@ -47,6 +57,17 @@ export default function OverviewPage() {
           Voici votre galerie aujourd'hui
         </h2>
       </header>
+
+      {welcome && (
+        <section className="mb-8 rounded-md bg-aubergine text-platre p-6">
+          <p className="text-xs uppercase tracking-widest text-ocre">Bienvenue sur Drawiful</p>
+          <h3 className="font-display text-2xl mt-2">Votre galerie est créée.</h3>
+          <p className="text-sm text-platre/75 mt-2 max-w-xl">
+            Votre essai gratuit de 14 jours commence maintenant, sans carte bancaire. Suivez les étapes ci-dessous :
+            en quelques minutes, votre galerie est prête à être partagée.
+          </p>
+        </section>
+      )}
 
       {/* Premiers pas tant que la galerie n'est pas prête (inclut l'activation
           des paiements) ; ensuite, le bandeau paiements reste en filet de sécurité. */}
@@ -73,7 +94,7 @@ export default function OverviewPage() {
         <div className="rounded-md p-5 bg-white border border-bordure">
           <Award size={18} className="text-argile" strokeWidth={1.8} />
           <p className="font-display text-2xl text-encre mt-3">
-            {subscription ? statusLabels[subscription.status] ?? subscription.status : "—"}
+            {statusText}
           </p>
           <p className="text-xs mt-1 text-encre/60">Statut abonnement</p>
         </div>
@@ -83,7 +104,7 @@ export default function OverviewPage() {
           <p className="font-display text-2xl text-encre mt-3">
             {remaining !== null ? `${remaining} j.` : "—"}
           </p>
-          <p className="text-xs mt-1 text-encre/60">Avant prochaine échéance</p>
+          <p className="text-xs mt-1 text-encre/60">{onFreeTrial ? "Avant la fin de l'essai" : "Avant prochaine échéance"}</p>
         </div>
       </div>
 
@@ -102,7 +123,7 @@ export default function OverviewPage() {
       {artworks.length === 0 ? (
         <div className="rounded-md border border-dashed border-bordure p-10 text-center">
           <p className="text-sm text-encre/60">
-            Aucune œuvre pour l'instant. Ajoute ta première pièce depuis "Mes œuvres".
+            Aucune œuvre pour l'instant. Ajoutez votre première pièce depuis « Mes œuvres ».
           </p>
         </div>
       ) : (

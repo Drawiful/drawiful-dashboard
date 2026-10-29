@@ -45,7 +45,7 @@ export default function ArtworksPage() {
 
   async function handleGenerateCertificate(artworkId: string) {
     if (atCertLimit) {
-      setNotice(`Ta formule comprend ${limits.maxCertificates} certificat d'authenticité. Passe à la formule Artiste pour en créer d'autres.`);
+      setNotice(`Votre formule comprend ${limits.maxCertificates} certificat d'authenticité. Passez à la formule Artiste pour en créer d'autres.`);
       return;
     }
     setGeneratingId(artworkId);
@@ -69,7 +69,7 @@ export default function ArtworksPage() {
         <button
           onClick={() => {
             if (atArtworkLimit) {
-              setNotice(`Ta formule permet d'exposer ${limits.maxArtworks} œuvres. Archive une œuvre ou passe à la formule Artiste pour en ajouter.`);
+              setNotice(`Votre formule permet d'exposer ${limits.maxArtworks} œuvres. Archivez une œuvre ou passez à la formule Artiste pour en ajouter.`);
               return;
             }
             setEditing(null);

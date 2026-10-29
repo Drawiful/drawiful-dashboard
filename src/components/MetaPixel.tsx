@@ -118,7 +118,7 @@ export default function MetaPixel() {
         boxSizing: "border-box",
         padding: "10px 12px",
         borderRadius: 12,
-        background: "#2B1E2F",
+        background: "#16130F",
         color: "#F7F5F0",
         boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
         border: "1px solid rgba(247,245,240,0.12)",

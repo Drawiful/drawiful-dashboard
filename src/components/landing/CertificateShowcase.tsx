@@ -59,7 +59,7 @@ export default function CertificateShowcase() {
         </h2>
         <p className="mt-5 text-[#4A4540] leading-relaxed max-w-md">
           Un collectionneur achète plus sereinement quand l'authenticité est prouvée. Chaque œuvre vendue reçoit un
-          certificat numéroté, signé de ta main, consultable en ligne à tout moment.
+          certificat numéroté, signé de votre main, consultable en ligne à tout moment.
         </p>
         <div className="mt-8 flex flex-col gap-3 max-w-md" role="tablist" aria-label="Exemples de certificat">
           {SAMPLES.map((x, k) => (
@@ -68,8 +68,8 @@ export default function CertificateShowcase() {
               role="tab"
               aria-selected={k === i}
               onClick={() => setI(k)}
-              className={`text-left rounded-[4px] px-5 py-4 border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B8912F] ${
-                k === i ? "border-[#2B1E2F] bg-[#2B1E2F] text-[#F7F5F0]" : "border-[#1C1A17]/15 hover:border-[#1C1A17]/40"
+              className={`text-left rounded-[4px] px-5 py-4 border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C9A24A] ${
+                k === i ? "border-[#0E0C0A] bg-[#0E0C0A] text-[#F7F5F0]" : "border-[#1C1A17]/15 hover:border-[#1C1A17]/40"
               }`}
             >
               <span className="block font-semibold">{x.label}</span>
@@ -82,7 +82,7 @@ export default function CertificateShowcase() {
 
       <figure className="relative">
         <div className="bg-white p-3 shadow-[0_30px_60px_-25px_rgba(43,30,47,0.35)]">
-          <div className="border border-[#B8912F]/60 p-7 sm:p-9">
+          <div className="border border-[#C9A24A]/60 p-7 sm:p-9">
             <div className="flex items-start justify-between gap-6">
               <div>
                 <p className="text-sm text-[#77706A]">Drawiful</p>
@@ -90,14 +90,14 @@ export default function CertificateShowcase() {
               </div>
               <span
                 aria-hidden="true"
-                className="grid place-items-center h-14 w-14 shrink-0 rounded-full bg-[#7A2E2B] text-[#F7F5F0] ring-4 ring-[#7A2E2B]/15"
+                className="grid place-items-center h-14 w-14 shrink-0 rounded-full bg-[#0E0C0A] text-[#F7F5F0] ring-4 ring-[#0E0C0A]/15"
               >
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                   <path d="M5 12.5l4.5 4.5L19 7.5" />
                 </svg>
               </span>
             </div>
-            <div className="mt-6 border-t border-[#B8912F]/50">
+            <div className="mt-6 border-t border-[#C9A24A]/50">
               <Row label="Œuvre" value={s.artwork} />
               <Row label="Artiste" value={s.artist} />
               <Row label="Technique" value={s.technique} />
@@ -107,7 +107,7 @@ export default function CertificateShowcase() {
                 <Row label="Émis le" value={s.date} />
               </div>
             </div>
-            <p className="mt-6 font-display-lp italic text-xl text-[#2B1E2F]/80">{s.artist}</p>
+            <p className="mt-6 font-display-lp italic text-xl text-[#0E0C0A]/80">{s.artist}</p>
           </div>
         </div>
         <figcaption className="mt-3 text-xs text-[#77706A]">Exemple de certificat, données fictives.</figcaption>

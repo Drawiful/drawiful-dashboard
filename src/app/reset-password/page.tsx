@@ -48,15 +48,15 @@ export default function ResetPasswordPage() {
           : data.message;
         setError(
           res.status === 400
-            ? msg || "Ce lien est invalide ou a expiré. Fais une nouvelle demande."
-            : "Modification impossible pour le moment. Réessaie dans un instant."
+            ? msg || "Ce lien est invalide ou a expiré. Faites une nouvelle demande."
+            : "Modification impossible pour le moment. Réessayez dans un instant."
         );
         setLoading(false);
         return;
       }
       router.push("/login?reset=success");
     } catch {
-      setError("Modification impossible pour le moment. Réessaie dans un instant.");
+      setError("Modification impossible pour le moment. Réessayez dans un instant.");
       setLoading(false);
     }
   }
@@ -69,7 +69,7 @@ export default function ResetPasswordPage() {
         {token === undefined ? null : token === null ? (
           <>
             <p className="text-sm text-encre/70 mt-4 mb-8 leading-relaxed">
-              Ce lien est incomplet. Ouvre le lien reçu par e-mail en entier, ou fais une nouvelle demande.
+              Ce lien est incomplet. Ouvrez le lien reçu par e-mail en entier, ou faites une nouvelle demande.
             </p>
             <Link
               href="/forgot-password"
@@ -80,7 +80,7 @@ export default function ResetPasswordPage() {
           </>
         ) : (
           <>
-            <p className="text-sm text-encre/60 mb-8">Choisis un mot de passe d'au moins 8 caractères.</p>
+            <p className="text-sm text-encre/60 mb-8">Choisissez un mot de passe d'au moins 8 caractères.</p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>

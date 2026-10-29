@@ -62,7 +62,7 @@ export default function ArtworkForm({
     const w = widthCm.trim() ? Number(widthCm.replace(",", ".")) : null;
     const h = heightCm.trim() ? Number(heightCm.replace(",", ".")) : null;
     if ((w === null) !== (h === null)) {
-      setError("Indique la largeur et la hauteur, ou laisse les deux vides.");
+      setError("Indiquez la largeur et la hauteur, ou laissez les deux vides.");
       return;
     }
     if (w !== null && h !== null && (!(w >= 1 && w <= 1000) || !(h >= 1 && h <= 1000))) {
@@ -265,7 +265,7 @@ export default function ArtworkForm({
                   style={{ width: "100%", height: "220px", backgroundColor: "#F7F2EA" }}
                 />
                 <p className="text-xs text-center py-1.5 text-encre/50">
-                  Glisse pour tourner, molette pour zoomer
+                  Glissez pour tourner, molette pour zoomer
                 </p>
               </div>
             )}

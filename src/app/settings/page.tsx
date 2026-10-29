@@ -78,7 +78,7 @@ export default function SettingsPage() {
       <section className="max-w-lg mb-12">
         <h3 className="font-display text-xl text-encre mb-1">Encaisser mes ventes</h3>
         <p className="text-sm text-encre/60 mb-4">
-          Connecte ton compte Stripe pour recevoir directement l'argent de tes ventes d'œuvres.
+          Connectez votre compte Stripe pour recevoir directement l'argent de vos ventes d'œuvres.
           Drawiful ne prélève aucune commission.
         </p>
 

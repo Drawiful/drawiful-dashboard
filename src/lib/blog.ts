@@ -32,9 +32,9 @@ export const POSTS: BlogPost[] = [
     title: "Créer un site pour vendre ses tableaux, sans compétences techniques",
     seoTitle: "Créer un site pour vendre ses tableaux : le guide simple",
     description:
-      "Plateforme, créateur de site, WordPress ou solution pour artistes : comment créer ton site pour vendre tes tableaux, et ce qu'il doit contenir.",
+      "Plateforme, créateur de site, WordPress ou solution pour artistes : comment créer votre site pour vendre vos tableaux, et ce qu'il doit contenir.",
     excerpt:
-      "Les 4 options pour avoir ton propre site, ce que chaque page doit contenir et les 7 étapes pour le mettre en ligne cette semaine.",
+      "Les 4 options pour avoir votre propre site, ce que chaque page doit contenir et les 7 étapes pour le mettre en ligne cette semaine.",
     date: "2026-10-27",
     readingMinutes: 8,
     Content: CreerSite,
@@ -44,7 +44,7 @@ export const POSTS: BlogPost[] = [
     title: "Galerie d'art virtuelle en 3D : comment exposer ses œuvres en ligne",
     seoTitle: "Galerie d'art virtuelle 3D : exposer ses œuvres en ligne",
     description:
-      "Visite 360°, outils d'exposition virtuelle ou galerie 3D reliée à une boutique : comment créer ton exposition en ligne et la faire visiter.",
+      "Visite 360°, outils d'exposition virtuelle ou galerie 3D reliée à une boutique : comment créer votre exposition en ligne et la faire visiter.",
     excerpt:
       "Les trois façons de créer une exposition virtuelle, les critères pour choisir et les conseils pour qu'elle fasse vendre.",
     date: "2026-10-27",
@@ -56,9 +56,9 @@ export const POSTS: BlogPost[] = [
     title: "Vendre ses œuvres d'art en ligne sans commission : le guide 2026",
     seoTitle: "Vendre ses œuvres d'art en ligne sans commission (guide 2026)",
     description:
-      "Galerie, Saatchi, Artmajeur, Etsy ou ta propre galerie : combien tu gardes vraiment sur une vente de 1 000 €, et comment vendre en direct.",
+      "Galerie, Saatchi, Artmajeur, Etsy ou votre propre galerie : combien vous gardez vraiment sur une vente de 1 000 €, et comment vendre en direct.",
     excerpt:
-      "Sur une vente de 1 000 €, tu peux garder 500 € ou presque tout. Comparatif des commissions et méthode pour vendre en direct.",
+      "Sur une vente de 1 000 €, vous pouvez garder 500 € ou presque tout. Comparatif des commissions et méthode pour vendre en direct.",
     date: "2026-10-27",
     readingMinutes: 8,
     Content: VendreSansCommission,
@@ -70,7 +70,7 @@ export const POSTS: BlogPost[] = [
     description:
       "Les mentions à faire figurer sur un certificat d'authenticité, ce que dit la loi en France, un modèle à recopier et les erreurs à éviter.",
     excerpt:
-      "Les informations indispensables, les mots qui engagent juridiquement et un modèle prêt à l'emploi pour tes œuvres.",
+      "Les informations indispensables, les mots qui engagent juridiquement et un modèle prêt à l'emploi pour vos œuvres.",
     date: "2026-10-27",
     readingMinutes: 7,
     Content: CertificatAuthenticite,
@@ -80,7 +80,7 @@ export const POSTS: BlogPost[] = [
     title: "Comment fixer le prix de ses œuvres d'art : 3 méthodes simples",
     seoTitle: "Fixer le prix de ses tableaux et dessins : 3 méthodes",
     description:
-      "Prix au point, matériaux et temps passé, comparaison avec d'autres artistes : trois méthodes concrètes pour fixer le prix de tes œuvres.",
+      "Prix au point, matériaux et temps passé, comparaison avec d'autres artistes : trois méthodes concrètes pour fixer le prix de vos œuvres.",
     excerpt:
       "Prix au point, coût et temps passé, comparables : trois méthodes concrètes et les règles pour garder des prix cohérents.",
     date: "2026-10-27",

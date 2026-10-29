@@ -91,7 +91,7 @@ export default function OrdersPage() {
       ) : orders.length === 0 ? (
         <div className="rounded-md border border-dashed border-bordure p-10 text-center">
           <p className="text-sm text-encre/60">
-            Aucune vente pour l'instant. Connecte ton compte Stripe depuis les Paramètres pour
+            Aucune vente pour l'instant. Connectez votre compte Stripe depuis les Paramètres pour
             commencer à vendre.
           </p>
         </div>

@@ -23,7 +23,7 @@ export default function ForgotPasswordPage() {
       if (!res.ok) throw new Error();
       setSent(true);
     } catch {
-      setError("Envoi impossible pour le moment. Vérifie ton adresse et réessaie.");
+      setError("Envoi impossible pour le moment. Vérifiez votre adresse et réessayez.");
     } finally {
       setLoading(false);
     }
@@ -37,10 +37,10 @@ export default function ForgotPasswordPage() {
         {sent ? (
           <>
             <p className="text-sm text-encre/70 mt-4 mb-2 leading-relaxed">
-              Si un compte existe pour <strong className="text-encre">{email.trim()}</strong>, tu vas recevoir un
+              Si un compte existe pour <strong className="text-encre">{email.trim()}</strong>, vous allez recevoir un
               e-mail avec un lien pour choisir un nouveau mot de passe. Le lien est valable 1 heure.
             </p>
-            <p className="text-sm text-encre/60 mb-8">Pense à regarder dans tes spams.</p>
+            <p className="text-sm text-encre/60 mb-8">Pensez à regarder dans vos spams.</p>
             <Link href="/login" className="text-sm text-encre underline">
               Retour à la connexion
             </Link>
@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
         ) : (
           <>
             <p className="text-sm text-encre/60 mb-8">
-              Indique l'e-mail de ton compte : on t'envoie un lien pour choisir un nouveau mot de passe.
+              Indiquez l'e-mail de votre compte : nous vous envoyons un lien pour choisir un nouveau mot de passe.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">

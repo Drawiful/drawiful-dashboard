@@ -40,7 +40,7 @@ export default function BlogLayout({ children }: { children: ReactNode }) {
               href="/inscription?plan=artiste"
               className="rounded-full bg-[#B8912F] px-4 py-2 text-sm font-semibold text-[#1C1A17] hover:bg-[#C9A24A]"
             >
-              Essayer 14 jours
+              Essai gratuit
             </Link>
           </div>
         </nav>

@@ -21,32 +21,32 @@ export function onboardingSteps(profile: any): Step[] {
   return [
     {
       key: "identity",
-      title: "Donne un nom et une bio à ta galerie",
-      text: "C'est ce que tes visiteurs lisent en premier.",
+      title: "Donnez un nom et une bio à votre galerie",
+      text: "C'est ce que vos visiteurs lisent en premier.",
       href: "/gallery",
       cta: "Personnaliser",
       done: !!profile.bio?.trim() && !galleryName.startsWith("Galerie de "),
     },
     {
       key: "avatar",
-      title: "Ajoute ta photo ou ton logo",
-      text: "Il apparaît sur ta galerie et sur la page de paiement.",
+      title: "Ajoutez votre photo ou votre logo",
+      text: "Il apparaît sur votre galerie et sur la page de paiement.",
       href: "/gallery",
       cta: "Ajouter",
       done: !!profile.avatarUrl,
     },
     {
       key: "artwork",
-      title: "Publie ta première œuvre",
-      text: "Une photo, un titre, un prix : ta galerie prend vie.",
+      title: "Publiez votre première œuvre",
+      text: "Une photo, un titre, un prix : votre galerie prend vie.",
       href: "/artworks",
       cta: "Publier",
       done: artworks.some((a) => a.status === "PUBLISHED" || a.status === "SOLD"),
     },
     {
       key: "payments",
-      title: "Active les paiements",
-      text: "5 minutes avec Stripe pour recevoir l'argent de tes ventes, sans commission Drawiful.",
+      title: "Activez les paiements",
+      text: "5 minutes avec Stripe pour recevoir l'argent de vos ventes, sans commission Drawiful. Vous pouvez vendre dès l'essai.",
       href: "/settings",
       cta: "Activer",
       done: !!profile.stripeOnboardingDone,
@@ -105,9 +105,9 @@ export default function GettingStarted({ profile }: { profile: any }) {
           <X size={18} />
         </button>
         <p className="text-xs uppercase tracking-widest text-ocre">Galerie prête</p>
-        <h3 className="font-display text-2xl mt-2">Bravo, ta galerie est ouverte à la vente.</h3>
+        <h3 className="font-display text-2xl mt-2">Bravo, votre galerie est ouverte à la vente.</h3>
         <p className="text-sm text-platre/75 mt-2 max-w-xl">
-          Prochaine étape : la faire connaître. Mets le lien dans ta bio Instagram et TikTok, et partage-le à tes proches.
+          Prochaine étape : la faire connaître. Mettez le lien dans votre bio Instagram et TikTok, et partagez-le à vos proches.
         </p>
         <div className="flex flex-wrap items-center gap-3 mt-5">
           <span className="text-sm bg-platre/10 rounded-md px-3 py-2 break-all">{galleryUrl}</span>
@@ -136,7 +136,7 @@ export default function GettingStarted({ profile }: { profile: any }) {
     <section className="mb-8 rounded-md bg-white border border-bordure p-6">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
-          <h3 className="font-display text-2xl text-encre">Ouvre ta galerie en 4 étapes</h3>
+          <h3 className="font-display text-2xl text-encre">Ouvrez votre galerie en 4 étapes</h3>
           <p className="text-sm text-encre/60 mt-1">
             {doneCount} sur {steps.length} terminée{doneCount > 1 ? "s" : ""}
           </p>

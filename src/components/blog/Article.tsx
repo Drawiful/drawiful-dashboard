@@ -26,12 +26,13 @@ export function DrawifulCta({ title, text }: { title: string; text: string }) {
     <aside className="my-12 overflow-hidden rounded-2xl bg-[#2B1E2F] px-6 py-8 text-[#F7F5F0] sm:px-10 sm:py-10">
       <p className="font-display-lp text-2xl leading-tight sm:text-3xl">{title}</p>
       <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-[#F7F5F0]/75">{text}</p>
+      <p className="mt-2 text-[13px] text-[#F7F5F0]/55">14 jours gratuits, sans carte bancaire.</p>
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
         <Link
-          href="/inscription?plan=artiste"
+          href="/inscription"
           className="inline-flex items-center justify-center rounded-full bg-[#B8912F] px-7 py-3.5 text-[15px] font-semibold text-[#1C1A17] hover:bg-[#C9A24A]"
         >
-          Essayer 14 jours gratuits
+          Créer ma galerie gratuitement
         </Link>
         <a
           href="https://erwan.drawiful.art"

@@ -6,7 +6,7 @@ import { Analytics } from "@vercel/analytics/next";
 
 export const metadata = {
   title: "Drawiful — Dashboard artiste",
-  description: "Gère ta galerie, tes œuvres et ton abonnement",
+  description: "Gérez votre galerie, vos œuvres et votre abonnement",
   // Vérification des domaines dans Meta Business Suite (une balise par domaine) :
   // drawiful.app, puis drawiful.art
   other: {

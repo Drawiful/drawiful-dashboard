@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutGrid, Image, Palette, CreditCard, LogOut, ShoppingBag, Settings, Globe } from "lucide-react";
+import { LayoutGrid, Image, Palette, CreditCard, LogOut, ShoppingBag, Settings, Globe, Lock } from "lucide-react";
 import { clearToken } from "@/lib/api";
 
 const navItems = [
@@ -14,7 +14,7 @@ const navItems = [
   { href: "/settings", icon: Settings, label: "Paramètres" },
 ];
 
-export default function Sidebar({ galleryName }: { galleryName?: string }) {
+export default function Sidebar({ galleryName, locked = false }: { galleryName?: string; locked?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -35,6 +35,21 @@ export default function Sidebar({ galleryName }: { galleryName?: string }) {
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
+            // Essai terminé : seule la page Abonnement reste ouverte
+            if (locked && item.href !== "/subscription") {
+              return (
+                <span
+                  key={item.href}
+                  title="Choisissez votre formule pour rouvrir cette page"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm cursor-not-allowed"
+                  style={{ color: "rgba(216,205,217,0.4)" }}
+                >
+                  <Icon size={17} strokeWidth={1.8} />
+                  <span className="flex-1">{item.label}</span>
+                  <Lock size={13} strokeWidth={1.8} />
+                </span>
+              );
+            }
             return (
               <Link
                 key={item.href}

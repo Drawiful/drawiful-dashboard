@@ -34,8 +34,14 @@ function formatPrice(plan: Plan) {
   return price + per;
 }
 
+function longDate(iso?: string | null) {
+  return iso ? new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long" }) : "";
+}
+
 export default function SubscriptionPage() {
   const [subscription, setSubscription] = useState<any>(null);
+  const [limits, setLimits] = useState<any>(null);
+  const [preferred, setPreferred] = useState<string | null>(null);
   const [redirecting, setRedirecting] = useState(false);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [choosing, setChoosing] = useState<string | null>(null);
@@ -45,7 +51,11 @@ export default function SubscriptionPage() {
     api
       .getPlans()
       .then(setPlans)
-      .catch(() => setError("Impossible de charger les plans pour le moment."));
+      .catch(() => setError("Impossible de charger les formules pour le moment."));
+    // Formule repérée sur la landing avant l'inscription
+    try {
+      setPreferred(localStorage.getItem("drawiful_plan"));
+    } catch {}
   }, []);
 
   async function handleManage() {
@@ -72,20 +82,55 @@ export default function SubscriptionPage() {
 
   const status = subscription ? statusLabels[subscription.status] : null;
   const planName = subscription?.plan ? plans.find((p) => p.key === subscription.plan)?.name : null;
-  // On propose les plans s'il n'y a pas d'abonnement, ou s'il a été annulé.
+  // On propose les formules s'il n'y a pas d'abonnement, ou s'il a été annulé.
   const showPlans = !subscription || subscription.status === "CANCELED";
-  const firstSubscription = !subscription;
+  const access = limits?.access;
+  const trialEnd = longDate(limits?.trialEndsAt);
+  // Essai sans carte en cours : l'abonnement démarre à la fin de l'essai
+  // (Stripe exige au moins 48 h d'écart, sinon le prélèvement est immédiat).
+  const trialMsLeft = limits?.trialEndsAt ? new Date(limits.trialEndsAt).getTime() - Date.now() : 0;
+  const deferredCharge = access === "trial" && trialMsLeft > 48 * 60 * 60 * 1000;
+
+  let heading = "Choisissez votre formule";
+  let intro = "14 jours d'essai gratuit, puis prélèvement automatique. Vous pouvez annuler à tout moment.";
+  if (subscription?.status === "CANCELED") {
+    heading = "Reprendre un abonnement";
+    intro = "Votre abonnement est annulé : choisissez une formule pour réactiver votre galerie.";
+  } else if (access === "trial") {
+    intro = deferredCharge
+      ? `Votre essai gratuit court jusqu'au ${trialEnd}. Choisissez votre formule dès maintenant : rien n'est prélevé avant cette date, et vous gardez tout pendant l'essai.`
+      : `Votre essai gratuit se termine le ${trialEnd}. Choisissez votre formule pour continuer sans interruption.`;
+  } else if (access === "locked") {
+    heading = "Rouvrez votre galerie";
+    intro =
+      "Choisissez votre formule : votre tableau de bord, votre boutique et votre visite 3D se rouvrent immédiatement. Vos œuvres, vos certificats et vos réglages sont conservés.";
+  }
 
   return (
-    <DashboardShell onProfileLoaded={(p) => setSubscription(p.subscription)}>
+    <DashboardShell
+      onProfileLoaded={(p) => {
+        setSubscription(p.subscription);
+        setLimits(p.limits);
+      }}
+    >
       <h2 className="font-display text-4xl text-encre mb-8">Abonnement</h2>
+
+      {access === "locked" && !subscription && (
+        <div className="max-w-2xl rounded-md border border-ocre/50 bg-ocre/10 p-6 mb-10">
+          <p className="font-display text-2xl text-encre">Votre essai gratuit est terminé</p>
+          <p className="text-sm text-encre/70 mt-2">
+            Votre galerie reste en ligne et vos visiteurs voient toujours vos œuvres. En revanche, la boutique et la
+            visite 3D sont en pause, et votre tableau de bord est en lecture seule.
+          </p>
+        </div>
+      )}
 
       {subscription && (
         <div className="max-w-lg rounded-md bg-aubergine p-7 mb-10">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <CreditCard size={20} className="text-ocre" strokeWidth={1.8} />
-              {planName && <span className="text-sm text-lilas">Plan {planName}</span>}
+              {planName && <span className="text-sm text-lilas">Formule {planName}</span>}
             </div>
             <span
               className="text-xs px-2.5 py-1 rounded-full font-medium"
@@ -111,7 +156,7 @@ export default function SubscriptionPage() {
                 {redirecting ? "Redirection..." : "Gérer mon abonnement"}
               </button>
               <p className="text-xs text-lilas/60 mt-3 text-center">
-                Change de plan, mets à jour ta carte, ou annule directement depuis Stripe.
+                Changez de formule, mettez à jour votre carte ou annulez directement depuis Stripe.
               </p>
             </>
           )}
@@ -120,14 +165,8 @@ export default function SubscriptionPage() {
 
       {showPlans && (
         <section className="max-w-4xl">
-          <h3 className="font-display text-2xl text-encre mb-2">
-            {firstSubscription ? "Choisis ton plan" : "Reprendre un abonnement"}
-          </h3>
-          <p className="text-sm text-encre/60 mb-6">
-            {firstSubscription
-              ? "14 jours d'essai gratuit, puis prélèvement automatique. Tu peux annuler à tout moment."
-              : "Ton abonnement est annulé : choisis un plan pour réactiver ta galerie."}
-          </p>
+          <h3 className="font-display text-2xl text-encre mb-2">{heading}</h3>
+          <p className="text-sm text-encre/60 mb-6 max-w-2xl">{intro}</p>
 
           {error && <p className="text-sm text-[#B5533C] mb-4">{error}</p>}
 
@@ -136,7 +175,12 @@ export default function SubscriptionPage() {
               const price = formatPrice(plan);
               const with3d = PLANS_WITH_3D.includes(plan.key);
               return (
-                <div key={plan.key} className="rounded-md border border-bordure p-6 flex flex-col">
+                <div
+                  key={plan.key}
+                  className={`rounded-md border p-6 flex flex-col ${
+                    preferred === plan.key ? "border-ocre ring-1 ring-ocre/50" : "border-bordure"
+                  }`}
+                >
                   <p className="font-display text-xl text-encre mb-1">{plan.name}</p>
                   <p className="text-sm text-encre/70 mb-5">
                     {plan.onQuote ? "Sur devis, selon le nombre d'artistes" : price ?? "Prix affiché au paiement"}
@@ -144,7 +188,7 @@ export default function SubscriptionPage() {
 
                   <p className={`flex items-center gap-2 text-sm mb-6 ${with3d ? "text-encre" : "text-encre/50"}`}>
                     <Box size={15} className={with3d ? "text-ocre" : ""} />
-                    {with3d ? "Visite 3D de ta galerie incluse" : "Sans visite 3D"}
+                    {with3d ? "Boutique et visite 3D incluses" : "Sans boutique ni visite 3D"}
                   </p>
 
                   {plan.onQuote ? (
