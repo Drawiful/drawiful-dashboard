@@ -29,11 +29,11 @@ const display = Bodoni_Moda({ subsets: ["latin"], variable: "--font-lp-display",
 const body = Manrope({ subsets: ["latin"], variable: "--font-lp-body", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Drawiful — L'écrin digital des artistes contemporains",
+  title: "Drawiful — L'écrin des artistes contemporains",
   description:
     "Exposez vos œuvres dans votre propre galerie visitable en 3D, avec certificats d'authenticité et vente en ligne. 0 % de commission. 14 jours offerts, sans carte bancaire.",
   openGraph: {
-    title: "Drawiful — L'écrin digital des artistes contemporains",
+    title: "Drawiful — L'écrin des artistes contemporains",
     description:
       "Votre galerie à votre nom, visitable en 3D, avec certificats d'authenticité et vente en ligne. 0 % de commission. 14 jours offerts.",
     images: ["/landing/salle-haussmann.jpg"],
@@ -302,10 +302,10 @@ export default function LandingPage() {
           </div>
           <div className="relative -mt-8 px-5 pb-6">
             <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.3em] text-[#D9B75C] [@media(max-height:720px)]:hidden">
-              L'excellence numérique au service de la création
+              L'excellence au service de la création
             </p>
             <h1 className="font-display-lp text-[40px] leading-[1.02] tracking-[-0.01em] [@media(max-height:680px)]:text-[36px]">
-              L'écrin digital des artistes contemporains.
+              L'écrin des artistes contemporains.
             </h1>
             <p className="mt-3 text-[15px] leading-relaxed text-[#F4EFE6]/80">
               Offrez à vos collectionneurs une immersion grandeur nature dans votre univers. Exposez en 3D, vendez dans le
@@ -330,10 +330,10 @@ export default function LandingPage() {
           <div className="relative mx-auto max-w-7xl px-8 pt-36 pb-28 lg:pt-40 grid grid-cols-[1.15fr_0.85fr] gap-16 lg:gap-24 items-center">
             <div>
               <p className="text-[12px] font-semibold uppercase tracking-[0.32em] text-[#D9B75C]">
-                L'excellence numérique au service de la création
+                L'excellence au service de la création
               </p>
               <h1 className="font-display-lp mt-6 text-6xl lg:text-[82px] leading-[1.0] tracking-[-0.015em]">
-                L'écrin digital des artistes contemporains.
+                L'écrin des artistes contemporains.
               </h1>
               <p className="mt-8 max-w-xl text-lg leading-relaxed text-[#F4EFE6]/75">
                 Offrez à vos collectionneurs une immersion grandeur nature dans votre univers. Exposez en 3D, vendez dans
@@ -681,10 +681,10 @@ export default function LandingPage() {
       <section className="bg-[#F7F3EC] text-[#1A1714]">
         <div className="mx-auto max-w-4xl px-5 sm:px-8 py-20 sm:py-32">
           <Kicker n="IX">Le fondateur</Kicker>
-          <h2 className="font-display-lp mt-6 text-[38px] sm:text-5xl leading-[1.05]">L'outil d'un créateur, pour les créateurs.</h2>
+          <h2 className="font-display-lp mt-6 text-[38px] sm:text-5xl leading-[1.05]">Pensé par un artiste, pour les artistes.</h2>
           <blockquote className="mt-10 border-l-2 border-[#9A7B2F] pl-6 sm:pl-8">
             <p className="font-display-lp text-2xl sm:text-[30px] leading-[1.35] italic">
-              « En tant que dessinateur, j'ai longtemps cherché un espace numérique capable de restituer la solennité et
+              « En tant que dessinateur, j'ai longtemps cherché un lieu capable de restituer la solennité et
               l'émotion d'une véritable exposition. Ne trouvant aucune solution à la hauteur de notre métier, j'ai choisi
               de bâtir Drawiful. »
             </p>
@@ -749,7 +749,7 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-6 px-5 py-12 sm:flex-row sm:px-8">
           <div>
             <p className="font-display-lp text-2xl text-[#F4EFE6]">Drawiful</p>
-            <p className="mt-2 text-sm">L'écrin digital des artistes contemporains.</p>
+            <p className="mt-2 text-sm">L'écrin des artistes contemporains.</p>
             <SocialLinks className="mt-4 -ml-2.5" />
           </div>
           <div className="flex flex-col gap-2 text-sm sm:items-end">
