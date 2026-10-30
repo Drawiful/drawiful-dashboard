@@ -7,7 +7,7 @@ import { api } from "@/lib/api";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { ROOT_DOMAIN, galleryUrl } from "@/lib/domain";
 
-import { THEME_OPTIONS as THEMES, DEFAULT_THEME, normalizeThemeId } from "@/components/themes/skins";
+import { THEME_OPTIONS as THEMES, DEFAULT_THEME, normalizeThemeId, getSkin } from "@/components/themes/skins";
 
 import { Section, field, fieldLabel as label, hint } from "@/components/FormSection";
 
@@ -104,9 +104,10 @@ export default function GalleryPage() {
 
       <form onSubmit={handleSubmit} className="pb-28">
         <Section num="I" title="L'ambiance" intro="Vos œuvres, votre bio et vos prix restent les mêmes : seule la mise en scène change.">
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-3">
             {THEMES.map((t) => {
               const selected = theme === t.value;
+              const room = getSkin(t.value).ambiance3d;
               return (
                 <button
                   key={t.value}
@@ -114,27 +115,33 @@ export default function GalleryPage() {
                   disabled={!t.available}
                   onClick={() => setTheme(t.value)}
                   aria-pressed={selected}
-                  className={`relative text-left rounded-xl p-5 transition-colors ${
-                    selected ? "bg-nuit text-ivoire ring-1 ring-champagne/70" : "bg-papier border border-bordure text-encre hover:border-laiton/60"
+                  className={`group text-left rounded-xl overflow-hidden transition-shadow ${
+                    selected ? "ring-2 ring-champagne shadow-[0_14px_34px_rgba(22,19,15,0.25)]" : "ring-1 ring-bordure hover:ring-laiton/60"
                   } ${t.available ? "" : "opacity-60 cursor-not-allowed"}`}
                 >
-                  {selected && (
-                    <span className="absolute top-4 right-4 flex items-center justify-center w-6 h-6 rounded-full bg-champagne text-nuit">
-                      <Check size={13} strokeWidth={2.2} />
-                    </span>
-                  )}
-                  {!t.available && (
-                    <span className="absolute top-4 right-4 text-pierre">
-                      <Lock size={14} />
-                    </span>
-                  )}
-                  <div className="flex gap-1.5 mb-4">
-                    {t.swatch.map((c, i) => (
-                      <span key={i} className="w-5 h-5 rounded-full border border-black/10" style={{ background: c }} />
-                    ))}
-                  </div>
-                  <p className="font-display text-xl leading-tight">{t.label}</p>
-                  <p className={`text-[13px] leading-relaxed mt-1.5 ${selected ? "text-lilas" : "text-pierre"}`}>{t.description}</p>
+                  <span className="relative block aspect-[4/3] bg-nuit overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`/salles/${room}.jpg`}
+                      alt={`Aperçu de la salle « ${t.label} » en 3D`}
+                      loading="lazy"
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                    />
+                    {selected && (
+                      <span className="absolute top-3 right-3 flex items-center justify-center w-7 h-7 rounded-full bg-champagne text-nuit">
+                        <Check size={14} strokeWidth={2.2} />
+                      </span>
+                    )}
+                    {!t.available && (
+                      <span className="absolute top-3 right-3 text-ivoire">
+                        <Lock size={14} />
+                      </span>
+                    )}
+                  </span>
+                  <span className={`flex items-center justify-between gap-3 px-4 py-3.5 ${selected ? "bg-nuit text-ivoire" : "bg-papier text-encre"}`}>
+                    <span className="font-display text-xl leading-tight">{t.label}</span>
+                    {selected && <span className="text-[11px] uppercase tracking-[0.18em] text-champagne">Votre salle</span>}
+                  </span>
                 </button>
               );
             })}
