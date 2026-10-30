@@ -1951,6 +1951,13 @@ function updateMovement(delta){
 const raycaster = new THREE.Raycaster();
 const infoPanel = document.getElementById('infoPanel');
 let focusedArt = null;
+// Prévient la galerie de l'œuvre regardée (mesure « s'est attardé »)
+let lastFocusId = null;
+function notifyFocus(id){
+  if(id === lastFocusId) return;
+  lastFocusId = id;
+  try{ if(window.parent !== window) window.parent.postMessage({ type:'GALLERY_ARTWORK_FOCUS', id }, location.origin); }catch(e){}
+}
 
 document.getElementById('ip-cta').addEventListener('click', () => {
   if(!focusedArt) return;
@@ -1965,6 +1972,7 @@ function updateFocus(){
   if(hits.length && hits[0].distance < 5 && !occluders.includes(hits[0].object)){
     const f = frameGroups.find(x => x.canvasMesh === hits[0].object);
     focusedArt = f.art;
+    notifyFocus(f.art.id || null);
     document.getElementById('ip-artist').textContent = f.art.artist || '';
     document.getElementById('ip-title').textContent = f.art.title;
     document.getElementById('ip-meta').textContent = f.art.meta || '';
@@ -1973,6 +1981,7 @@ function updateFocus(){
   } else {
     infoPanel.classList.remove('visible');
     focusedArt = null;
+    notifyFocus(null);
   }
 }
 

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { CheckCircle2, AlertCircle, ExternalLink } from "lucide-react";
 import DashboardShell from "@/components/DashboardShell";
+import PageHeader from "@/components/PageHeader";
 import { api } from "@/lib/api";
 
 export default function SettingsPage() {
@@ -73,10 +74,10 @@ export default function SettingsPage() {
 
   return (
     <DashboardShell>
-      <h2 className="font-display text-4xl text-encre mb-8">Paramètres</h2>
+      <PageHeader kicker="Votre maison" title="Votre maison" intro="L’encaissement de vos ventes, votre adresse e-mail et votre mot de passe." />
 
       <section className="max-w-lg mb-12">
-        <h3 className="font-display text-xl text-encre mb-1">Encaisser mes ventes</h3>
+        <h3 className="font-display text-xl text-encre mb-1">Encaisser vos ventes</h3>
         <p className="text-sm text-encre/60 mb-4">
           Connectez votre compte Stripe pour recevoir directement l'argent de vos ventes d'œuvres.
           Drawiful ne prélève aucune commission.

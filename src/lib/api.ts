@@ -98,6 +98,9 @@ export const api = {
   // Ventes
   getOrders: () => request("/api/orders"),
   getOrderStats: () => request("/api/orders/stats"),
+
+  // Fréquentation de la galerie (visiteurs, « se sont attardés »), N derniers jours
+  getMyStats: (days = 7) => request(`/api/analytics/me?days=${days}`),
   markOrderShipped: (id: string) => request(`/api/orders/${id}/ship`, { method: "PATCH" }),
   refundOrder: (id: string) => request(`/api/orders/${id}/refund`, { method: "POST" }),
 

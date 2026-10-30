@@ -37,10 +37,10 @@ export function onboardingSteps(profile: any): Step[] {
     },
     {
       key: "artwork",
-      title: "Publiez votre première œuvre",
+      title: "Accrochez votre première œuvre",
       text: "Une photo, un titre, un prix : votre galerie prend vie.",
       href: "/artworks",
-      cta: "Publier",
+      cta: "Accrocher",
       done: artworks.some((a) => a.status === "PUBLISHED" || a.status === "SOLD"),
     },
     {
@@ -100,20 +100,20 @@ export default function GettingStarted({ profile }: { profile: any }) {
   if (doneCount === steps.length) {
     if (celebrationSeen) return null;
     return (
-      <section className="mb-8 rounded-md bg-aubergine text-platre p-6 relative">
-        <button onClick={dismiss} aria-label="Fermer" className="absolute top-4 right-4 text-platre/60 hover:text-platre">
+      <section className="rounded-xl bg-nuit text-ivoire p-8 relative">
+        <button onClick={dismiss} aria-label="Fermer" className="absolute top-3 right-3 w-11 h-11 flex items-center justify-center text-ivoire/60 hover:text-ivoire">
           <X size={18} />
         </button>
-        <p className="text-xs uppercase tracking-widest text-ocre">Galerie prête</p>
-        <h3 className="font-display text-2xl mt-2">Bravo, votre galerie est ouverte à la vente.</h3>
-        <p className="text-sm text-platre/75 mt-2 max-w-xl">
-          Prochaine étape : la faire connaître. Mettez le lien dans votre bio Instagram et TikTok, et partagez-le à vos proches.
+        <p className="text-[11px] uppercase tracking-[0.2em] text-champagne">Vernissage</p>
+        <h3 className="font-display font-normal text-[30px] leading-snug mt-2">Votre galerie est ouverte. Que le monde entre.</h3>
+        <p className="text-[15px] text-lilas mt-2 max-w-xl">
+          Faites-la connaître : glissez le lien dans votre bio Instagram et TikTok, et partagez-le à vos proches.
         </p>
         <div className="flex flex-wrap items-center gap-3 mt-5">
-          <span className="text-sm bg-platre/10 rounded-md px-3 py-2 break-all">{galleryUrl}</span>
+          <span className="text-sm bg-ivoire/10 rounded-md px-3 py-2 break-all">{galleryUrl}</span>
           <button
             onClick={copyLink}
-            className="inline-flex items-center gap-2 text-sm px-4 py-2 rounded-md bg-platre text-aubergine font-medium"
+            className="inline-flex items-center gap-2 text-sm min-h-[44px] px-5 rounded-full bg-champagne text-nuit font-semibold"
           >
             <Copy size={14} /> {copied ? "Lien copié" : "Copier le lien"}
           </button>
@@ -121,9 +121,9 @@ export default function GettingStarted({ profile }: { profile: any }) {
             href={galleryUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm px-4 py-2 rounded-md border border-platre/30"
+            className="inline-flex items-center gap-2 text-sm min-h-[44px] px-5 rounded-full border border-ivoire/40"
           >
-            Voir ma galerie <ExternalLink size={14} />
+            Visiter votre galerie <ExternalLink size={14} />
           </a>
         </div>
       </section>
@@ -133,11 +133,12 @@ export default function GettingStarted({ profile }: { profile: any }) {
   const next = steps.find((s) => !s.done);
 
   return (
-    <section className="mb-8 rounded-md bg-white border border-bordure p-6">
+    <section className="rounded-xl bg-papier border border-bordure p-8">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
-          <h3 className="font-display text-2xl text-encre">Ouvrez votre galerie en 4 étapes</h3>
-          <p className="text-sm text-encre/60 mt-1">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-laiton">Avant le vernissage</p>
+          <h3 className="font-display font-normal text-[28px] text-encre mt-2">Préparez l'ouverture de votre galerie</h3>
+          <p className="text-sm text-pierre mt-1">
             {doneCount} sur {steps.length} terminée{doneCount > 1 ? "s" : ""}
           </p>
         </div>
@@ -145,15 +146,15 @@ export default function GettingStarted({ profile }: { profile: any }) {
           href={galleryUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-sm text-aubergine hover:underline"
+          className="inline-flex items-center gap-1.5 text-sm text-laiton underline underline-offset-4"
         >
-          Voir ma galerie <ExternalLink size={13} />
+          Visiter votre galerie <ExternalLink size={13} />
         </a>
       </div>
 
-      <div className="h-1.5 rounded-full bg-bordure mt-4 overflow-hidden">
+      <div className="h-1 rounded-full bg-bordure mt-5 overflow-hidden">
         <div
-          className="h-full bg-ocre rounded-full transition-all"
+          className="h-full bg-champagne rounded-full transition-all"
           style={{ width: `${(doneCount / steps.length) * 100}%` }}
         />
       </div>
@@ -165,7 +166,7 @@ export default function GettingStarted({ profile }: { profile: any }) {
             <li key={s.key} className="flex items-center gap-4 py-3.5">
               <span
                 className={`flex items-center justify-center w-7 h-7 rounded-full shrink-0 text-xs font-semibold ${
-                  s.done ? "bg-sauge text-white" : isNext ? "bg-aubergine text-platre" : "border border-bordure text-encre/50"
+                  s.done ? "bg-champagne text-nuit" : isNext ? "bg-nuit text-ivoire" : "border border-bordure text-pierre"
                 }`}
               >
                 {s.done ? <Check size={14} /> : i + 1}
@@ -177,8 +178,8 @@ export default function GettingStarted({ profile }: { profile: any }) {
               {!s.done && (
                 <Link
                   href={s.href}
-                  className={`inline-flex items-center gap-1.5 text-sm px-3.5 py-2 rounded-md shrink-0 ${
-                    isNext ? "bg-aubergine text-platre font-medium" : "border border-bordure text-encre/70"
+                  className={`inline-flex items-center gap-1.5 text-sm min-h-[44px] px-4 rounded-full shrink-0 ${
+                    isNext ? "bg-nuit text-ivoire font-medium" : "border border-bordure text-encre/70"
                   }`}
                 >
                   {s.cta} {isNext && <ArrowRight size={14} />}

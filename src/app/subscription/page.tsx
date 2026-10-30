@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Box, CreditCard } from "lucide-react";
 import DashboardShell from "@/components/DashboardShell";
+import PageHeader from "@/components/PageHeader";
 import { api } from "@/lib/api";
 
 const statusLabels: Record<string, { label: string; color: string }> = {
@@ -113,7 +114,7 @@ export default function SubscriptionPage() {
         setLimits(p.limits);
       }}
     >
-      <h2 className="font-display text-4xl text-encre mb-8">Abonnement</h2>
+      <PageHeader kicker="Votre accès" title="Votre accès à Drawiful" />
 
       {access === "locked" && !subscription && (
         <div className="max-w-2xl rounded-md border border-ocre/50 bg-ocre/10 p-6 mb-10">

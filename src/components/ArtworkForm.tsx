@@ -101,8 +101,8 @@ export default function ArtworkForm({
     <div className="fixed inset-0 bg-encre/40 flex items-center justify-center z-50 px-4">
       <div className="bg-white rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-bordure">
-          <h3 className="font-display text-xl text-encre">
-            {artwork ? "Modifier l'œuvre" : "Nouvelle œuvre"}
+          <h3 className="font-display text-2xl text-encre">
+            {artwork ? "Modifier l'œuvre" : "Accrocher une œuvre"}
           </h3>
           <button onClick={onClose}>
             <X size={18} className="text-encre/50" />
@@ -284,9 +284,9 @@ export default function ArtworkForm({
               onChange={(e) => setStatus(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-md border border-bordure text-sm bg-white"
             >
-              <option value="DRAFT">Brouillon</option>
-              <option value="PUBLISHED">Publiée</option>
-              <option value="ARCHIVED">Archivée</option>
+              <option value="DRAFT">En réserve (non visible)</option>
+              <option value="PUBLISHED">Aux murs (visible dans votre galerie)</option>
+              <option value="ARCHIVED">Décrochée</option>
             </select>
           </div>
 
@@ -295,7 +295,7 @@ export default function ArtworkForm({
           <button
             type="submit"
             disabled={saving || uploadingImage || uploading3d}
-            className="w-full py-2.5 rounded-md bg-aubergine text-platre text-sm font-medium disabled:opacity-60"
+            className="w-full min-h-[48px] rounded-full bg-nuit text-ivoire text-sm font-medium disabled:opacity-60"
           >
             {saving ? "Enregistrement..." : "Enregistrer"}
           </button>

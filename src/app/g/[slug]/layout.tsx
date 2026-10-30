@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { fetchArtistForMeta, shortText } from "@/lib/galleryMeta";
+import GalleryBeacon from "@/components/GalleryBeacon";
 
 // Titre de l'onglet, description Google et aperçu de partage (WhatsApp,
 // Instagram, Messenger…) de chaque galerie publique. Les pages de la galerie
@@ -39,5 +40,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default function GalleryLayout({ children }: { children: ReactNode }) {
-  return children;
+  return (
+    <>
+      {children}
+      {/* Fréquentation anonyme de la galerie (sans cookie) */}
+      <GalleryBeacon />
+    </>
+  );
 }

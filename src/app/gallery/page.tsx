@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { UploadCloud, Check, Lock, ExternalLink, X } from "lucide-react";
 import DashboardShell from "@/components/DashboardShell";
+import PageHeader from "@/components/PageHeader";
 import { api } from "@/lib/api";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { ROOT_DOMAIN, galleryUrl } from "@/lib/domain";
@@ -93,7 +94,7 @@ export default function GalleryPage() {
 
   return (
     <DashboardShell onProfileLoaded={loadProfile}>
-      <h2 className="font-display text-4xl text-encre mb-8">Ma galerie</h2>
+      <PageHeader kicker="Scénographie" title="Vos salles" intro="Le nom de votre galerie, son ambiance et la salle où vos œuvres sont accrochées." />
 
       <form onSubmit={handleSubmit} className="max-w-lg space-y-5">
         <div>

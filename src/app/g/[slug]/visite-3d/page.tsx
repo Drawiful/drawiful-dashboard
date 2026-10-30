@@ -9,6 +9,7 @@ import { PAD, ThemedPage, ThemedHeader, ThemedFooter, btnStyle, money } from "@/
 import { useCart } from "@/lib/cart";
 import { getToken } from "@/lib/api";
 import { formatDimensions } from "@/lib/dimensions";
+import { track, startLingerTimer } from "@/components/GalleryBeacon";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -169,10 +170,26 @@ export default function Visite3DPage() {
         );
       } else if (data.type === "GALLERY_ARTWORK_CLICK" && typeof data.id === "string") {
         router.push(`/g/${slug}/${data.id}`);
+      } else if (data.type === "GALLERY_ARTWORK_FOCUS") {
+        // Le visiteur regarde une œuvre : « s'est attardé » après 20 secondes devant elle
+        stopLinger?.();
+        stopLinger = null;
+        const id = typeof data.id === "string" ? data.id : null;
+        if (id && !counted.has(id)) {
+          stopLinger = startLingerTimer(() => {
+            counted.add(id);
+            track("linger", { slug, artwork: id });
+          });
+        }
       }
     }
+    let stopLinger: (() => void) | null = null;
+    const counted = new Set<string>();
     window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
+    return () => {
+      window.removeEventListener("message", onMessage);
+      stopLinger?.();
+    };
   }, [status, works, artist, slug, router, allowAR]);
 
   const skin = getSkin(artist?.theme);

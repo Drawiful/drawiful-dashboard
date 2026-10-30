@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import DashboardShell from "@/components/DashboardShell";
+import PageHeader from "@/components/PageHeader";
 import { api } from "@/lib/api";
 
 type DnsRecord = { type: string; name: string; value: string; reason?: string };
@@ -25,7 +26,7 @@ function CopyButton({ text }: { text: string }) {
         setDone(true);
         setTimeout(() => setDone(false), 1500);
       }}
-      className="ml-2 text-xs text-ocre hover:underline"
+      className="ml-2 text-xs text-laiton hover:underline"
     >
       {done ? "Copié" : "Copier"}
     </button>
@@ -95,10 +96,11 @@ export default function DomainPage() {
   return (
     <DashboardShell>
       <div className="max-w-2xl">
-        <h2 className="font-display text-4xl text-encre mb-2">Adresse & domaine</h2>
-        <p className="text-sm text-encre/60 mb-8">
-          Votre galerie a toujours une adresse Drawiful. Vous pouvez aussi y relier votre propre nom de domaine.
-        </p>
+        <PageHeader
+          kicker="Votre adresse"
+          title="Où l'on vous trouve"
+          intro="Votre galerie a toujours une adresse Drawiful. Vous pouvez aussi lui donner votre propre nom de domaine."
+        />
 
         {error && <p className="mb-6 text-sm text-argile">{error}</p>}
         {notice && <p className="mb-6 text-sm text-green-700">{notice}</p>}
@@ -108,7 +110,7 @@ export default function DomainPage() {
           <h2 className="font-display text-xl text-encre mb-1">Adresse Drawiful</h2>
           <p className="text-sm text-encre/60 mb-4">
             En ligne maintenant :{" "}
-            <a href={status.defaultUrl} target="_blank" rel="noreferrer" className="text-ocre hover:underline">
+            <a href={status.defaultUrl} target="_blank" rel="noreferrer" className="text-laiton hover:underline">
               {status.defaultUrl.replace("https://", "")}
             </a>
           </p>
@@ -221,7 +223,7 @@ export default function DomainPage() {
                 href={`https://${status.customDomain}`}
                 target="_blank"
                 rel="noreferrer"
-                className="text-ocre hover:underline"
+                className="text-laiton hover:underline"
               >
                 {status.customDomain}
               </a>

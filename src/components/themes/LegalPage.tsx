@@ -6,7 +6,7 @@ import { ThemedPage, ThemedHeader, ThemedFooter } from "@/components/themes/Them
 
 // Rendu des 3 pages légales (Mentions légales, CGV, Confidentialité).
 // Le texte vient soit du modèle générique, soit de ce que l'artiste a saisi
-// dans l'onglet « Ma galerie ». L'habillage suit le thème de l'artiste.
+// dans « Vos salles ». L'habillage suit le thème de l'artiste.
 
 export type LegalSection = { heading: string; body: string };
 

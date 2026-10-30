@@ -47,11 +47,12 @@ export default function PrintsInterestCard() {
   if (state === "loading") return null;
 
   return (
-    <div className="rounded-md border border-bordure bg-white p-6 mb-12">
+    <div className="rounded-xl border border-bordure bg-papier p-8">
       <div className="flex gap-4">
-        <Frame size={22} className="text-ocre shrink-0 mt-0.5" strokeWidth={1.8} />
+        <Frame size={22} className="text-laiton shrink-0 mt-1" strokeWidth={1.5} />
         <div className="flex-1">
-          <p className="font-display text-xl text-encre">Bientôt : vendez des tirages d'art encadrés</p>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-laiton">Bientôt</p>
+          <p className="font-display text-2xl text-encre mt-1.5">Vos œuvres en tirages d'art encadrés</p>
 
           {state === "done" ? (
             <p className="text-sm text-encre/70 mt-1.5">
@@ -67,7 +68,7 @@ export default function PrintsInterestCard() {
               {state === "idle" && (
                 <button
                   onClick={() => setState("form")}
-                  className="mt-4 text-sm px-4 py-2 rounded-md font-medium bg-aubergine text-platre"
+                  className="mt-5 inline-flex items-center min-h-[44px] px-5 rounded-full text-sm font-medium bg-nuit text-ivoire"
                 >
                   Ça m'intéresse
                 </button>
@@ -82,7 +83,7 @@ export default function PrintsInterestCard() {
                         <label
                           key={f.key}
                           className={`text-sm px-3 py-1.5 rounded-full border cursor-pointer ${
-                            formats.includes(f.key) ? "border-aubergine bg-aubergine text-platre" : "border-bordure text-encre/80"
+                            formats.includes(f.key) ? "border-nuit bg-nuit text-ivoire" : "border-bordure text-encre/80"
                           }`}
                         >
                           <input
@@ -105,7 +106,7 @@ export default function PrintsInterestCard() {
                         <label
                           key={p}
                           className={`text-sm px-3 py-1.5 rounded-full border cursor-pointer ${
-                            price === p ? "border-aubergine bg-aubergine text-platre" : "border-bordure text-encre/80"
+                            price === p ? "border-nuit bg-nuit text-ivoire" : "border-bordure text-encre/80"
                           }`}
                         >
                           <input
@@ -125,7 +126,7 @@ export default function PrintsInterestCard() {
                     <button
                       onClick={send}
                       disabled={state === "sending"}
-                      className="text-sm px-4 py-2 rounded-md font-medium bg-aubergine text-platre disabled:opacity-60"
+                      className="inline-flex items-center min-h-[44px] px-5 rounded-full text-sm font-medium bg-nuit text-ivoire disabled:opacity-60"
                     >
                       {state === "sending" ? "Envoi..." : "Envoyer"}
                     </button>

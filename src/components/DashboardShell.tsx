@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { api, getToken } from "@/lib/api";
 import Sidebar from "./Sidebar";
 import TrialBanner from "./TrialBanner";
+import { galleryUrl } from "@/lib/domain";
 
 // Essai terminé sans formule : seule la page Abonnement reste accessible.
 const OPEN_WHEN_LOCKED = ["/subscription"];
@@ -45,18 +46,26 @@ export default function DashboardShell({
 
   if (loading || blocked) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-platre">
-        <p className="text-sm text-encre/50">Chargement...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-nuit">
+        <img src="/icon.png" alt="" className="w-12 h-12 rounded-full animate-pulse" />
+        <p className="font-display text-lg text-ivoire/80">Ouverture de votre galerie…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full flex bg-platre">
-      <Sidebar galleryName={profile?.galleryName} locked={locked} />
-      <main className="flex-1 px-12 py-10 max-w-5xl">
-        <TrialBanner limits={profile?.limits} />
-        {children}
+    <div className="min-h-screen w-full flex flex-col md:flex-row bg-platre">
+      <Sidebar
+        galleryName={profile?.galleryName}
+        galleryUrl={profile?.slug ? galleryUrl(profile.slug) : undefined}
+        limits={profile?.limits}
+        locked={locked}
+      />
+      <main className="flex-1 min-w-0 px-5 py-8 sm:px-10 md:px-14 md:py-12">
+        <div className="max-w-[1080px] mx-auto">
+          <TrialBanner limits={profile?.limits} />
+          {children}
+        </div>
       </main>
     </div>
   );
