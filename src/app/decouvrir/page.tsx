@@ -288,9 +288,11 @@ export default function LandingPage() {
 
       {/* 1. PREMIER ÉCRAN */}
       <section className="relative overflow-hidden">
-        {/* Téléphone : le film en bandeau, le texte dessous (la toile reste lisible) */}
-        <div className="md:hidden">
-          <div className="relative h-[52svh] min-h-[340px]">
+        {/* Téléphone : le premier écran fait exactement la hauteur de l'écran. Le texte
+            prend sa place, le film occupe le reste : le bouton reste visible dès
+            l'ouverture, même dans le navigateur d'Instagram (écran utile ≈ 640 px). */}
+        <div className="md:hidden flex flex-col h-[100svh] min-h-[540px] max-h-[920px]">
+          <div className="relative flex-1 min-h-[170px]">
             <HeroFilm className="absolute inset-0 h-full w-full object-cover" />
             <div
               aria-hidden="true"
@@ -298,18 +300,18 @@ export default function LandingPage() {
               style={{ background: "linear-gradient(to bottom, rgba(14,12,10,0.6) 0%, rgba(14,12,10,0) 20%, rgba(14,12,10,0) 70%, #0E0C0A 100%)" }}
             />
           </div>
-          <div className="relative -mt-8 px-5 pb-10">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#D9B75C]">
+          <div className="relative -mt-8 px-5 pb-6">
+            <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.3em] text-[#D9B75C] [@media(max-height:720px)]:hidden">
               L'excellence numérique au service de la création
             </p>
-            <h1 className="font-display-lp mt-4 text-[40px] leading-[1.02] tracking-[-0.01em]">
+            <h1 className="font-display-lp text-[40px] leading-[1.02] tracking-[-0.01em] [@media(max-height:680px)]:text-[36px]">
               L'écrin digital des artistes contemporains.
             </h1>
-            <p className="mt-4 text-[15px] leading-relaxed text-[#F4EFE6]/80">
+            <p className="mt-3 text-[15px] leading-relaxed text-[#F4EFE6]/80">
               Offrez à vos collectionneurs une immersion grandeur nature dans votre univers. Exposez en 3D, vendez dans le
               monde entier et scellez l'authenticité de vos œuvres. Sans aucune commission.
             </p>
-            <CtaPrimary id="hero-cta" href={SIGNUP} className="mt-7 w-full">
+            <CtaPrimary id="hero-cta" href={SIGNUP} className="mt-6 w-full">
               Initier mon accès privé
             </CtaPrimary>
             <p className="mt-3 text-center text-[12px] leading-relaxed text-[#F4EFE6]/60">
