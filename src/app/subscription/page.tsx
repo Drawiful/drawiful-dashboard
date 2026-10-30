@@ -1,20 +1,44 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Box, CreditCard } from "lucide-react";
+import { Check, Minus } from "lucide-react";
 import DashboardShell from "@/components/DashboardShell";
 import PageHeader from "@/components/PageHeader";
 import { api } from "@/lib/api";
 
-const statusLabels: Record<string, { label: string; color: string }> = {
-  TRIALING: { label: "Essai en cours", color: "#C98A3E" },
-  ACTIVE: { label: "Actif", color: "#7A8B69" },
-  PAST_DUE: { label: "Paiement en retard", color: "#B5533C" },
-  CANCELED: { label: "Annulé", color: "#B5533C" },
-  INCOMPLETE: { label: "En attente", color: "#7A6B5D" },
+const statusLabels: Record<string, string> = {
+  TRIALING: "Accès privé en cours",
+  ACTIVE: "Active",
+  PAST_DUE: "Paiement en attente",
+  CANCELED: "Annulée",
+  INCOMPLETE: "En attente",
 };
 
-// Plans qui ouvrent la visite 3D (même règle que has3dAccess côté backend).
-const PLANS_WITH_3D = ["artiste", "studio"];
+// Ce que chaque formule ouvre (mêmes promesses que la landing).
+const PLAN_DETAILS: Record<string, { pitch: string; features: string[]; missing: string[]; featured?: boolean }> = {
+  aspirant: {
+    pitch: "Pour poser les fondations de votre présence en ligne et exposer vos premières créations.",
+    features: ["Une sélection de 5 œuvres", "Galerie publique en ligne", "1 certificat d'authenticité", "Votre adresse dédiée : votrenom.drawiful.art"],
+    missing: ["Vente en ligne", "Galerie 3D immersive", "Nom de domaine personnalisé"],
+  },
+  artiste: {
+    pitch: "La formule des artistes qui vendent leurs œuvres.",
+    features: [
+      "Œuvres et expositions illimitées",
+      "Vente en ligne de vos œuvres",
+      "Galerie 3D immersive et réalité augmentée",
+      "Certificats d'authenticité illimités",
+      "Suivi des acquisitions et des envois",
+      "Votre propre nom de domaine",
+    ],
+    missing: [],
+    featured: true,
+  },
+  studio: {
+    pitch: "Pour les galeries d'art, les agents et les collectifs multi-artistes.",
+    features: ["L'intégralité de la formule Artiste", "De 2 à 10 artistes sous votre enseigne", "Accompagnement dédié"],
+    missing: [],
+  },
+};
 
 type Plan = {
   key: string;
@@ -28,11 +52,14 @@ type Plan = {
 
 function formatPrice(plan: Plan) {
   if (plan.amount == null || !plan.currency) return null;
-  const price = new Intl.NumberFormat("fr-FR", { style: "currency", currency: plan.currency.toUpperCase() }).format(
-    plan.amount / 100
-  );
-  const per = plan.interval === "year" ? " / an" : plan.interval === "month" ? " / mois" : "";
-  return price + per;
+  const price = new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: plan.currency.toUpperCase(),
+    minimumFractionDigits: plan.amount % 100 ? 2 : 0,
+    maximumFractionDigits: 2,
+  }).format(plan.amount / 100);
+  const per = plan.interval === "year" ? "par an" : plan.interval === "month" ? "par mois" : "";
+  return { price, per };
 }
 
 function longDate(iso?: string | null) {
@@ -87,24 +114,28 @@ export default function SubscriptionPage() {
   const showPlans = !subscription || subscription.status === "CANCELED";
   const access = limits?.access;
   const trialEnd = longDate(limits?.trialEndsAt);
-  // Essai sans carte en cours : l'abonnement démarre à la fin de l'essai
+  // Accès privé sans carte en cours : la formule démarre à la fin de l'accès privé
   // (Stripe exige au moins 48 h d'écart, sinon le prélèvement est immédiat).
   const trialMsLeft = limits?.trialEndsAt ? new Date(limits.trialEndsAt).getTime() - Date.now() : 0;
   const deferredCharge = access === "trial" && trialMsLeft > 48 * 60 * 60 * 1000;
 
-  let heading = "Choisissez votre formule";
-  let intro = "14 jours d'essai gratuit, puis prélèvement automatique. Vous pouvez annuler à tout moment.";
-  if (subscription?.status === "CANCELED") {
-    heading = "Reprendre un abonnement";
-    intro = "Votre abonnement est annulé : choisissez une formule pour réactiver votre galerie.";
+  let title = "Votre accès à Drawiful";
+  let intro = "14 jours d'accès privé, puis prélèvement automatique. Vous pouvez annuler à tout moment.";
+  if (subscription && subscription.status !== "CANCELED") {
+    title = "Votre galerie vous appartient";
+    intro = "Votre formule est active. Vous pouvez la faire évoluer à tout moment.";
+  } else if (subscription?.status === "CANCELED") {
+    title = "Rouvrez votre galerie";
+    intro = "Votre formule est annulée : choisissez-en une pour rouvrir votre galerie.";
   } else if (access === "trial") {
+    title = "Prolongez l'expérience";
     intro = deferredCharge
-      ? `Votre essai gratuit court jusqu'au ${trialEnd}. Choisissez votre formule dès maintenant : rien n'est prélevé avant cette date, et vous gardez tout pendant l'essai.`
-      : `Votre essai gratuit se termine le ${trialEnd}. Choisissez votre formule pour continuer sans interruption.`;
+      ? `Votre accès privé court jusqu'au ${trialEnd}. Choisissez votre formule dès maintenant : rien n'est prélevé avant cette date, et tout reste ouvert d'ici là.`
+      : `Votre accès privé se termine le ${trialEnd}. Choisissez votre formule pour continuer sans interruption.`;
   } else if (access === "locked") {
-    heading = "Rouvrez votre galerie";
+    title = "Votre galerie vous attend";
     intro =
-      "Choisissez votre formule : votre tableau de bord, votre boutique et votre visite 3D se rouvrent immédiatement. Vos œuvres, vos certificats et vos réglages sont conservés.";
+      "Choisissez votre formule : votre espace, la vente de vos œuvres et votre visite 3D se rouvrent immédiatement. Vos œuvres, vos certificats et vos réglages sont conservés.";
   }
 
   return (
@@ -114,104 +145,131 @@ export default function SubscriptionPage() {
         setLimits(p.limits);
       }}
     >
-      <PageHeader kicker="Votre accès" title="Votre accès à Drawiful" />
+      <PageHeader kicker="Votre accès" title={title} intro={intro} />
 
       {access === "locked" && !subscription && (
-        <div className="max-w-2xl rounded-md border border-ocre/50 bg-ocre/10 p-6 mb-10">
-          <p className="font-display text-2xl text-encre">Votre essai gratuit est terminé</p>
-          <p className="text-sm text-encre/70 mt-2">
-            Votre galerie reste en ligne et vos visiteurs voient toujours vos œuvres. En revanche, la boutique et la
-            visite 3D sont en pause, et votre tableau de bord est en lecture seule.
+        <div className="max-w-2xl rounded-xl bg-nuit text-ivoire p-8 mb-12">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-champagne">Accès privé terminé</p>
+          <p className="font-display text-[26px] leading-snug mt-2">Votre galerie reste en ligne.</p>
+          <p className="text-[15px] text-lilas mt-2 leading-relaxed">
+            Vos visiteurs voient toujours vos œuvres. En revanche, la vente et la visite 3D sont en pause, et votre espace
+            est en lecture seule.
           </p>
         </div>
       )}
 
-      {subscription && (
-        <div className="max-w-lg rounded-md bg-aubergine p-7 mb-10">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <CreditCard size={20} className="text-ocre" strokeWidth={1.8} />
-              {planName && <span className="text-sm text-lilas">Formule {planName}</span>}
-            </div>
-            <span
-              className="text-xs px-2.5 py-1 rounded-full font-medium"
-              style={{ backgroundColor: `${status?.color}22`, color: status?.color }}
-            >
-              {status?.label ?? subscription.status}
+      {subscription && subscription.status !== "CANCELED" && (
+        <div className="max-w-xl rounded-xl bg-nuit text-ivoire p-8 mb-12 flex flex-col gap-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-champagne">Votre formule</p>
+            <span className="text-xs px-3 py-1 rounded-full bg-champagne/15 text-champagne font-medium">
+              {status ?? subscription.status}
             </span>
           </div>
-
-          {subscription.currentPeriodEnd && subscription.status !== "CANCELED" && (
-            <p className="text-sm text-lilas mb-6">
-              Prochaine échéance le {new Date(subscription.currentPeriodEnd).toLocaleDateString("fr-FR")}
+          <p className="font-display text-[40px] leading-none">{planName ?? "Drawiful"}</p>
+          {subscription.currentPeriodEnd && (
+            <p className="text-sm text-lilas">
+              Prochaine échéance le{" "}
+              {new Date(subscription.currentPeriodEnd).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
             </p>
           )}
-
-          {subscription.status !== "CANCELED" && (
-            <>
-              <button
-                onClick={handleManage}
-                disabled={redirecting}
-                className="w-full py-2.5 rounded-md bg-ocre text-aubergine text-sm font-medium disabled:opacity-60"
-              >
-                {redirecting ? "Redirection..." : "Gérer mon abonnement"}
-              </button>
-              <p className="text-xs text-lilas/60 mt-3 text-center">
-                Changez de formule, mettez à jour votre carte ou annulez directement depuis Stripe.
-              </p>
-            </>
-          )}
+          <div>
+            <button
+              type="button"
+              onClick={handleManage}
+              disabled={redirecting}
+              className="inline-flex items-center min-h-[48px] px-6 rounded-full bg-champagne text-nuit text-sm font-semibold disabled:opacity-60"
+            >
+              {redirecting ? "Ouverture…" : "Gérer ma formule"}
+            </button>
+            <p className="text-xs text-lilas mt-3">
+              Changez de formule, mettez à jour votre carte ou annulez depuis l'espace sécurisé Stripe.
+            </p>
+          </div>
         </div>
       )}
 
       {showPlans && (
-        <section className="max-w-4xl">
-          <h3 className="font-display text-2xl text-encre mb-2">{heading}</h3>
-          <p className="text-sm text-encre/60 mb-6 max-w-2xl">{intro}</p>
+        <section>
+          {error && <p className="text-sm text-argile mb-6">{error}</p>}
 
-          {error && <p className="text-sm text-[#B5533C] mb-4">{error}</p>}
-
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-6 lg:grid-cols-3">
             {plans.map((plan) => {
-              const price = formatPrice(plan);
-              const with3d = PLANS_WITH_3D.includes(plan.key);
+              const amount = formatPrice(plan);
+              const d = PLAN_DETAILS[plan.key];
+              const highlight = preferred ? preferred === plan.key : !!d?.featured;
               return (
                 <div
                   key={plan.key}
-                  className={`rounded-md border p-6 flex flex-col ${
-                    preferred === plan.key ? "border-ocre ring-1 ring-ocre/50" : "border-bordure"
+                  className={`relative rounded-xl p-8 flex flex-col ${
+                    highlight ? "bg-nuit text-ivoire ring-1 ring-champagne/60" : "bg-papier border border-bordure text-encre"
                   }`}
                 >
-                  <p className="font-display text-xl text-encre mb-1">{plan.name}</p>
-                  <p className="text-sm text-encre/70 mb-5">
-                    {plan.onQuote ? "Sur devis, selon le nombre d'artistes" : price ?? "Prix affiché au paiement"}
-                  </p>
+                  {highlight && (
+                    <span className="absolute -top-3 left-8 px-3 py-1 rounded-full bg-champagne text-nuit text-[11px] font-semibold tracking-wide">
+                      {preferred === plan.key ? "Votre choix" : "Recommandée"}
+                    </span>
+                  )}
+                  <p className="font-display text-[32px] leading-none">{plan.name}</p>
+                  {d?.pitch && (
+                    <p className={`text-sm leading-relaxed mt-3 ${highlight ? "text-lilas" : "text-encre/70"}`}>{d.pitch}</p>
+                  )}
+                  <div className="mt-6 mb-6">
+                    {plan.onQuote ? (
+                      <p className="font-display text-[34px] leading-tight">Sur devis</p>
+                    ) : amount ? (
+                      <p className="flex items-baseline gap-2">
+                        <span className="font-display text-[44px] leading-none">{amount.price}</span>
+                        <span className={`text-sm ${highlight ? "text-lilas" : "text-pierre"}`}>{amount.per}</span>
+                      </p>
+                    ) : (
+                      <p className={`text-sm ${highlight ? "text-lilas" : "text-pierre"}`}>Prix affiché au paiement</p>
+                    )}
+                  </div>
 
-                  <p className={`flex items-center gap-2 text-sm mb-6 ${with3d ? "text-encre" : "text-encre/50"}`}>
-                    <Box size={15} className={with3d ? "text-ocre" : ""} />
-                    {with3d ? "Boutique et visite 3D incluses" : "Sans boutique ni visite 3D"}
-                  </p>
+                  {d && (
+                    <ul className="flex flex-col gap-2.5 mb-8 text-sm">
+                      {d.features.map((f) => (
+                        <li key={f} className="flex items-start gap-2.5">
+                          <Check size={15} strokeWidth={1.8} className={`mt-0.5 shrink-0 ${highlight ? "text-champagne" : "text-laiton"}`} />
+                          {f}
+                        </li>
+                      ))}
+                      {d.missing.map((f) => (
+                        <li key={f} className={`flex items-start gap-2.5 ${highlight ? "text-ivoire/45" : "text-pierre"}`}>
+                          <Minus size={15} strokeWidth={1.8} className="mt-0.5 shrink-0" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
 
                   {plan.onQuote ? (
                     <a
                       href={`mailto:${plan.contact || "clients@drawiful.app"}?subject=${encodeURIComponent(`Formule ${plan.name} — demande de devis`)}`}
-                      className="mt-auto w-full py-2.5 rounded-md border border-aubergine text-aubergine text-sm font-medium text-center"
+                      className={`mt-auto inline-flex items-center justify-center min-h-[48px] rounded-full text-sm font-medium border ${
+                        highlight ? "border-ivoire/50 text-ivoire" : "border-encre text-encre"
+                      }`}
                     >
                       Demander un devis
                     </a>
                   ) : (
                     <button
+                      type="button"
                       onClick={() => handleChoose(plan.key)}
                       disabled={choosing !== null}
-                      className="mt-auto w-full py-2.5 rounded-md bg-aubergine text-ocre text-sm font-medium disabled:opacity-60"
+                      className={`mt-auto min-h-[48px] rounded-full text-sm font-semibold disabled:opacity-60 ${
+                        highlight ? "bg-champagne text-nuit" : "bg-nuit text-ivoire"
+                      }`}
                     >
-                      {choosing === plan.key ? "Redirection..." : `Choisir ${plan.name}`}
+                      {choosing === plan.key ? "Ouverture du paiement…" : `Choisir ${plan.name}`}
                     </button>
                   )}
                 </div>
               );
             })}
           </div>
+          <p className="text-xs text-pierre mt-6">Paiement sécurisé par Stripe. Vous pouvez changer de formule ou l'annuler à tout moment.</p>
         </section>
       )}
     </DashboardShell>

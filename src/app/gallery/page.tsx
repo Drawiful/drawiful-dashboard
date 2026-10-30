@@ -9,6 +9,8 @@ import { ROOT_DOMAIN, galleryUrl } from "@/lib/domain";
 
 import { THEME_OPTIONS as THEMES, DEFAULT_THEME, normalizeThemeId } from "@/components/themes/skins";
 
+import { Section, field, fieldLabel as label, hint } from "@/components/FormSection";
+
 export default function GalleryPage() {
   const [galleryName, setGalleryName] = useState("");
   const [slug, setSlug] = useState("");
@@ -24,7 +26,7 @@ export default function GalleryPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadingSignature, setUploadingSignature] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
   function loadProfile(profile: any) {
     setGalleryName(profile.galleryName ?? "");
@@ -70,7 +72,7 @@ export default function GalleryPage() {
     setMessage(null);
     setSaving(true);
     try {
-            await api.updateMyProfile({
+      await api.updateMyProfile({
         galleryName,
         slug,
         bio,
@@ -84,9 +86,9 @@ export default function GalleryPage() {
       } as any);
 
       setSavedSlug(slug);
-      setMessage("Profil mis à jour ✓");
+      setMessage({ ok: true, text: "Vos salles sont à jour." });
     } catch (err: any) {
-      setMessage(err.message || "Erreur lors de la mise à jour");
+      setMessage({ ok: false, text: err.message || "L’enregistrement n’a pas abouti. Réessayez dans un instant." });
     } finally {
       setSaving(false);
     }
@@ -94,15 +96,15 @@ export default function GalleryPage() {
 
   return (
     <DashboardShell onProfileLoaded={loadProfile}>
-      <PageHeader kicker="Scénographie" title="Vos salles" intro="Le nom de votre galerie, son ambiance et la salle où vos œuvres sont accrochées." />
+      <PageHeader
+        kicker="Scénographie"
+        title="Vos salles"
+        intro="L'ambiance de votre galerie, son nom, votre portrait et votre signature : tout ce que vos visiteurs découvrent en entrant."
+      />
 
-      <form onSubmit={handleSubmit} className="max-w-lg space-y-5">
-        <div>
-          <label className="block text-sm mb-1.5 text-encre/80">Apparence de la galerie</label>
-          <p className="text-xs text-encre/50 mb-3">
-            Le contenu (œuvres, bio, prix) reste le même quel que soit le thème choisi.
-          </p>
-          <div className="grid sm:grid-cols-3 gap-3">
+      <form onSubmit={handleSubmit} className="pb-28">
+        <Section num="I" title="L'ambiance" intro="Vos œuvres, votre bio et vos prix restent les mêmes : seule la mise en scène change.">
+          <div className="grid gap-4 sm:grid-cols-3">
             {THEMES.map((t) => {
               const selected = theme === t.value;
               return (
@@ -111,212 +113,201 @@ export default function GalleryPage() {
                   type="button"
                   disabled={!t.available}
                   onClick={() => setTheme(t.value)}
-                  className={`relative text-left rounded-md border p-3.5 transition-colors ${
-                    selected ? "border-aubergine ring-1 ring-aubergine" : "border-bordure"
-                  } ${t.available ? "bg-white hover:border-aubergine/50" : "bg-white/60 cursor-not-allowed"}`}
+                  aria-pressed={selected}
+                  className={`relative text-left rounded-xl p-5 transition-colors ${
+                    selected ? "bg-nuit text-ivoire ring-1 ring-champagne/70" : "bg-papier border border-bordure text-encre hover:border-laiton/60"
+                  } ${t.available ? "" : "opacity-60 cursor-not-allowed"}`}
                 >
                   {selected && (
-                    <span className="absolute top-2.5 right-2.5 flex items-center justify-center w-5 h-5 rounded-full bg-aubergine text-platre">
-                      <Check size={12} />
+                    <span className="absolute top-4 right-4 flex items-center justify-center w-6 h-6 rounded-full bg-champagne text-nuit">
+                      <Check size={13} strokeWidth={2.2} />
                     </span>
                   )}
                   {!t.available && (
-                    <span className="absolute top-2.5 right-2.5 text-encre/40">
+                    <span className="absolute top-4 right-4 text-pierre">
                       <Lock size={14} />
                     </span>
                   )}
-                  <div className="flex gap-1.5 mb-2.5">
+                  <div className="flex gap-1.5 mb-4">
                     {t.swatch.map((c, i) => (
-                      <span key={i} className="w-4 h-4 rounded-full border border-bordure" style={{ background: c }} />
+                      <span key={i} className="w-5 h-5 rounded-full border border-black/10" style={{ background: c }} />
                     ))}
                   </div>
-                  <p className="font-display text-sm text-encre mb-0.5">{t.label}</p>
-                  <p className="text-xs text-encre/60 leading-relaxed">{t.description}</p>
+                  <p className="font-display text-xl leading-tight">{t.label}</p>
+                  <p className={`text-[13px] leading-relaxed mt-1.5 ${selected ? "text-lilas" : "text-pierre"}`}>{t.description}</p>
                 </button>
               );
             })}
           </div>
-        </div>
+        </Section>
 
-        <div>
-          <label className="block text-sm mb-1.5 text-encre/80">Nom de la galerie</label>
-          <input
-            value={galleryName}
-            onChange={(e) => setGalleryName(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-md border border-bordure text-sm bg-white"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm mb-1.5 text-encre/80">Adresse de votre galerie</label>
-          <div className="flex items-center rounded-md border border-bordure bg-white overflow-hidden">
-            <span className="pl-3.5 text-sm text-encre/40">https://</span>
-            <input
-              value={slug}
-              onChange={(e) =>
-                setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))
-              }
-              className="min-w-0 flex-1 py-2.5 text-sm outline-none text-right"
-            />
-            <span className="pr-3.5 text-sm text-encre/40">.{ROOT_DOMAIN}</span>
+        <Section num="II" title="L'identité" intro="Le nom sur la porte, l'adresse où l'on vous trouve, et quelques mots sur vous.">
+          <div>
+            <label htmlFor="g-name" className={label}>Nom de la galerie</label>
+            <input id="g-name" value={galleryName} onChange={(e) => setGalleryName(e.target.value)} className={field} />
           </div>
-          {slug !== savedSlug && savedSlug ? (
-            <p className="text-xs mt-1.5 text-argile">
-              Attention : l'ancienne adresse ({savedSlug}.{ROOT_DOMAIN}) ne fonctionnera plus. Pensez à
-              mettre à jour vos liens en bio.
-            </p>
-          ) : (
-            savedSlug && (
-              <a
-                href={galleryUrl(savedSlug)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs mt-1.5 text-aubergine hover:underline"
-              >
-                Voir ma galerie <ExternalLink size={12} />
-              </a>
-            )
-          )}
-        </div>
 
-        <div>
-          <label className="block text-sm mb-1.5 text-encre/80">Bio</label>
-          <textarea
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            rows={4}
-            className="w-full px-3.5 py-2.5 rounded-md border border-bordure text-sm bg-white"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm mb-1.5 text-encre/80">Photo / avatar</label>
-          <div className="flex items-center gap-4">
-            {avatarUrl && (
-              <img src={avatarUrl} alt="Avatar" className="w-14 h-14 rounded-full object-cover" />
-            )}
-            <label className="flex items-center gap-2 px-3.5 py-2.5 rounded-md border border-dashed border-bordure text-sm cursor-pointer text-encre/60">
-              <UploadCloud size={16} />
-              {uploading ? "Envoi..." : avatarUrl ? "Changer la photo" : "Ajouter une photo"}
-              <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
-            </label>
-            {avatarUrl && !uploading && (
-              <button
-                type="button"
-                onClick={() => setAvatarUrl("")}
-                className="flex items-center gap-1.5 px-3 py-2.5 rounded-md text-sm text-encre/60 hover:text-red-700"
-              >
-                <X size={15} />
-                Retirer
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm mb-1.5 text-encre/80">
-            Signature manuscrite (optionnel)
-          </label>
-          <p className="text-xs text-encre/50 mb-2">
-            Affichée sur vos certificats d'authenticité. Sans image, votre nom s'affiche dans une
-            police manuscrite à la place.
-          </p>
-          <div className="flex items-center gap-4">
-            {signatureUrl && (
-              <img
-                src={signatureUrl}
-                alt="Signature"
-                className="h-14 object-contain bg-white border border-bordure rounded-md px-2"
-              />
-            )}
-            <label className="flex items-center gap-2 px-3.5 py-2.5 rounded-md border border-dashed border-bordure text-sm cursor-pointer text-encre/60">
-              <UploadCloud size={16} />
-              {uploadingSignature ? "Envoi..." : signatureUrl ? "Changer la signature" : "Uploader une signature"}
+          <div>
+            <label htmlFor="g-slug" className={label}>Adresse de votre galerie</label>
+            <div className="flex items-center rounded-lg border border-bordure bg-papier overflow-hidden focus-within:border-laiton">
+              <span className="pl-4 text-[15px] text-pierre">https://</span>
               <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleSignatureChange}
+                id="g-slug"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                className="min-w-0 flex-1 py-3 text-[15px] bg-transparent outline-none text-right text-encre"
               />
-            </label>
-            {signatureUrl && !uploadingSignature && (
-              <button
-                type="button"
-                onClick={() => setSignatureUrl("")}
-                className="flex items-center gap-1.5 px-3 py-2.5 rounded-md text-sm text-encre/60 hover:text-red-700"
-              >
-                <X size={15} />
-                Retirer
-              </button>
+              <span className="pr-4 text-[15px] text-pierre">.{ROOT_DOMAIN}</span>
+            </div>
+            {slug !== savedSlug && savedSlug ? (
+              <p className="text-[13px] mt-2 text-argile">
+                Attention : l'ancienne adresse ({savedSlug}.{ROOT_DOMAIN}) ne fonctionnera plus. Pensez à mettre à jour vos
+                liens en bio.
+              </p>
+            ) : (
+              savedSlug && (
+                <a
+                  href={galleryUrl(savedSlug)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-[13px] mt-2 text-laiton underline underline-offset-4"
+                >
+                  Visiter votre galerie <ExternalLink size={12} />
+                </a>
+              )
             )}
           </div>
-        </div>
 
-        <div>
-          <label className="block text-sm mb-1.5 text-encre/80">Site web (optionnel)</label>
-          <input
-            value={websiteUrl}
-            onChange={(e) => setWebsiteUrl(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-md border border-bordure text-sm bg-white"
-          />
-        </div>
+          <div>
+            <label htmlFor="g-bio" className={label}>Votre bio</label>
+            <textarea
+              id="g-bio"
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              rows={5}
+              placeholder="Votre parcours, votre médium, ce qui vous inspire…"
+              className={field}
+            />
+          </div>
 
-        <div className="pt-2 border-t border-bordure">
-          <h3 className="font-display text-xl text-encre mt-5 mb-1">Pages légales</h3>
-          <p className="text-xs text-encre/50 mb-4">
-            Laissez un champ vide pour afficher le modèle générique par défaut sur votre galerie
-            publique. Renseignez-le pour le remplacer par votre propre texte.
-          </p>
+          <div>
+            <label htmlFor="g-web" className={label}>Site web <span className="font-normal text-pierre">(facultatif)</span></label>
+            <input id="g-web" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} className={field} />
+          </div>
+        </Section>
 
-          <div className="space-y-5">
-            <div>
-              <label className="block text-sm mb-1.5 text-encre/80">Mentions légales</label>
-              <textarea
-                value={legalMentionsText}
-                onChange={(e) => setLegalMentionsText(e.target.value)}
-                rows={6}
-                placeholder="SIRET, raison sociale, adresse, directeur de publication, hébergeur..."
-                className="w-full px-3.5 py-2.5 rounded-md border border-bordure text-sm bg-white"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1.5 text-encre/80">
-                Conditions générales de vente
+        <Section num="III" title="Portrait et signature" intro="Votre visage ou votre logo accueille vos visiteurs. Votre signature authentifie vos certificats.">
+          <div>
+            <p className={label}>Portrait ou logo</p>
+            <div className="flex flex-wrap items-center gap-4">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Votre portrait" className="w-20 h-20 rounded-full object-cover border border-bordure" />
+              ) : (
+                <span className="w-20 h-20 rounded-full bg-[#EAE3D6] border border-bordure" aria-hidden="true" />
+              )}
+              <label className="inline-flex items-center gap-2 min-h-[44px] px-5 rounded-full border border-encre text-sm text-encre cursor-pointer">
+                <UploadCloud size={16} strokeWidth={1.6} />
+                {uploading ? "Envoi…" : avatarUrl ? "Changer le portrait" : "Ajouter un portrait"}
+                <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
               </label>
-              <textarea
-                value={termsOfSaleText}
-                onChange={(e) => setTermsOfSaleText(e.target.value)}
-                rows={6}
-                placeholder="Modalités de paiement, livraison, retours, garanties..."
-                className="w-full px-3.5 py-2.5 rounded-md border border-bordure text-sm bg-white"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1.5 text-encre/80">
-                Politique de confidentialité
-              </label>
-              <textarea
-                value={privacyPolicyText}
-                onChange={(e) => setPrivacyPolicyText(e.target.value)}
-                rows={6}
-                placeholder="Données collectées, finalités, durée de conservation, droits RGPD..."
-                className="w-full px-3.5 py-2.5 rounded-md border border-bordure text-sm bg-white"
-              />
+              {avatarUrl && !uploading && (
+                <button
+                  type="button"
+                  onClick={() => setAvatarUrl("")}
+                  className="inline-flex items-center gap-1.5 min-h-[44px] px-2 text-sm text-pierre hover:text-argile"
+                >
+                  <X size={15} />
+                  Retirer
+                </button>
+              )}
             </div>
           </div>
-        </div>
 
-        {message && <p className="text-sm text-sauge">{message}</p>}
+          <div>
+            <p className={label}>Signature manuscrite <span className="font-normal text-pierre">(facultatif)</span></p>
+            <p className={`${hint} mb-3`}>
+              Apposée sur vos certificats d'authenticité. Sans image, votre nom s'affiche dans une écriture manuscrite.
+            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              {signatureUrl && (
+                <img src={signatureUrl} alt="Votre signature" className="h-16 object-contain bg-white border border-bordure rounded-lg px-3" />
+              )}
+              <label className="inline-flex items-center gap-2 min-h-[44px] px-5 rounded-full border border-encre text-sm text-encre cursor-pointer">
+                <UploadCloud size={16} strokeWidth={1.6} />
+                {uploadingSignature ? "Envoi…" : signatureUrl ? "Changer la signature" : "Ajouter ma signature"}
+                <input type="file" accept="image/*" className="hidden" onChange={handleSignatureChange} />
+              </label>
+              {signatureUrl && !uploadingSignature && (
+                <button
+                  type="button"
+                  onClick={() => setSignatureUrl("")}
+                  className="inline-flex items-center gap-1.5 min-h-[44px] px-2 text-sm text-pierre hover:text-argile"
+                >
+                  <X size={15} />
+                  Retirer
+                </button>
+              )}
+            </div>
+          </div>
+        </Section>
 
-        <button
-          type="submit"
-          disabled={saving || uploading}
-          className="px-5 py-2.5 rounded-md bg-aubergine text-platre text-sm font-medium disabled:opacity-60"
+        <Section
+          num="IV"
+          title="Pages légales"
+          intro="Laissez un champ vide pour afficher le modèle générique sur votre galerie. Renseignez-le pour le remplacer par votre texte."
         >
-          {saving ? "Enregistrement..." : "Enregistrer"}
-        </button>
+          <div>
+            <label htmlFor="g-legal" className={label}>Mentions légales</label>
+            <textarea
+              id="g-legal"
+              value={legalMentionsText}
+              onChange={(e) => setLegalMentionsText(e.target.value)}
+              rows={6}
+              placeholder="SIRET, raison sociale, adresse, directeur de publication, hébergeur…"
+              className={field}
+            />
+          </div>
+          <div>
+            <label htmlFor="g-cgv" className={label}>Conditions générales de vente</label>
+            <textarea
+              id="g-cgv"
+              value={termsOfSaleText}
+              onChange={(e) => setTermsOfSaleText(e.target.value)}
+              rows={6}
+              placeholder="Modalités de paiement, livraison, retours, garanties…"
+              className={field}
+            />
+          </div>
+          <div>
+            <label htmlFor="g-privacy" className={label}>Politique de confidentialité</label>
+            <textarea
+              id="g-privacy"
+              value={privacyPolicyText}
+              onChange={(e) => setPrivacyPolicyText(e.target.value)}
+              rows={6}
+              placeholder="Données collectées, finalités, durée de conservation, droits RGPD…"
+              className={field}
+            />
+          </div>
+        </Section>
+
+        {/* Barre d'enregistrement, toujours à portée de main */}
+        <div className="fixed bottom-0 left-0 right-0 md:left-[264px] z-30 bg-platre/95 backdrop-blur border-t border-bordure">
+          <div className="max-w-[1080px] mx-auto px-5 sm:px-10 md:px-14 py-4 flex flex-wrap items-center justify-end gap-4">
+            {message && (
+              <p role="status" className={`text-sm mr-auto ${message.ok ? "text-sauge" : "text-argile"}`}>
+                {message.text}
+              </p>
+            )}
+            <button
+              type="submit"
+              disabled={saving || uploading || uploadingSignature}
+              className="inline-flex items-center min-h-[48px] px-7 rounded-full bg-nuit text-ivoire text-sm font-medium disabled:opacity-60"
+            >
+              {saving ? "Enregistrement…" : "Enregistrer"}
+            </button>
+          </div>
+        </div>
       </form>
     </DashboardShell>
   );
