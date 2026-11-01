@@ -19,7 +19,7 @@ import { getAttribution } from "@/lib/attribution";
 */
 
 const inputClass =
-  "w-full rounded-xl border border-[#1C1A17]/20 bg-white px-4 py-3.5 text-base text-[#1C1A17] placeholder:text-[#77706A]/70 focus:outline-none focus:border-[#2B1E2F] focus:ring-2 focus:ring-[#B8912F]/40";
+  "w-full rounded-xl border border-[#1A1714]/20 bg-white px-4 py-3.5 text-base text-[#1A1714] placeholder:text-[#6B655B]/70 focus:outline-none focus:border-[#16130F] focus:ring-2 focus:ring-[#D9B75C]/40";
 
 function trialEndDate() {
   const d = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
@@ -83,19 +83,19 @@ function InscriptionForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F5F0] text-[#1C1A17] grid lg:grid-cols-[1fr_1.1fr]">
+    <div className="min-h-screen bg-[#F7F3EC] text-[#1A1714] grid lg:grid-cols-[1fr_1.1fr]">
       {/* Colonne image (ordinateur) : la galerie qui attend l'artiste */}
-      <aside className="relative hidden lg:block bg-[#2B1E2F]">
+      <aside className="relative hidden lg:block bg-[#16130F]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/landing/salle-haussmann.jpg"
           alt=""
           className="absolute inset-0 h-full w-full object-cover opacity-90"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#2B1E2F] via-[#2B1E2F]/30 to-transparent" />
-        <div className="absolute left-10 right-10 bottom-12 text-[#F7F5F0]">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#16130F] via-[#16130F]/30 to-transparent" />
+        <div className="absolute left-10 right-10 bottom-12 text-[#F4EFE6]">
           <p className="font-display text-4xl leading-tight">Votre galerie ouvre dans quelques minutes.</p>
-          <p className="mt-4 text-[#F7F5F0]/75 max-w-md">
+          <p className="mt-4 text-[#F4EFE6]/75 max-w-md">
             14 jours pour tout essayer : la galerie 3D, la boutique, les certificats. Vous pouvez vendre dès l'essai,
             sans commission.
           </p>
@@ -104,7 +104,7 @@ function InscriptionForm() {
 
       <main className="flex justify-center px-5 pt-8 pb-12 sm:py-16 lg:items-center">
         <div className="w-full max-w-md">
-          <Link href="/" className="font-display text-2xl text-[#2B1E2F]">
+          <Link href="/" className="font-display text-2xl text-[#16130F]">
             Drawiful
           </Link>
           <h1 className="font-display text-[32px] leading-tight sm:text-4xl mt-6">Créez votre galerie</h1>
@@ -152,7 +152,7 @@ function InscriptionForm() {
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-pressed={showPassword}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-3 py-2 text-sm font-semibold text-[#2B1E2F]"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-3 py-2 text-sm font-semibold text-[#16130F]"
                 >
                   {showPassword ? "Masquer" : "Afficher"}
                 </button>
@@ -160,7 +160,7 @@ function InscriptionForm() {
             </div>
 
             {error && (
-              <p className="text-sm text-[#7A2E2B]" role="alert">
+              <p className="text-sm text-[#9B3B2A]" role="alert">
                 {error}{" "}
                 {error.includes("existe déjà") && (
                   <Link href="/login" className="underline font-semibold">
@@ -173,20 +173,20 @@ function InscriptionForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-full bg-[#B8912F] py-4 text-[17px] font-semibold text-[#1C1A17] active:bg-[#C9A24A] hover:bg-[#C9A24A] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2B1E2F]"
+              className="w-full rounded-full bg-[#D9B75C] py-4 text-[17px] font-semibold text-[#1A1714] active:bg-[#E6C877] hover:bg-[#E6C877] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#16130F]"
             >
               {loading ? "Création de votre galerie…" : "Créer ma galerie gratuitement"}
             </button>
-            <p className="text-[13px] leading-relaxed text-[#77706A] text-center">
+            <p className="text-[13px] leading-relaxed text-[#6B655B] text-center">
               Sans carte bancaire · essai jusqu'au {endDate ?? "14e jour"}
               <br />
               Vous choisirez votre formule plus tard, si Drawiful vous plaît.
             </p>
           </form>
 
-          <p className="mt-8 text-sm text-center text-[#77706A]">
+          <p className="mt-8 text-sm text-center text-[#6B655B]">
             Déjà un compte ?{" "}
-            <Link href="/login" className="text-[#2B1E2F] font-semibold hover:underline">
+            <Link href="/login" className="text-[#16130F] font-semibold hover:underline">
               Se connecter
             </Link>
           </p>

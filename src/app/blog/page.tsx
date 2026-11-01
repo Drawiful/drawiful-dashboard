@@ -19,13 +19,13 @@ export const metadata: Metadata = {
 export default function BlogIndex() {
   return (
     <main>
-      <section className="bg-[#2B1E2F] text-[#F7F5F0]">
+      <section className="bg-[#16130F] text-[#F4EFE6] border-b border-[#D9B75C]/15">
         <div className="mx-auto max-w-6xl px-5 pb-14 pt-12 sm:px-8 sm:pb-20 sm:pt-16">
-          <p className="text-sm text-[#E3C77A]">Le blog des artistes qui vendent leurs œuvres</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#D9B75C]">Le journal de la maison</p>
           <h1 className="font-display-lp mt-3 max-w-3xl text-4xl leading-[1.05] sm:text-6xl">
             Vendre son art, sans y laisser la moitié.
           </h1>
-          <p className="mt-5 max-w-2xl text-base leading-relaxed text-[#F7F5F0]/75 sm:text-lg">
+          <p className="mt-5 max-w-2xl text-base leading-relaxed text-[#F4EFE6]/75 sm:text-lg">
             Prix, certificats, commissions, présentation : des guides concrets, écrits par un artiste pour les artistes.
           </p>
         </div>
@@ -37,14 +37,14 @@ export default function BlogIndex() {
             <li key={p.slug}>
               <Link
                 href={`/blog/${p.slug}`}
-                className="group flex h-full flex-col rounded-2xl border border-[#1C1A17]/10 bg-white p-6 transition-shadow hover:shadow-[0_12px_32px_rgba(28,26,23,0.08)]"
+                className="group flex h-full flex-col border border-[#1A1714]/10 bg-[#FFFDF9] p-7 transition-shadow hover:shadow-[0_18px_40px_rgba(26,23,20,0.10)]"
               >
-                <p className="text-xs text-[#77706A]">
+                <p className="text-xs text-[#6B655B]">
                   {formatDate(p.date)} · {p.readingMinutes} min de lecture
                 </p>
-                <h2 className="font-display-lp mt-3 text-2xl leading-tight group-hover:text-[#7A2E2B]">{p.title}</h2>
-                <p className="mt-3 flex-1 text-[15px] leading-relaxed text-[#4A4540]">{p.excerpt}</p>
-                <p className="mt-5 text-sm font-semibold text-[#7A2E2B]">Lire l'article →</p>
+                <h2 className="font-display-lp mt-3 text-2xl leading-tight group-hover:text-[#7A5F1F]">{p.title}</h2>
+                <p className="mt-3 flex-1 text-[15px] leading-relaxed text-[#55504A]">{p.excerpt}</p>
+                <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#7A5F1F]">Lire l'article</p>
               </Link>
             </li>
           ))}

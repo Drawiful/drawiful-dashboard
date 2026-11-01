@@ -40,9 +40,9 @@ const SAMPLES = [
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="py-3 border-b border-[#1C1A17]/10">
-      <p className="text-[11px] tracking-wide text-[#77706A]">{label}</p>
-      <p className="font-display-lp text-lg text-[#1C1A17] mt-0.5">{value}</p>
+    <div className="py-3 border-b border-[#1A1714]/10">
+      <p className="text-[11px] tracking-wide text-[#6B655B]">{label}</p>
+      <p className="font-display-lp text-lg text-[#1A1714] mt-0.5">{value}</p>
     </div>
   );
 }
@@ -54,7 +54,7 @@ export default function CertificateShowcase() {
   return (
     <div className="grid lg:grid-cols-[1fr_1.05fr] gap-10 lg:gap-16 items-start">
       <div>
-        <h2 className="font-display-lp text-4xl sm:text-5xl leading-[1.05] text-[#1C1A17]">
+        <h2 className="font-display-lp text-4xl sm:text-5xl leading-[1.05] text-[#1A1714]">
           Un certificat pour chaque œuvre.
         </h2>
         <p className="mt-5 text-[#4A4540] leading-relaxed max-w-md">
@@ -68,36 +68,36 @@ export default function CertificateShowcase() {
               role="tab"
               aria-selected={k === i}
               onClick={() => setI(k)}
-              className={`text-left rounded-[4px] px-5 py-4 border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C9A24A] ${
-                k === i ? "border-[#0E0C0A] bg-[#0E0C0A] text-[#F7F5F0]" : "border-[#1C1A17]/15 hover:border-[#1C1A17]/40"
+              className={`text-left rounded-[4px] px-5 py-4 border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9A7B2F] ${
+                k === i ? "border-[#0E0C0A] bg-[#0E0C0A] text-[#F4EFE6]" : "border-[#1A1714]/15 hover:border-[#1A1714]/40"
               }`}
             >
               <span className="block font-semibold">{x.label}</span>
-              <span className={`block text-sm ${k === i ? "text-[#F7F5F0]/70" : "text-[#77706A]"}`}>{x.hint}</span>
+              <span className={`block text-sm ${k === i ? "text-[#F4EFE6]/70" : "text-[#6B655B]"}`}>{x.hint}</span>
             </button>
           ))}
         </div>
-        <p className="mt-4 text-xs text-[#77706A]">Certificats illimités avec les plans Artiste et Gallery.</p>
+        <p className="mt-4 text-xs text-[#6B655B]">Certificats illimités avec les plans Artiste et Gallery.</p>
       </div>
 
       <figure className="relative">
         <div className="bg-white p-3 shadow-[0_30px_60px_-25px_rgba(43,30,47,0.35)]">
-          <div className="border border-[#C9A24A]/60 p-7 sm:p-9">
+          <div className="border border-[#9A7B2F]/60 p-7 sm:p-9">
             <div className="flex items-start justify-between gap-6">
               <div>
-                <p className="text-sm text-[#77706A]">Drawiful</p>
-                <p className="font-display-lp text-2xl sm:text-3xl text-[#1C1A17] mt-1">Certificat d'authenticité</p>
+                <p className="text-sm text-[#6B655B]">Drawiful</p>
+                <p className="font-display-lp text-2xl sm:text-3xl text-[#1A1714] mt-1">Certificat d'authenticité</p>
               </div>
               <span
                 aria-hidden="true"
-                className="grid place-items-center h-14 w-14 shrink-0 rounded-full bg-[#0E0C0A] text-[#F7F5F0] ring-4 ring-[#0E0C0A]/15"
+                className="grid place-items-center h-14 w-14 shrink-0 rounded-full bg-[#0E0C0A] text-[#F4EFE6] ring-4 ring-[#0E0C0A]/15"
               >
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                   <path d="M5 12.5l4.5 4.5L19 7.5" />
                 </svg>
               </span>
             </div>
-            <div className="mt-6 border-t border-[#C9A24A]/50">
+            <div className="mt-6 border-t border-[#9A7B2F]/50">
               <Row label="Œuvre" value={s.artwork} />
               <Row label="Artiste" value={s.artist} />
               <Row label="Technique" value={s.technique} />
@@ -110,7 +110,7 @@ export default function CertificateShowcase() {
             <p className="mt-6 font-display-lp italic text-xl text-[#0E0C0A]/80">{s.artist}</p>
           </div>
         </div>
-        <figcaption className="mt-3 text-xs text-[#77706A]">Exemple de certificat, données fictives.</figcaption>
+        <figcaption className="mt-3 text-xs text-[#6B655B]">Exemple de certificat, données fictives.</figcaption>
       </figure>
     </div>
   );
