@@ -7,6 +7,7 @@ import type { Skin } from "./skins";
 import { withAlpha } from "./skins";
 import { wrap, capsStyle, Eyebrow, ThemedPage, ThemedHeader, ThemedFooter, ArtworkMedia, btnStyle, money } from "./ThemedChrome";
 import { formatDimensions } from "@/lib/dimensions";
+import CircleInvite from "./CircleInvite";
 
 // Mêmes propriétés que les anciens composants MaisonHaussmannArtwork /
 // GalerieBlancheArtwork : la page de la fiche œuvre n'a pas besoin de changer
@@ -152,6 +153,9 @@ export function ThemedArtwork({
               {"Certificat d'authenticité inclus, vérifiable publiquement à tout moment."}
             </a>
           )}
+
+          {/* Le Cercle : être prévenu des prochaines œuvres */}
+          <CircleInvite skin={skin} slug={slug} galleryName={artist.galleryName} artworkId={artwork.id} variant="compact" />
         </div>
       </section>
 

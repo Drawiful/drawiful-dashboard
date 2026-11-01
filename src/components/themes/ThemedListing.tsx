@@ -19,6 +19,7 @@ import {
   money,
   roman,
 } from "./ThemedChrome";
+import CircleInvite from "./CircleInvite";
 
 function plural(n: number, one: string, many: string) {
   return n > 1 ? many : one;
@@ -86,6 +87,8 @@ export function ThemedListing({
       <Works skin={skin} artist={artist} slug={slug} artworks={artworks} />
       {has3d && <Visit3D skin={skin} slug={slug} />}
       <ArtistWord skin={skin} artist={artist} slug={slug} />
+      {/* Le Cercle : le livre d'or de la galerie */}
+      <CircleInvite skin={skin} slug={slug} galleryName={artist.galleryName} />
       <Guarantees skin={skin} artworks={artworks} />
       <ThemedFooter skin={skin} slug={slug} />
     </ThemedPage>

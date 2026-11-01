@@ -101,6 +101,12 @@ export const api = {
 
   // Fréquentation de la galerie (visiteurs, « se sont attardés »), N derniers jours
   getMyStats: (days = 7) => request(`/api/analytics/me?days=${days}`),
+
+  // Le Cercle : collectionneurs de l'artiste et cartons de vernissage privé
+  getMyCircle: () => request("/api/circle/me"),
+  removeCircleMember: (id: string) => request(`/api/circle/me/members/${id}`, { method: "DELETE" }),
+  sendCircleInvitation: (data: { artworkId: string; eventDate?: string; message?: string }) =>
+    request("/api/circle/me/invitations", { method: "POST", body: JSON.stringify(data) }),
   markOrderShipped: (id: string) => request(`/api/orders/${id}/ship`, { method: "PATCH" }),
   refundOrder: (id: string) => request(`/api/orders/${id}/refund`, { method: "POST" }),
 

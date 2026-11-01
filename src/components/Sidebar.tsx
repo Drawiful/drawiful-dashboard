@@ -12,10 +12,11 @@ export const navItems = [
   { href: "/overview", num: "I", label: "Votre galerie" },
   { href: "/artworks", num: "II", label: "Votre collection" },
   { href: "/orders", num: "III", label: "Acquisitions" },
-  { href: "/gallery", num: "IV", label: "Vos salles" },
-  { href: "/domaine", num: "V", label: "Votre adresse" },
-  { href: "/subscription", num: "VI", label: "Votre accès" },
-  { href: "/settings", num: "VII", label: "Votre maison" },
+  { href: "/cercle", num: "IV", label: "Votre Cercle" },
+  { href: "/gallery", num: "V", label: "Vos salles" },
+  { href: "/domaine", num: "VI", label: "Votre adresse" },
+  { href: "/subscription", num: "VII", label: "Votre accès" },
+  { href: "/settings", num: "VIII", label: "Votre maison" },
 ];
 
 function AccessCard({ limits }: { limits: any }) {
@@ -112,7 +113,7 @@ export default function Sidebar({
                     title="Choisissez votre formule pour rouvrir cette pièce"
                     className="flex items-baseline gap-3.5 px-3.5 py-3 rounded-md text-sm text-ivoire/40 cursor-not-allowed"
                   >
-                    <span className="font-display text-[13px] w-6">{item.num}</span>
+                    <span className="font-display text-[13px] w-8 shrink-0">{item.num}</span>
                     <span className="flex-1">{item.label}</span>
                     <Lock size={13} strokeWidth={1.6} className="self-center" />
                   </span>
@@ -128,7 +129,7 @@ export default function Sidebar({
                     active ? "bg-champagne/10 text-champagne font-medium" : "text-lilas hover:text-ivoire"
                   }`}
                 >
-                  <span className="font-display text-[13px] w-6">{item.num}</span>
+                  <span className="font-display text-[13px] w-8 shrink-0">{item.num}</span>
                   {item.label}
                 </Link>
               );

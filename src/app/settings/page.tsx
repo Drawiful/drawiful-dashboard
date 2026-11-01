@@ -19,6 +19,31 @@ export default function SettingsPage() {
   const [emailPassword, setEmailPassword] = useState("");
   const [emailMessage, setEmailMessage] = useState<{ text: string; ok: boolean } | null>(null);
 
+  // Adresse qui reçoit les réponses du Cercle
+  const [replyEmail, setReplyEmail] = useState("");
+  const [savedReply, setSavedReply] = useState("");
+  const [replyMessage, setReplyMessage] = useState<{ text: string; ok: boolean } | null>(null);
+  const [savingReply, setSavingReply] = useState(false);
+
+  async function handleReplySubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setReplyMessage(null);
+    setSavingReply(true);
+    try {
+      const value = replyEmail.trim();
+      await api.updateMyProfile({ circleReplyEmail: value });
+      setSavedReply(value);
+      setReplyMessage({
+        text: value ? "Les réponses de votre Cercle arriveront sur cette adresse." : "Les réponses arriveront sur votre adresse de connexion.",
+        ok: true,
+      });
+    } catch (err: any) {
+      setReplyMessage({ text: err.message || "La modification n’a pas abouti.", ok: false });
+    } finally {
+      setSavingReply(false);
+    }
+  }
+
   useEffect(() => {
     api.getAccount().then(setAccount).catch(() => {});
     api.getConnectStatus().then(setConnect).catch(() => {});
@@ -74,11 +99,16 @@ export default function SettingsPage() {
   const connectReady = connect?.chargesEnabled && connect?.detailsSubmitted;
 
   return (
-    <DashboardShell>
+    <DashboardShell
+      onProfileLoaded={(p) => {
+        setReplyEmail(p?.circleReplyEmail ?? "");
+        setSavedReply(p?.circleReplyEmail ?? "");
+      }}
+    >
       <PageHeader
         kicker="Votre maison"
         title="Votre maison"
-        intro="Ce qui reste en coulisses : l'encaissement de vos ventes, votre adresse e-mail et votre mot de passe."
+        intro="Ce qui reste en coulisses : l'encaissement de vos ventes, vos adresses e-mail et votre mot de passe."
       />
 
       <Section
@@ -152,7 +182,35 @@ export default function SettingsPage() {
         </form>
       </Section>
 
-      <Section num="III" title="Mot de passe" intro="Au moins 8 caractères.">
+      <Section
+        num="III"
+        title="Les réponses de votre Cercle"
+        intro="Quand un collectionneur répond à l'un de vos cartons de vernissage, sa réponse vous arrive directement, sur l'adresse de votre choix."
+      >
+        <form onSubmit={handleReplySubmit} className="flex flex-col gap-4 max-w-md">
+          <div>
+            <label htmlFor="s-reply" className={fieldLabel}>Adresse de réponse</label>
+            <input
+              id="s-reply"
+              type="email"
+              autoComplete="email"
+              value={replyEmail}
+              onChange={(e) => setReplyEmail(e.target.value)}
+              placeholder={account?.email ? `${account.email} (adresse de connexion)` : "contact@votre-galerie.fr"}
+              className={field}
+            />
+            <p className="text-[13px] text-pierre mt-2">Laissez vide pour utiliser votre adresse de connexion.</p>
+          </div>
+          <FormMessage message={replyMessage} />
+          <div>
+            <button type="submit" disabled={savingReply || replyEmail.trim() === savedReply} className={btnPrimary}>
+              {savingReply ? "Enregistrement…" : "Enregistrer l'adresse"}
+            </button>
+          </div>
+        </form>
+      </Section>
+
+      <Section num="IV" title="Mot de passe" intro="Au moins 8 caractères.">
         <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-4 max-w-md">
           <div>
             <label htmlFor="s-cur" className={fieldLabel}>Mot de passe actuel</label>
