@@ -241,7 +241,17 @@ const PLANS = [
   },
 ];
 
+const CIRCLE_STEPS = [
+  { title: "Il s'attarde", text: "Devant une œuvre qui le touche, il rejoint votre Cercle en un geste, depuis votre galerie." },
+  { title: "Vous l'invitez", text: "À chaque nouvelle œuvre, un carton de vernissage privé à votre nom part vers votre Cercle." },
+  { title: "Il revient", text: "Il découvre l'œuvre en avant-première, et c'est à vous qu'il répond." },
+];
+
 const FAQ = [
+  {
+    q: "Qu'est-ce que le Cercle ?",
+    a: "Le livre d'or de votre galerie. Vos visiteurs peuvent demander à être prévenus de vos prochaines œuvres. À chaque nouvelle création, vous invitez votre Cercle à un vernissage privé, au plus une fois par semaine pour que chaque invitation reste un événement. Votre Cercle vous appartient : vous pouvez l'exporter à tout moment.",
+  },
   {
     q: "Faut-il une carte bancaire pour commencer ?",
     a: "Non. Votre accès de 14 jours s'ouvre avec votre seule adresse e-mail. Vous choisissez une formule uniquement si l'expérience vous convient.",
@@ -442,7 +452,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl px-5 sm:px-8 py-20 sm:py-32">
           <Kicker n="III">Pour chaque sensibilité</Kicker>
           <h2 className="font-display-lp mt-6 max-w-3xl text-[38px] sm:text-6xl leading-[1.03]">
-            Une technologie invisible, au service de votre discipline.
+            Un écrin pour chaque discipline.
           </h2>
           <div className="mt-14 sm:mt-20 grid sm:grid-cols-2 gap-x-16 gap-y-14">
             {DISCIPLINES.map((d) => (
@@ -508,11 +518,60 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* 6b. LE CERCLE : chaque visiteur peut devenir un collectionneur */}
+      <section id="cercle" className="bg-[#F7F3EC] text-[#1A1714] scroll-mt-20">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 py-20 sm:py-32 grid lg:grid-cols-[1.05fr_0.95fr] gap-14 lg:gap-24 items-center">
+          <div>
+            <Kicker n="VI">Le Cercle</Kicker>
+            <h2 className="font-display-lp mt-6 text-[38px] sm:text-6xl leading-[1.03]">
+              Chaque visiteur peut devenir votre collectionneur.
+            </h2>
+            <p className="mt-7 max-w-lg text-[#55504A] leading-relaxed">
+              Une œuvre le retient. Il demande à être prévenu de vos prochaines créations et rejoint votre Cercle. À chaque
+              nouvelle œuvre, vous l'invitez à un vernissage privé : il la découvre avant tout le monde.
+            </p>
+            <ol className="mt-12 flex flex-col">
+              {CIRCLE_STEPS.map((c, i) => (
+                <li key={c.title} className="grid grid-cols-[56px_1fr] gap-4 border-t border-[#1A1714]/15 py-7">
+                  <span className="font-display-lp text-4xl leading-none text-[#9A7B2F]">{i + 1}</span>
+                  <div>
+                    <h3 className="font-display-lp text-2xl">{c.title}</h3>
+                    <p className="mt-2 text-[#55504A] leading-relaxed">{c.text}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <div className="mt-6 bg-[#16130F] text-[#F4EFE6] p-7 sm:p-9">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#D9B75C]">Notre engagement</p>
+              <p className="font-display-lp mt-3 text-[28px] sm:text-[32px] leading-[1.15]">Votre Cercle vous appartient.</p>
+              <p className="mt-3 text-[15px] leading-relaxed text-[#F4EFE6]/70">
+                Vos collectionneurs vous répondent directement. Vous pouvez emporter votre Cercle à tout moment, et Drawiful
+                ne le sollicite jamais pour d'autres artistes.
+              </p>
+            </div>
+          </div>
+          <figure className="mx-auto w-full max-w-[460px]">
+            <div className="bg-[#16130F] p-4 sm:p-6 shadow-[0_40px_80px_rgba(14,12,10,0.25)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/landing/carton-vernissage.jpg"
+                alt="Un carton de vernissage privé envoyé par l'artiste aux membres de son Cercle"
+                loading="lazy"
+                className="block w-full h-auto"
+              />
+            </div>
+            <figcaption className="mt-4 text-center font-display-lp text-base italic text-[#55504A]">
+              Le carton de vernissage privé, reçu par les membres du Cercle
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
       {/* 7. COMMISSIONS */}
       <section id="commission" className="bg-[#0E0C0A] scroll-mt-20">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 py-20 sm:py-32 grid lg:grid-cols-[1fr_1.05fr] gap-12 lg:gap-24 items-center">
           <div>
-            <Kicker n="VI" light>
+            <Kicker n="VII" light>
               0 % de commission
             </Kicker>
             <h2 className="font-display-lp mt-6 text-[38px] sm:text-6xl leading-[1.03]">Préservez l'intégralité de votre valeur.</h2>
@@ -544,7 +603,7 @@ export default function LandingPage() {
       {/* 8. AVANT / APRÈS */}
       <section className="bg-[#F7F3EC] text-[#1A1714]">
         <div className="mx-auto max-w-6xl px-5 sm:px-8 py-20 sm:py-32">
-          <Kicker n="VII">Avant, après</Kicker>
+          <Kicker n="VIII">Avant, après</Kicker>
           <h2 className="font-display-lp mt-6 text-[38px] sm:text-6xl leading-[1.03]">Restaurez l'harmonie.</h2>
           <p className="mt-6 max-w-xl text-[#55504A] leading-relaxed">
             Ce que la plupart des artistes assemblent à la main, et ce que Drawiful réunit pour vous.
@@ -588,7 +647,7 @@ export default function LandingPage() {
       {/* 9. FORMULES */}
       <section id="tarifs" className="bg-[#16130F] scroll-mt-20">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 py-20 sm:py-32">
-          <Kicker n="VIII" light>
+          <Kicker n="IX" light>
             Les formules
           </Kicker>
           <div className="mt-6 grid lg:grid-cols-[1fr_1fr] gap-8 lg:gap-20 items-end">
@@ -680,7 +739,7 @@ export default function LandingPage() {
       {/* 10. LE FONDATEUR */}
       <section className="bg-[#F7F3EC] text-[#1A1714]">
         <div className="mx-auto max-w-4xl px-5 sm:px-8 py-20 sm:py-32">
-          <Kicker n="IX">Le fondateur</Kicker>
+          <Kicker n="X">Le fondateur</Kicker>
           <h2 className="font-display-lp mt-6 text-[38px] sm:text-5xl leading-[1.05]">Pensé par un artiste, pour les artistes.</h2>
           <blockquote className="mt-10 border-l-2 border-[#9A7B2F] pl-6 sm:pl-8">
             <p className="font-display-lp text-2xl sm:text-[30px] leading-[1.35] italic">
@@ -693,7 +752,7 @@ export default function LandingPage() {
               <a href="https://erwan.drawiful.art" target="_blank" rel="noopener noreferrer" className="text-[#9A7B2F] underline underline-offset-4">
                 erwan.drawiful.art
               </a>
-              . Je veille personnellement à ce que la technologie s'efface derrière votre art. Une question, une vision à
+              . Je veille personnellement à ce que rien ne s'interpose entre votre art et ceux qui le regardent. Une question, une vision à
               partager ? Écrivez-moi à{" "}
               <a href="mailto:clients@drawiful.app" className="text-[#9A7B2F] underline underline-offset-4">
                 clients@drawiful.app
