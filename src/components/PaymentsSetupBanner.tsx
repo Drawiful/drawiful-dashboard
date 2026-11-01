@@ -39,7 +39,7 @@ export default function PaymentsSetupBanner({ profile }: { profile: any }) {
   }
 
   return (
-    <div className="mt-6 rounded-xl bg-papier border border-laiton/40 p-6 flex flex-wrap items-center gap-5">
+    <div className="rounded-xl bg-papier border border-laiton/40 p-6 flex flex-wrap items-center gap-5">
       <CreditCard size={22} className="text-laiton shrink-0" strokeWidth={1.5} />
       <div className="flex-1 min-w-[240px]">
         <p className="font-display text-xl text-encre">Ouvrez la vente de vos œuvres</p>

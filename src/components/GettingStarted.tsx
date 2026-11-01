@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Check, ArrowRight, Copy, ExternalLink, X } from "lucide-react";
+import { Copy, ExternalLink, X } from "lucide-react";
 import { galleryUrl as galleryUrlFor } from "@/lib/domain";
 
 /*
@@ -53,6 +52,20 @@ export function onboardingSteps(profile: any): Step[] {
     },
     // Formule sans boutique (Aspirant) : pas d'étape paiements
   ].filter((s) => s.key !== "payments" || !profile.limits || profile.limits.shop);
+}
+
+// Les premiers pas, dans la langue de la maison, pour la carte « Votre prochain geste »
+const NEXT_STEP_COPY: Record<string, { title: string; text: string; cta: string }> = {
+  identity: { title: "Donnez un nom et une voix à votre galerie.", text: "Son nom et quelques mots sur vous : c'est ce que vos visiteurs lisent en premier.", cta: "Présenter ma galerie" },
+  avatar: { title: "Ajoutez votre portrait.", text: "Votre visage ou votre logo accueille vos visiteurs et signe la page de paiement.", cta: "Ajouter mon portrait" },
+  artwork: { title: "Accrochez votre première œuvre.", text: "Une photo, un titre, un prix : votre galerie prend vie.", cta: "Accrocher une œuvre" },
+  payments: { title: "Ouvrez la vente de vos œuvres.", text: "Cinq minutes avec Stripe pour recevoir le produit de vos ventes, sans commission Drawiful.", cta: "Ouvrir mes ventes" },
+};
+
+export function nextOnboardingStep(profile: any): { key: string; href: string; title: string; text: string; cta: string } | null {
+  const next = onboardingSteps(profile).find((s) => !s.done);
+  if (!next) return null;
+  return { key: next.key, href: next.href, ...NEXT_STEP_COPY[next.key] };
 }
 
 export function onboardingComplete(profile: any) {
@@ -130,65 +143,7 @@ export default function GettingStarted({ profile }: { profile: any }) {
     );
   }
 
-  const next = steps.find((s) => !s.done);
-
-  return (
-    <section className="rounded-xl bg-papier border border-bordure p-8">
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.2em] text-laiton">Avant le vernissage</p>
-          <h3 className="font-display font-normal text-[28px] text-encre mt-2">Préparez l'ouverture de votre galerie</h3>
-          <p className="text-sm text-pierre mt-1">
-            {doneCount} sur {steps.length} terminée{doneCount > 1 ? "s" : ""}
-          </p>
-        </div>
-        <a
-          href={galleryUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-sm text-laiton underline underline-offset-4"
-        >
-          Visiter votre galerie <ExternalLink size={13} />
-        </a>
-      </div>
-
-      <div className="h-1 rounded-full bg-bordure mt-5 overflow-hidden">
-        <div
-          className="h-full bg-champagne rounded-full transition-all"
-          style={{ width: `${(doneCount / steps.length) * 100}%` }}
-        />
-      </div>
-
-      <ol className="mt-5 divide-y divide-bordure">
-        {steps.map((s, i) => {
-          const isNext = s.key === next?.key;
-          return (
-            <li key={s.key} className="flex items-center gap-4 py-3.5">
-              <span
-                className={`flex items-center justify-center w-7 h-7 rounded-full shrink-0 text-xs font-semibold ${
-                  s.done ? "bg-champagne text-nuit" : isNext ? "bg-nuit text-ivoire" : "border border-bordure text-pierre"
-                }`}
-              >
-                {s.done ? <Check size={14} /> : i + 1}
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className={`text-sm font-medium ${s.done ? "text-encre/45 line-through" : "text-encre"}`}>{s.title}</p>
-                {!s.done && <p className="text-xs text-encre/60 mt-0.5">{s.text}</p>}
-              </div>
-              {!s.done && (
-                <Link
-                  href={s.href}
-                  className={`inline-flex items-center gap-1.5 text-sm min-h-[44px] px-4 rounded-full shrink-0 ${
-                    isNext ? "bg-nuit text-ivoire font-medium" : "border border-bordure text-encre/70"
-                  }`}
-                >
-                  {s.cta} {isNext && <ArrowRight size={14} />}
-                </Link>
-              )}
-            </li>
-          );
-        })}
-      </ol>
-    </section>
-  );
+  // Galerie pas encore prête : plus de liste à cocher. Le prochain geste est
+  // proposé, seul, dans la carte « Votre prochain geste » de l'accueil.
+  return null;
 }

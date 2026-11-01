@@ -5,7 +5,7 @@ import { ArrowUpRight, Copy } from "lucide-react";
 import DashboardShell from "@/components/DashboardShell";
 import PrintsInterestCard from "@/components/PrintsInterestCard";
 import PaymentsSetupBanner from "@/components/PaymentsSetupBanner";
-import GettingStarted, { onboardingComplete } from "@/components/GettingStarted";
+import GettingStarted, { onboardingComplete, nextOnboardingStep } from "@/components/GettingStarted";
 import { api } from "@/lib/api";
 import { galleryUrl as galleryUrlFor } from "@/lib/domain";
 
@@ -94,6 +94,8 @@ export default function OverviewPage() {
   const toShipCity = toShip?.shippingAddress?.city;
   const toShipTitle = toShip?.items?.[0]?.titleSnapshot;
 
+  // Le prochain premier pas, s'il en reste un (portrait, première œuvre, ventes…)
+  const nextStep = profile ? nextOnboardingStep(profile) : null;
   const wallsLeft =
     typeof limits?.maxArtworks === "number" ? Math.max(0, limits.maxArtworks - artworks.length) : null;
 
@@ -144,12 +146,8 @@ export default function OverviewPage() {
 
         {/* Premiers pas tant que la galerie n'est pas prête (inclut l'activation
             des paiements) ; ensuite, le bandeau paiements reste en filet de sécurité. */}
-        {profile && (
-          <div>
-            <GettingStarted profile={profile} />
-            {(onboardingComplete(profile) || profile.stripeOnboardingDone) && <PaymentsSetupBanner profile={profile} />}
-          </div>
-        )}
+        {profile && <GettingStarted profile={profile} />}
+        {profile && (onboardingComplete(profile) || profile.stripeOnboardingDone) && <PaymentsSetupBanner profile={profile} />}
 
         <section className="grid gap-7 lg:grid-cols-2">
           {/* À l'affiche */}
@@ -298,22 +296,30 @@ export default function OverviewPage() {
           )}
 
           <div className="rounded-xl bg-papier border border-bordure p-8 flex flex-col gap-3">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-laiton">Votre prochain geste</p>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-laiton">
+              {nextStep ? "Avant le vernissage" : "Votre prochain geste"}
+            </p>
             <h3 className="font-display font-normal text-[28px] leading-snug text-encre">
-              {onWalls.length ? "Accrochez une nouvelle œuvre." : "Accrochez votre première œuvre."}
+              {nextStep ? nextStep.title : onWalls.length ? "Accrochez une nouvelle œuvre." : "Accrochez votre première œuvre."}
             </h3>
             <p className="text-[15px] leading-relaxed text-encre/75">
-              Une galerie qui se renouvelle attire de nouveaux regards.
-              {wallsLeft !== null && wallsLeft > 0
-                ? ` Il vous reste ${wallsLeft} ${plural(wallsLeft, "place", "places")} sur vos murs.`
-                : ""}
+              {nextStep ? (
+                nextStep.text
+              ) : (
+                <>
+                  Une galerie qui se renouvelle attire de nouveaux regards.
+                  {wallsLeft !== null && wallsLeft > 0
+                    ? ` Il vous reste ${wallsLeft} ${plural(wallsLeft, "place", "places")} sur vos murs.`
+                    : ""}
+                </>
+              )}
             </p>
             <div className="mt-2">
               <Link
-                href="/artworks"
+                href={nextStep ? nextStep.href : "/artworks"}
                 className="inline-flex items-center min-h-[44px] px-5 rounded-full bg-nuit text-ivoire text-sm font-medium"
               >
-                Accrocher une œuvre
+                {nextStep ? nextStep.cta : "Accrocher une œuvre"}
               </Link>
             </div>
           </div>
