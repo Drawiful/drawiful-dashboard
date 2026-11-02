@@ -816,7 +816,7 @@ export default function LandingPage() {
               clients@drawiful.app
             </a>
             <Link href="/blog" className="hover:text-[#F4EFE6]">
-              Blog
+              Le journal
             </Link>
             <Link href="/login" className="hover:text-[#F4EFE6]">
               Espace artiste
