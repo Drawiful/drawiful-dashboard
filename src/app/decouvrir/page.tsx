@@ -322,7 +322,7 @@ export default function LandingPage() {
               monde entier et scellez l'authenticité de vos œuvres. Sans aucune commission.
             </p>
             <CtaPrimary id="hero-cta" href={SIGNUP} className="mt-6 w-full">
-              Initier mon accès privé
+              Entrer dans votre galerie
             </CtaPrimary>
             <p className="mt-3 text-center text-[12px] leading-relaxed text-[#F4EFE6]/60">
               14 jours offerts, sans carte bancaire · Sans engagement
@@ -350,7 +350,7 @@ export default function LandingPage() {
                 le monde entier et scellez l'authenticité de vos œuvres. Sans aucune commission.
               </p>
               <div className="mt-10">
-                <CtaPrimary href={SIGNUP}>Initier mon accès privé</CtaPrimary>
+                <CtaPrimary href={SIGNUP}>Entrer dans votre galerie</CtaPrimary>
               </div>
               <p className="mt-4 text-[13px] text-[#F4EFE6]/55">
                 14 jours offerts, sans carte bancaire · Sans engagement · Configuration sereine en quelques minutes
@@ -512,7 +512,7 @@ export default function LandingPage() {
             ))}
           </ol>
           <div className="mt-16">
-            <CtaPrimary href={SIGNUP}>Initier mon accès privé</CtaPrimary>
+            <CtaPrimary href={SIGNUP}>Révéler votre univers</CtaPrimary>
             <p className="mt-3 text-[13px] text-[#F4EFE6]/50">14 jours offerts, sans carte bancaire</p>
           </div>
         </div>
@@ -798,7 +798,7 @@ export default function LandingPage() {
             commission, pour toujours.
           </p>
           <div className="mt-11">
-            <CtaPrimary href={SIGNUP}>Entrer dans l'expérience Drawiful</CtaPrimary>
+            <CtaPrimary href={SIGNUP}>Préparer votre vernissage</CtaPrimary>
           </div>
           <p className="mt-5 text-sm text-[#F4EFE6]/50">14 jours offerts, sans carte bancaire · Sans engagement</p>
         </div>

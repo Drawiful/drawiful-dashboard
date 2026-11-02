@@ -41,7 +41,7 @@ export default function StickyCta() {
         tabIndex={show ? 0 : -1}
         className="flex w-full items-center justify-center rounded-full bg-[#D9B75C] py-3.5 text-[15px] font-semibold text-[#0E0C0A] active:bg-[#E6C877]"
       >
-        Initier mon accès privé
+        Entrer dans votre galerie
       </Link>
       <p className="mt-1.5 text-center text-[11px] text-[#F4EFE6]/60">14 jours offerts · sans carte bancaire</p>
     </div>
