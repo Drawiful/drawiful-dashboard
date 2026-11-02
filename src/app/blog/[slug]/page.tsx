@@ -63,9 +63,22 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     publisher: { "@type": "Organization", name: "Drawiful", url: SITE_URL },
   };
 
+  const faqLd = post.faq?.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: post.faq.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      }
+    : null;
+
   return (
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <article className="mx-auto max-w-[720px] px-5 pb-8 pt-10 sm:px-8 sm:pt-14">
         <nav aria-label="Fil d'Ariane" className="text-sm text-[#6B655B]">
@@ -82,6 +95,27 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         <div className={`mt-8 ${PROSE}`}>
           <Content />
         </div>
+
+        {post.faq && post.faq.length > 0 && (
+          <section aria-labelledby="faq" className="mt-14 border-t border-[#1A1714]/10 pt-10">
+            <h2 id="faq" className="font-display-lp text-[28px] leading-tight text-[#1A1714] sm:text-[32px]">
+              Questions fréquentes
+            </h2>
+            <div className="mt-6 divide-y divide-[#1A1714]/10 border-y border-[#1A1714]/10">
+              {post.faq.map((f) => (
+                <details key={f.q} className="group py-5">
+                  <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-[17px] font-semibold leading-snug text-[#1A1714] [&::-webkit-details-marker]:hidden">
+                    {f.q}
+                    <span aria-hidden="true" className="mt-0.5 text-[#9A7B2F] transition-transform group-open:rotate-45">
+                      +
+                    </span>
+                  </summary>
+                  <p className="mt-3 text-[16px] leading-[1.7] text-[#2A2622]">{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
       </article>
 
       {others.length > 0 && (
