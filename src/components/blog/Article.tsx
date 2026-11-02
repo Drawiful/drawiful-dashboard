@@ -32,13 +32,13 @@ export function DrawifulCta({ title, text }: { title: string; text: string }) {
           href="/inscription"
           className="inline-flex items-center justify-center rounded-full bg-[#D9B75C] px-7 py-3.5 text-[15px] font-semibold text-[#0E0C0A] hover:bg-[#E6C877]"
         >
-          Initier mon accès privé
+          Entrer dans votre galerie
         </Link>
         <a
           href="https://erwan.drawiful.art"
           className="text-center text-sm text-[#D9B75C] underline underline-offset-4 sm:text-left"
         >
-          Visiter une galerie Drawiful
+          Visiter la galerie d'un artiste
         </a>
       </div>
     </aside>

@@ -40,7 +40,7 @@ export default function BlogLayout({ children }: { children: ReactNode }) {
               href="/inscription"
               className="hidden sm:inline-flex rounded-full bg-[#D9B75C] px-5 py-2.5 text-sm font-semibold text-[#0E0C0A] hover:bg-[#E6C877] transition-colors"
             >
-              Accès privé, 14 jours offerts
+              Votre galerie, 14 jours offerts
             </Link>
           </div>
         </nav>
