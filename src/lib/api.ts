@@ -11,6 +11,41 @@ export function setToken(token: string) {
 
 export function clearToken() {
   localStorage.removeItem("drawiful_token");
+  localStorage.removeItem(MAISON_KEY);
+}
+
+/*
+  Accès maison (conciergerie) : la maison entre dans la galerie d'un artiste
+  avec un jeton de 2 h. Son propre jeton est mis de côté pour y revenir.
+*/
+const MAISON_KEY = "drawiful_maison";
+
+export type MaisonVisit = { token: string; galleryName: string };
+
+export function getMaisonVisit(): MaisonVisit | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(MAISON_KEY);
+    return raw ? (JSON.parse(raw) as MaisonVisit) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function startMaisonVisit(artistToken: string, galleryName: string) {
+  const own = getToken();
+  if (!own) return;
+  localStorage.setItem(MAISON_KEY, JSON.stringify({ token: own, galleryName }));
+  setToken(artistToken);
+}
+
+// Retour au compte de la maison ; renvoie false s'il n'y avait pas d'accès en cours.
+export function endMaisonVisit(): boolean {
+  const visit = getMaisonVisit();
+  localStorage.removeItem(MAISON_KEY);
+  if (!visit) return false;
+  setToken(visit.token);
+  return true;
 }
 
 class ApiError extends Error {
@@ -36,8 +71,13 @@ async function request(path: string, options: RequestInit = {}) {
 
   if (!res.ok) {
     if (res.status === 401 && typeof window !== "undefined") {
-      clearToken();
-      window.location.href = "/login";
+      // Accès maison expiré (2 h) : retour au compte de la maison
+      if (endMaisonVisit()) {
+        window.location.href = "/maison";
+      } else {
+        clearToken();
+        window.location.href = "/login";
+      }
     }
     throw new ApiError(data.message || "Une erreur est survenue", res.status);
   }
@@ -46,6 +86,13 @@ async function request(path: string, options: RequestInit = {}) {
 }
 
 export const api = {
+  // Accès maison (conciergerie)
+  maisonAccess: () => request("/api/maison/acces"),
+  maisonSearch: (q: string) => request(`/api/maison/galeries?q=${encodeURIComponent(q)}`),
+  maisonEnter: (profileId: string) =>
+    request(`/api/maison/galeries/${encodeURIComponent(profileId)}/entrer`, { method: "POST" }),
+  maisonJournal: () => request("/api/maison/journal"),
+
   // Auth
   login: (email: string, password: string) =>
     request("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),

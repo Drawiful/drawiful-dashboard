@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { api, getToken } from "@/lib/api";
 import Sidebar from "./Sidebar";
 import TrialBanner from "./TrialBanner";
+import MaisonBanner from "./MaisonBanner";
 import { galleryUrl } from "@/lib/domain";
 
 // Essai terminé sans formule : seule la page Abonnement reste accessible.
@@ -56,6 +57,8 @@ export default function DashboardShell({
   }
 
   return (
+    <>
+    <MaisonBanner />
     <div className="min-h-screen w-full flex flex-col md:flex-row bg-platre">
       <Sidebar
         galleryName={profile?.galleryName}
@@ -70,5 +73,6 @@ export default function DashboardShell({
         </div>
       </main>
     </div>
+    </>
   );
 }
