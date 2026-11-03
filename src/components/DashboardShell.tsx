@@ -22,8 +22,10 @@ export default function DashboardShell({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Après connexion, l'artiste revient sur la page demandée (ex. lien d'un e-mail)
+    const toLogin = () => router.replace(`/login?next=${encodeURIComponent(pathname || "/overview")}`);
     if (!getToken()) {
-      router.replace("/login");
+      toLogin();
       return;
     }
     api
@@ -32,7 +34,7 @@ export default function DashboardShell({
         setProfile(data);
         onProfileLoaded?.(data);
       })
-      .catch(() => router.replace("/login"))
+      .catch(toLogin)
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -27,7 +27,9 @@ export default function LoginPage() {
     try {
       const { accessToken } = await api.login(email, password);
       setToken(accessToken);
-      router.push("/overview");
+      // Retour vers la page demandée avant la connexion (uniquement une page du site)
+      const next = new URLSearchParams(window.location.search).get("next");
+      router.push(next && next.startsWith("/") && !next.startsWith("//") ? next : "/overview");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Connexion impossible");
     } finally {
