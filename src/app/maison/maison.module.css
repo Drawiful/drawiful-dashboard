@@ -1,0 +1,387 @@
+/* Landing « maison » : nuit, ivoire, champagne. Bodoni Moda pour les titres, Manrope pour le texte. */
+
+.page {
+  --nuit: #16130f;
+  --encre: #0e0c0a;
+  --ivoire: #f4efe6;
+  --papier: #f7f3ec;
+  --champagne: #d9b75c;
+  --laiton: #9a7b2f;
+  --laiton-fonce: #7a5f1f;
+  --pierre: #6b655b;
+  --ivoire-doux: #d8d0bf;
+  --brume: #b5ac98;
+  --filet: #d8cfbd;
+  --titre: var(--font-bodoni), "Bodoni 72", Didot, Georgia, serif;
+  --texte: var(--font-manrope), system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  background: var(--encre);
+  color: var(--ivoire);
+  font-family: var(--texte);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page *,
+.page *::before,
+.page *::after {
+  box-sizing: border-box;
+}
+
+.wrap {
+  width: min(1040px, 100% - 48px);
+  margin-inline: auto;
+}
+
+/* En-tête */
+.nav {
+  background: var(--nuit);
+}
+
+.navInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ivoire);
+  text-decoration: none;
+}
+
+.disc {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--champagne);
+  color: var(--nuit);
+  font-family: var(--titre);
+  font-size: 1.0625rem;
+}
+
+.brandName {
+  font-family: var(--titre);
+  font-size: 0.8125rem;
+  letter-spacing: 0.28em;
+}
+
+.navLink {
+  color: var(--brume);
+  font-size: 0.8125rem;
+  text-decoration: none;
+}
+
+.navLink:hover {
+  color: var(--ivoire);
+}
+
+/* Hero */
+.hero {
+  background: var(--encre);
+  padding-block: clamp(56px, 11vw, 132px);
+}
+
+.title {
+  max-width: 17ch;
+  margin: 0;
+  font-family: var(--titre);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 6.4vw, 4.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: var(--ivoire);
+}
+
+.accent {
+  color: var(--champagne);
+}
+
+.rule {
+  width: 44px;
+  height: 1px;
+  margin: 28px 0;
+  background: var(--champagne);
+}
+
+.lead {
+  max-width: 52ch;
+  margin: 0 0 32px;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--ivoire-doux);
+}
+
+.btn {
+  display: inline-block;
+  padding: 14px 22px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--champagne);
+  color: var(--nuit);
+  font-family: var(--texte);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #e3c673;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.btn:focus-visible,
+.link:focus-visible,
+.navLink:focus-visible,
+.brand:focus-visible,
+.field:focus-visible {
+  outline: 2px solid var(--champagne);
+  outline-offset: 3px;
+}
+
+.note {
+  margin: 14px 0 0;
+  font-size: 0.8125rem;
+  color: var(--brume);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rise {
+    animation: rise 0.9s ease-out both;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Sections */
+.section {
+  padding-block: clamp(48px, 8vw, 88px);
+}
+
+.dark {
+  background: var(--nuit);
+  color: var(--ivoire);
+}
+
+.light {
+  background: var(--papier);
+  color: var(--nuit);
+}
+
+.h2 {
+  margin: 0 0 28px;
+  font-family: var(--titre);
+  font-weight: 400;
+  font-size: clamp(1.625rem, 3.6vw, 2.375rem);
+  line-height: 1.15;
+}
+
+.text {
+  max-width: 52ch;
+  margin: 0 0 24px;
+  color: var(--ivoire-doux);
+}
+
+.link {
+  display: inline-block;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--laiton);
+  color: var(--champagne);
+  text-decoration: none;
+}
+
+.link:hover {
+  border-bottom-color: var(--champagne);
+}
+
+/* Trois temps */
+.steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--filet);
+  list-style: none;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 2.75rem 1fr;
+  gap: 4px 12px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--filet);
+}
+
+.num {
+  font-family: var(--titre);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: var(--laiton-fonce);
+}
+
+.stepTitle {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 500;
+}
+
+.stepText {
+  max-width: 46ch;
+  margin: 4px 0 0;
+  font-size: 0.9375rem;
+  color: var(--pierre);
+}
+
+@media (min-width: 800px) {
+  .steps {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0 40px;
+    border-top: 0;
+  }
+
+  .step {
+    grid-template-columns: 1fr;
+    padding: 24px 0 0;
+    border-top: 1px solid var(--filet);
+    border-bottom: 0;
+  }
+}
+
+/* Engagements */
+.list {
+  max-width: 640px;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--filet);
+  list-style: none;
+}
+
+.item {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--filet);
+}
+
+/* Formulaire */
+.form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  max-width: 720px;
+}
+
+@media (min-width: 640px) {
+  .form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .full {
+    grid-column: 1 / -1;
+  }
+}
+
+.label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: var(--brume);
+}
+
+.field {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--pierre);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--ivoire);
+  font-family: var(--texte);
+  font-size: 1rem;
+}
+
+.field:focus {
+  border-color: var(--champagne);
+}
+
+.field option {
+  background: var(--nuit);
+  color: var(--ivoire);
+}
+
+.area {
+  min-height: 112px;
+  resize: vertical;
+}
+
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.error {
+  margin: 0;
+  color: #e8a598;
+  font-size: 0.9375rem;
+}
+
+.sent {
+  max-width: 720px;
+  padding: 20px 22px;
+  border-left: 2px solid var(--champagne);
+  background: var(--encre);
+}
+
+.sentTitle {
+  margin: 0 0 6px;
+  font-family: var(--titre);
+  font-size: 1.375rem;
+}
+
+.sentText {
+  margin: 0;
+  color: var(--ivoire-doux);
+}
+
+.privacy {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--brume);
+}
+
+/* Pied de page */
+.foot {
+  padding-block: 28px;
+  border-top: 1px solid var(--laiton);
+  background: var(--nuit);
+  color: var(--brume);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.sign {
+  margin: 12px 0 0;
+  font-family: var(--titre);
+  font-style: italic;
+  color: var(--champagne);
+}
