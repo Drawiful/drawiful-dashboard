@@ -1,0 +1,91 @@
+/* Section « Sélection monumentale » : cadre or aux couleurs de la charte. */
+
+.section {
+  --nuit: #16130f;
+  --encre: #0e0c0a;
+  --ivoire: #f4efe6;
+  --champagne: #d9b75c;
+  --laiton: #9a7b2f;
+  --laiton-fonce: #7a5f1f;
+  --brume: #b5ac98;
+  --ivoire-doux: #d8d0bf;
+
+  background: var(--encre);
+  color: var(--ivoire);
+  padding-block: clamp(56px, 9vw, 104px);
+  font-family: var(--font-manrope), system-ui, sans-serif;
+}
+
+.wrap {
+  width: min(1040px, 100% - 48px);
+  margin-inline: auto;
+  display: grid;
+  gap: 32px;
+  justify-items: center;
+  text-align: center;
+}
+
+.h2 {
+  margin: 0;
+  font-family: var(--font-bodoni), "Bodoni 72", Didot, Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(1.875rem, 4.4vw, 3rem);
+  line-height: 1.1;
+}
+
+.lead {
+  max-width: 52ch;
+  margin: -12px 0 0;
+  color: var(--ivoire-doux);
+  line-height: 1.7;
+}
+
+/* Cadre or : filet champagne, passe-partout nuit, filet laiton intérieur */
+.frame {
+  margin: 0;
+  width: min(640px, 100%);
+}
+
+.mat {
+  padding: 10px;
+  border: 1px solid var(--champagne);
+  background: var(--nuit);
+  box-shadow:
+    0 0 0 5px var(--nuit),
+    0 0 0 6px var(--laiton),
+    0 18px 40px rgba(0, 0, 0, 0.55);
+}
+
+.img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--laiton-fonce);
+}
+
+.cap {
+  margin-top: 22px;
+  font-size: 0.8125rem;
+  color: var(--brume);
+}
+
+.btn {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 14px 22px;
+  border-radius: 2px;
+  background: var(--champagne);
+  color: var(--nuit);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background: #e3c673;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--champagne);
+  outline-offset: 3px;
+}

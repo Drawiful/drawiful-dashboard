@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Bodoni_Moda, Manrope } from "next/font/google";
 import ConsultationForm from "./ConsultationForm";
+import SelectionMonumentale from "./SelectionMonumentale";
 import { COLLECTION_URL, DELAI_REPONSE, DELAI_SELECTION, SHOW_COLLECTION } from "./config";
 import s from "./maison.module.css";
 
@@ -74,6 +75,8 @@ export default function MaisonPage() {
           <p className={s.note}>Réponse personnelle sous {DELAI_REPONSE}.</p>
         </div>
       </section>
+
+      <SelectionMonumentale cta="Demander un dossier d'acquisition sur mesure" />
 
       <section className={`${s.section} ${s.light}`} aria-labelledby="temps">
         <div className={s.wrap}>
