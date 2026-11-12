@@ -53,9 +53,6 @@ export default function MaisonPage() {
             </span>
             <span className={s.brandName}>DRAWIFUL</span>
           </Link>
-          <Link href="/decouvrir" className={s.navLink}>
-            Vous êtes artiste ?
-          </Link>
         </div>
       </header>
 
