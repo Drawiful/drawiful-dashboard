@@ -71,7 +71,7 @@ export async function middleware(req: NextRequest) {
   if (host === ROOT_DOMAIN) {
     if (req.nextUrl.pathname === "/") {
       const url = req.nextUrl.clone();
-      url.pathname = "/decouvrir";
+      url.pathname = "/selection";
       return NextResponse.rewrite(url);
     }
     return NextResponse.next();

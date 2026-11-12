@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { DELAI_REPONSE } from "@/app/maison/config";
+import { DELAI_REPONSE } from "@/app/selection/config";
 
 export const runtime = "nodejs";
 
@@ -79,7 +79,7 @@ export async function POST(req: Request) {
     sender,
     to: [{ email: CONSULTATION_TO_EMAIL }],
     replyTo: { email, name },
-    subject: `Nouvelle demande de consultation : ${name}`,
+    subject: `Nouvelle demande de dossier d'acquisition : ${name}`,
     htmlContent:
       `<table style="font-family:Arial,sans-serif;font-size:14px">` +
       ligne("Nom", name) +
@@ -104,7 +104,7 @@ export async function POST(req: Request) {
     htmlContent:
       `<div style="font-family:Georgia,serif;font-size:16px;line-height:1.6;color:#16130f">` +
       `<p>Bonjour ${esc(name)},</p>` +
-      `<p>Votre demande de consultation est bien arrivée. Je vous réponds personnellement sous ${esc(DELAI_REPONSE)}.</p>` +
+      `<p>Votre demande de dossier d'acquisition est bien arrivée. Je vous réponds personnellement sous ${esc(DELAI_REPONSE)}.</p>` +
       `<p><em>La maison Drawiful</em></p></div>`,
   }).catch((e) => console.error("[consultation] confirmation non envoyée", e));
 
