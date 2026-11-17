@@ -1,4 +1,4 @@
-/* Section « Sélection monumentale » : cadre or aux couleurs de la charte. */
+﻿/* Section Â« SÃ©lection monumentale Â» : cadre or aux couleurs de la charte. */
 
 .section {
   --nuit: #16130f;
@@ -40,10 +40,10 @@
   line-height: 1.7;
 }
 
-/* Cadre or : filet champagne, passe-partout nuit, filet laiton intérieur */
+/* Cadre or : filet champagne, passe-partout nuit, filet laiton intÃ©rieur */
 .frame {
   margin: 0;
-  width: min(640px, 100%);
+  width: min(460px, 100%);
 }
 
 .mat {
@@ -88,4 +88,26 @@
 .btn:focus-visible {
   outline: 2px solid var(--champagne);
   outline-offset: 3px;
+}
+
+.cap {
+  display: grid;
+  gap: 6px;
+}
+
+.artiste {
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--champagne);
+}
+
+.titre {
+  font-family: var(--font-bodoni), "Bodoni 72", Didot, Georgia, serif;
+  font-size: 1.25rem;
+  color: var(--ivoire);
+}
+
+.detail {
+  letter-spacing: 0.04em;
 }

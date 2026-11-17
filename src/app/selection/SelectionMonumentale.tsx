@@ -1,9 +1,18 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import s from "./selection-monumentale.module.css";
 
-// Ne mentionnez que ce qui est vrai et que vous pouvez prouver
-// (dimensions, provenance, état). Rien n'est inventé ici.
-const LEGENDE = "Mise en situation, à titre d'illustration.";
+// Ne mentionnez que ce qui est vrai et que vous pouvez prouver.
+const OEUVRES = [
+  {
+    src: "/selection/homme-turban.jpg",
+    largeur: 1200,
+    hauteur: 1597,
+    alt: "Homme avec un turban, portrait à l'huile en gros plan sur fond sombre",
+    artiste: "Hanneke Bantje",
+    titre: "Homme avec un turban",
+    detail: "Huile sur toile, 150 × 200 cm · À titre d'exemple",
+  },
+];
 
 export default function SelectionMonumentale({ cta }: { cta: string }) {
   return (
@@ -17,19 +26,25 @@ export default function SelectionMonumentale({ cta }: { cta: string }) {
           d&apos;une pièce.
         </p>
 
-        <figure className={s.frame}>
-          <div className={s.mat}>
-            <Image
-              src="/selection/monumentale-salon.jpg"
-              alt="Une œuvre monumentale dans un cadre doré, accrochée dans un hall de prestige"
-              width={800}
-              height={800}
-              sizes="(min-width: 900px) 640px, 100vw"
-              className={s.img}
-            />
-          </div>
-          <figcaption className={s.cap}>{LEGENDE}</figcaption>
-        </figure>
+        {OEUVRES.map((o) => (
+          <figure key={o.src} className={s.frame}>
+            <div className={s.mat}>
+              <Image
+                src={o.src}
+                alt={o.alt}
+                width={o.largeur}
+                height={o.hauteur}
+                sizes="(min-width: 900px) 460px, 90vw"
+                className={s.img}
+              />
+            </div>
+            <figcaption className={s.cap}>
+              <span className={s.artiste}>{o.artiste}</span>
+              <span className={s.titre}>{o.titre}</span>
+              <span className={s.detail}>{o.detail}</span>
+            </figcaption>
+          </figure>
+        ))}
 
         <a href="#consultation" className={s.btn}>
           {cta}
