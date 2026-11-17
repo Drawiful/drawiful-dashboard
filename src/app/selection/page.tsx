@@ -136,11 +136,8 @@ export default function MaisonPage() {
 
       <footer className={s.foot}>
         <div className={s.wrap}>
-          <Link href="/a-propos" className={s.link} style={{ marginRight: "28px" }}>
+          <Link href="/a-propos" className={s.link}>
             À propos
-          </Link>
-          <Link href="/decouvrir" className={s.link}>
-            Vous êtes artiste ? Découvrez votre galerie Drawiful.
           </Link>
           <p className={s.sign}>La maison Drawiful</p>
         </div>
