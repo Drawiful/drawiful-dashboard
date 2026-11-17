@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { Bodoni_Moda, Manrope } from "next/font/google";
 import ConsultationForm from "./ConsultationForm";
@@ -136,6 +136,9 @@ export default function MaisonPage() {
 
       <footer className={s.foot}>
         <div className={s.wrap}>
+          <Link href="/a-propos" className={s.link} style={{ marginRight: "28px" }}>
+            À propos
+          </Link>
           <Link href="/decouvrir" className={s.link}>
             Vous êtes artiste ? Découvrez votre galerie Drawiful.
           </Link>
