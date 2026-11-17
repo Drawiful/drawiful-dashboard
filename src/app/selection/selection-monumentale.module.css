@@ -111,3 +111,20 @@
 .detail {
   letter-spacing: 0.04em;
 }
+
+.grille {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 56px 48px;
+  width: 100%;
+}
+
+.grille > .portrait {
+  width: min(340px, 100%);
+}
+
+.grille > .paysage {
+  width: min(500px, 100%);
+}
